@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>31415.me | System Online</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #0f172a; /* Schickes Dunkelblau */
+            color: #e2e8f0;
+            font-family: 'Courier New', Courier, monospace; /* Nerdiger Vibe */
+        }
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+        .accent {
+            color: #38bdf8; /* Helles Blau für den Punkt */
+        }
+        .easter-egg {
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .easter-egg:hover {
+            color: #f472b6; /* Wird pink beim Drüberfahren */
+        }
+        .pi-text {
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            margin-top: 20px;
+            text-align: center;
+            max-width: 80%;
+            color: #94a3b8;
+        }
+        .easter-egg:hover + .pi-text {
+            opacity: 1; /* Zeigt die restlichen Ziffern von Pi an */
+        }
+    </style>
+</head>
+<body>
+    <h1><span class="easter-egg">31415</span><span class="accent">.me</span></h1>
+    <p>>_ System initialisiert. Willkommen.</p>
+    <div class="pi-text">
+        926535 8979323846 2643383279 5028841971 6939937510...
+    </div>
+</body>
+</html>
