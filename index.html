@@ -1,29 +1,25 @@
 ---
-layout: default
+layout: base.html
+title: 31415 | Startseite
 ---
-
-<section style="padding: 6rem 5% 4rem; max-width: 900px; margin: 0 auto; text-align: center;">
-    <h1 style="font-size: 3.5rem; margin-bottom: 1.5rem; font-family: var(--font-serif);">Die unendliche Reise<br>des Denkens</h1>
-    <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 3rem;">So wie die Kreiszahl π (Pi) unendlich und voller unentdeckter Muster ist, so ist auch das bewusste Leben eine stetige Reise der Philosophie und der Reflexion.</p>
+<section id="start" class="hero">
+    <h1>Die unendliche Reise<br>des Denkens</h1>
+    <p>So wie die Kreiszahl π (Pi) unendlich und voller unentdeckter Muster ist, so ist auch das bewusste Leben eine stetige Reise der Philosophie, der Reflexion und der inneren Klarheit.</p>
+    <a href="#florilegium" class="btn">Das Florilegium öffnen</a>
 </section>
 
-<section style="padding: 2rem 5% 6rem; max-width: 1200px; margin: 0 auto;">
-    
-    {% for post in site.posts %}
-    <article class="post-block">
-        <div class="post-date">{{ post.date | date: "%d. %B %Y" }}</div>
-        
-        {% if post.zitat %}
-        <blockquote class="quote-box">
-            <p>„{{ post.zitat }}“</p>
-            {% if post.quelle %}<cite>— {{ post.quelle }}</cite>{% endif %}
-        </blockquote>
-        {% endif %}
-        
-        <div class="reflection">
-            {{ post.content }}
+<section class="content-section">
+    <div class="grid">
+        <div class="card" id="florilegium">
+            <div class="icon">✧</div>
+            <h3>Florilegium</h3>
+            <p>Eine sorgsame Sammlung philosophischer Blütenlese. Kostbare Zitate, Textstellen und Gedanken von antiken Stoikern bis hin zu modernen Denkern, die zum Innehalten einladen.</p>
         </div>
-    </article>
-    {% endfor %}
 
+        <div class="card" id="betrachtungen">
+            <div class="icon">⚯</div>
+            <h3>Betrachtungen</h3>
+            <p>Eigene Essays und Reflexionen über das bewusste Leben in einer lauten Welt.</p>
+        </div>
+    </div>
 </section>
