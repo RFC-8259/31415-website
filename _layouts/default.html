@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ site.name }} | Philosophie & Bewusstes Leben</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #fcfbf9;
+            --text-main: #2c3e50;
+            --text-muted: #596a7b;
+            --accent-gold: #cda434;
+            --accent-light: #ece9df;
+            --font-serif: 'Playfair Display', serif;
+            --font-sans: 'Inter', sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+            position: relative;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+        }
+
+        h1, h2, h3 { font-family: var(--font-serif); font-weight: 600; color: var(--text-main); }
+        a { text-decoration: none; color: inherit; transition: color 0.3s ease; }
+        a:hover { color: var(--accent-gold); }
+
+        .pi-background {
+            position: absolute; top: -15vw; right: -10vw; width: 50vw; height: 50vw;
+            border: 1px solid var(--accent-light); border-radius: 50%; z-index: -1;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .pi-background::after {
+            content: "π"; font-family: var(--font-serif); font-size: 25vw;
+            color: var(--accent-light); opacity: 0.4;
+        }
+
+        header { padding: 2.5rem 5%; display: flex; justify-content: space-between; align-items: center; max-width: 1400px; margin: 0 auto; }
+        .logo { font-size: 2rem; font-family: var(--font-serif); font-weight: 600; letter-spacing: 2px; }
+        .logo span { color: var(--accent-gold); }
+        nav ul { display: flex; gap: 2.5rem; list-style: none; }
+        nav ul li a { font-size: 0.9rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; }
+
+        /* Blog Post Styling */
+        .post-block {
+            background: #fff; padding: 3rem; border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02); margin-bottom: 3rem;
+            border-left: 4px solid var(--accent-gold);
+            max-width: 800px; margin-left: auto; margin-right: auto;
+        }
+        .post-date { font-size: 0.85rem; color: var(--accent-gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; font-weight: 500; }
+        .quote-box { font-family: var(--font-serif); font-size: 1.5rem; color: var(--text-main); font-style: italic; margin-bottom: 2rem; padding-left: 1.5rem; border-left: 2px solid var(--accent-light); }
+        .quote-box cite { display: block; font-size: 0.95rem; color: var(--text-muted); font-style: normal; margin-top: 1rem; font-family: var(--font-sans); }
+        .reflection p { margin-bottom: 1rem; color: var(--text-main); }
+
+        footer { text-align: center; padding: 3rem 5%; color: var(--text-muted); font-size: 0.9rem; border-top: 1px solid var(--accent-light); margin-top: 2rem; }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 1.5rem; text-align: center; }
+            nav ul { flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
+            .pi-background { width: 100vw; height: 100vw; right: -30vw; top: -20vw; }
+            .post-block { padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="pi-background"></div>
+    <header>
+        <div class="logo">3<span>.</span>1415</div>
+        <nav>
+            <ul>
+                <li><a href="/">Start</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        {{ content }}
+    </main>
+
+    <footer>
+        <p>&copy; 2026 31415.me — Ein Projekt über Philosophie und das bewusste Leben.</p>
+    </footer>
+</body>
+</html>
