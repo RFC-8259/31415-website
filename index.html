@@ -3,53 +3,267 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>31415.me | System Online</title>
+    <title>31415 | Philosophie & Bewusstes Leben</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    
     <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: #0f172a; /* Schickes Dunkelblau */
-            color: #e2e8f0;
-            font-family: 'Courier New', Courier, monospace; /* Nerdiger Vibe */
+        /* --- FARBPALETTE & VARIABLEN --- */
+        :root {
+            --bg-color: #fcfbf9;      /* Warmes, beruhigendes Off-White */
+            --text-main: #2c3e50;     /* Dunkles, weiches Schiefergrau (nicht hartes Schwarz) */
+            --text-muted: #596a7b;    /* Gedämpftes Grau für Untertitel */
+            --accent-gold: #cda434;   /* Elegantes, erdiges Gold */
+            --accent-light: #ece9df;  /* Sehr helles Beige für dezente Rahmen */
+            
+            --font-serif: 'Playfair Display', serif;
+            --font-sans: 'Inter', sans-serif;
         }
-        h1 {
-            font-size: 4rem;
-            margin-bottom: 10px;
+
+        /* --- BASIS-RESET --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.7;
+            overflow-x: hidden; /* Verhindert horizontales Scrollen durch den Deko-Kreis */
+        }
+
+        /* --- TYPOGRAFIE --- */
+        h1, h2, h3 { 
+            font-family: var(--font-serif); 
+            font-weight: 600; 
+            color: var(--text-main);
+        }
+        
+        a { 
+            text-decoration: none; 
+            color: inherit; 
+            transition: color 0.3s ease; 
+        }
+        
+        a:hover { color: var(--accent-gold); }
+
+        /* --- DIE PI & KREIS INTEGRATION (Subtiler Hintergrund) --- */
+        .pi-background {
+            position: absolute;
+            top: -15vw;
+            right: -10vw;
+            width: 50vw;
+            height: 50vw;
+            border: 1px solid var(--accent-light);
+            border-radius: 50%;
+            z-index: -1; /* Bleibt im Hintergrund */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .pi-background::after {
+            content: "π";
+            font-family: var(--font-serif);
+            font-size: 25vw;
+            color: var(--accent-light);
+            opacity: 0.4;
+        }
+
+        /* --- HEADER & NAVIGATION --- */
+        header {
+            padding: 2.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-family: var(--font-serif);
+            font-weight: 600;
             letter-spacing: 2px;
         }
-        .accent {
-            color: #38bdf8; /* Helles Blau für den Punkt */
+        
+        /* Der Punkt im Domainnamen als goldener Akzent */
+        .logo span { color: var(--accent-gold); }
+
+        nav ul {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
         }
-        .easter-egg {
-            cursor: pointer;
-            transition: color 0.3s ease;
+
+        nav ul li a {
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
         }
-        .easter-egg:hover {
-            color: #f472b6; /* Wird pink beim Drüberfahren */
-        }
-        .pi-text {
-            font-size: 1.2rem;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            margin-top: 20px;
+
+        /* --- HERO BEREICH (Begrüßung) --- */
+        .hero {
+            padding: 8rem 5% 6rem;
+            max-width: 900px;
+            margin: 0 auto;
             text-align: center;
-            max-width: 80%;
-            color: #94a3b8;
         }
-        .easter-egg:hover + .pi-text {
-            opacity: 1; /* Zeigt die restlichen Ziffern von Pi an */
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background-color: var(--text-main);
+            color: var(--bg-color);
+            border-radius: 50px; /* Abgerundet als Anspielung auf den Kreis/Pi */
+            font-weight: 500;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-gold);
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(205, 164, 52, 0.2);
+        }
+
+        /* --- INHALTS-GRID (Florilegium, etc.) --- */
+        .content-section {
+            padding: 2rem 5% 6rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+        }
+
+        .card {
+            background: #fff;
+            padding: 3rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            border-top: 3px solid transparent;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            border-top-color: var(--accent-gold);
+        }
+
+        .card .icon {
+            font-size: 2rem;
+            color: var(--accent-gold);
+            margin-bottom: 1.5rem;
+            font-family: var(--font-serif);
+        }
+
+        .card h3 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            text-align: center;
+            padding: 3rem 5%;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--accent-light);
+            margin-top: 2rem;
+        }
+
+        /* --- RESPONSIVE DESIGN (Für Smartphones & Tablets) --- */
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 1.5rem; text-align: center; }
+            nav ul { flex-wrap: wrap; justify-content: center; gap: 1.5rem; }
+            .hero { padding: 4rem 5% 3rem; }
+            .hero h1 { font-size: 2.5rem; }
+            .hero p { font-size: 1.1rem; }
+            .pi-background { width: 100vw; height: 100vw; right: -30vw; top: -20vw; }
         }
     </style>
 </head>
 <body>
-    <h1><span class="easter-egg">31415</span><span class="accent">.me</span></h1>
-    <p>>_ System initialisiert. Willkommen.</p>
-    <div class="pi-text">
-        926535 8979323846 2643383279 5028841971 6939937510...
-    </div>
+
+    <div class="pi-background"></div>
+
+    <header>
+        <div class="logo">3<span>.</span>1415</div>
+        <nav>
+            <ul>
+                <li><a href="#start">Start</a></li>
+                <li><a href="#florilegium">Florilegium</a></li>
+                <li><a href="#betrachtungen">Betrachtungen</a></li>
+                <li><a href="#ueber-mich">Über mich</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="start" class="hero">
+            <h1>Die unendliche Reise<br>des Denkens</h1>
+            <p>So wie die Kreiszahl π (Pi) unendlich und voller unentdeckter Muster ist, so ist auch das bewusste Leben eine stetige Reise der Philosophie, der Reflexion und der inneren Klarheit.</p>
+            <a href="#florilegium" class="btn">Das Florilegium öffnen</a>
+        </section>
+
+        <section class="content-section">
+            <div class="grid">
+                
+                <div class="card" id="florilegium">
+                    <div class="icon">✧</div>
+                    <h3>Florilegium</h3>
+                    <p>Eine sorgsame Sammlung philosophischer Blütenlese. Kostbare Zitate, Textstellen und Gedanken von antiken Stoikern bis hin zu modernen Denkern, die zum Innehalten einladen.</p>
+                </div>
+                
+                <div class="card" id="betrachtungen">
+                    <div class="icon">⚯</div>
+                    <h3>Betrachtungen</h3>
+                    <p>Eigene Essays und Reflexionen über das bewusste Leben in einer lauten Welt. Der Versuch, die Komplexität des Alltags mit philosophischer Gelassenheit zu ordnen.</p>
+                </div>
+
+                <div class="card">
+                    <div class="icon">∞</div>
+                    <h3>Zitate & Notizen</h3>
+                    <p>Kurze Impulse und Gedankensplitter für den Tag. Die Essenz großer Weisheiten, komprimiert auf das Wesentliche – kleine Anker für mehr Achtsamkeit.</p>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 31415.me — Ein Projekt über Philosophie und das bewusste Leben.</p>
+    </footer>
+
 </body>
 </html>
