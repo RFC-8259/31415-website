@@ -69,6 +69,42 @@ layout: base.html
         color: var(--accent-gold);
         font-weight: 500;
     }
+
+    /* --- RESPONSIVE ANPASSUNGEN FÜR MOBILE --- */
+    @media (max-width: 768px) {
+        /* Container-Paddings reduzieren */
+        .card[style*="max-width: 800px;"] {
+            padding: 2.5rem 1.5rem !important; /* Weniger Padding um den Hauptinhalt */
+        }
+
+        /* Zitat-Bereich kompakter machen */
+        .quote-section {
+            padding: 1.5rem; /* Weniger Innenabstand */
+            margin: 1.5rem 0 2rem 0; /* Weniger Außenabstand */
+        }
+
+        .quote-text {
+            font-size: 1.3rem; /* Textgröße leicht reduzieren, damit er nicht so gequetscht wirkt */
+        }
+
+        /* Titelgröße auf Mobile anpassen */
+        h1[style*="font-size: 2.5rem;"] {
+            font-size: 2rem !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        /* Trenner kompakter machen */
+        .separator {
+            margin: 2rem 0;
+            font-size: 1.2rem;
+            letter-spacing: 0.5rem;
+        }
+
+        /* Textgröße der Betrachtung leicht anpassen */
+        .reflection-content {
+            font-size: 1rem;
+        }
+    }
 </style>
 
 <section class="content-section">
