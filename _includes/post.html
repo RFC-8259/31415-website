@@ -1,0 +1,13 @@
+---
+layout: base.html
+---
+<section class="content-section">
+    <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <h1 style="margin-bottom: 0.5rem; color: var(--accent-gold);">{{ title }}</h1>
+        <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem;">{{ date | date: "%d.%m.%Y" }}</p>
+        
+        <div class="post-content">
+            {{ content | safe }}
+        </div>
+    </div>
+</section>
