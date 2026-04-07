@@ -1,0 +1,28 @@
+---
+layout: base.html
+title: 31415 | Florilegium Übersicht
+---
+<style>
+    /* Ein bisschen Extra-CSS, damit die klickbaren Karten schön aussehen */
+    .post-card { display: block; text-decoration: none; color: inherit; }
+    .post-card:hover h3 { color: var(--accent-gold); transition: color 0.3s ease; }
+    .read-more { color: var(--accent-gold); font-weight: 500; margin-top: 1rem; }
+</style>
+
+<section class="hero" style="padding-bottom: 2rem;">
+    <h1>Florilegium</h1>
+    <p>Eine sorgsame Sammlung philosophischer Blütenlese und Gedanken.</p>
+</section>
+
+<section class="content-section">
+    <div class="grid">
+        {% for post in collections.florilegium reversed %}
+        <a href="{{ post.url }}" class="card post-card">
+            <div class="icon">✧</div>
+            <h3>{{ post.data.title }}</h3>
+            <p style="font-size: 0.9rem; margin-bottom: 1rem;">{{ post.date | date: "%d.%m.%Y" }}</p>
+            <div class="read-more">Eintrag lesen →</div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
