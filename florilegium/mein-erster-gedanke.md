@@ -2,6 +2,7 @@
 layout: post.html
 title: Die Kraft der Stille
 date: 2026-04-07
+tags: florilegium
 ---
 
 Manchmal ist der Rückzug aus der lauten Welt kein Akt der Flucht, sondern eine **Notwendigkeit** für den Geist. 
