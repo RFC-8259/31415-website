@@ -1,13 +1,102 @@
 ---
 layout: base.html
 ---
+<style>
+    /* --- DESIGN FÜR DEINE POSTS --- */
+    
+    /* Der Zitat-Bereich */
+    .quote-section {
+        margin: 2rem 0 3rem 0;
+        padding: 2.5rem 3rem;
+        background-color: #f8f7f3; /* Ein winziger Kontrast zum Hintergrund */
+        border-left: 3px solid var(--accent-gold);
+        border-radius: 0 12px 12px 0;
+    }
+
+    .quote-text {
+        font-family: var(--font-serif);
+        font-size: 1.6rem;
+        line-height: 1.5;
+        color: var(--text-main);
+        font-style: italic;
+        margin-bottom: 1.5rem;
+    }
+
+    .quote-meta {
+        font-family: var(--font-sans);
+        font-size: 0.95rem;
+        color: var(--text-muted);
+    }
+
+    .quote-author {
+        font-weight: 600;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .quote-source {
+        font-style: italic;
+    }
+
+    /* Der dekorative Trenner */
+    .separator {
+        text-align: center;
+        margin: 3rem 0;
+        color: var(--accent-light);
+        font-size: 1.5rem;
+        letter-spacing: 1rem;
+    }
+
+    /* Dein eigener Kommentar / Betrachtung */
+    .reflection-section h3 {
+        font-size: 1rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 1.5rem;
+        font-family: var(--font-sans);
+    }
+
+    .reflection-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-main);
+    }
+
+    /* Wenn du Wörter im Markdown **fett** machst, werden sie dezent golden */
+    .reflection-content strong {
+        color: var(--accent-gold);
+        font-weight: 500;
+    }
+</style>
+
 <section class="content-section">
-    <div class="card" style="max-width: 800px; margin: 0 auto;">
-        <h1 style="margin-bottom: 0.5rem; color: var(--accent-gold);">{{ title }}</h1>
-        <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.9rem;">{{ date | date: "%d.%m.%Y" }}</p>
+    <div class="card" style="max-width: 800px; margin: 0 auto; padding: 4rem;">
         
-        <div class="post-content">
-            {{ content }}
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="color: var(--accent-gold); font-size: 2.5rem; margin-bottom: 0.5rem;">{{ title }}</h1>
+            <p style="color: var(--text-muted); font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase;">{{ date | date: "%d.%m.%Y" }}</p>
         </div>
+
+        {% if quote %}
+        <div class="quote-section">
+            <div class="quote-text">»{{ quote }}«</div>
+            <div class="quote-meta">
+                — <span class="quote-author">{{ author }}</span> 
+                {% if source %}<span style="margin: 0 0.5rem;">|</span> <span class="quote-source">{{ source }}</span>{% endif %}
+            </div>
+        </div>
+
+        <div class="separator">✧ ✧ ✧</div>
+        {% endif %}
+
+        <div class="reflection-section">
+            <h3>Betrachtung</h3>
+            <div class="reflection-content">
+                {{ content }}
+            </div>
+        </div>
+
     </div>
 </section>
