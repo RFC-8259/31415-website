@@ -3,974 +3,317 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>31415 · Ein digitales Taschenmesser</title>
+<meta name="description" content="Eine wachsende Sammlung kleiner, durchdachter Web-Werkzeuge für Alltag und Arbeit. Jedes tut genau eine Sache – und sie gut.">
 <meta name="theme-color" content="#0a0e14">
-<title>Decide — 31415.me</title>
-<meta name="description" content="Sieben Wege, eine Entscheidung zu treffen: Münze, Würfel, Zufallszahl, Liste mischen, Mehrfachauswahl, Turnier und das klassische Ja/Nein.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{ /* DARK (Default) */
-  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
-  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
-  --gold:#d8b46a; --gold-bright:#f0cd84;
-  --field-base:rgba(10,14,20,0.12);
-  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
-  --shadow:rgba(216,180,106,.55); --r:14px;
-}
-html[data-theme="light"]{
-  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
-  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
-  --gold:#a9802e; --gold-bright:#8c6618;
-  --field-base:rgba(246,243,234,0.14);
-  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
-  --shadow:rgba(169,128,46,.32);
-}
-
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
-body{
-  background:var(--ink);
-  color:var(--paper);
-  font-family:'Space Grotesk',sans-serif;
-  font-weight:400;
-  line-height:1.6;
-  min-height:100vh;
-  position:relative;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-}
-
-a{color:inherit;text-decoration:none;}
-::selection{background:var(--gold);color:var(--ink);}
-
-::-webkit-scrollbar{width:10px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;}
-
-button{font-family:inherit;cursor:pointer;}
-
-/* ---------- ambient layers ---------- */
-#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
-.grain{
-  position:fixed;inset:0;z-index:1;pointer-events:none;
-  opacity:.035;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-html[data-theme="light"] .grain{opacity:.02;}
-
-.container{max-width:1180px;margin:0 auto;padding:0 36px;position:relative;z-index:2;}
-@media (max-width:640px){ .container{padding:0 24px;} }
-
-/* ---------- header ---------- */
-header{
-  position:fixed;top:0;left:0;right:0;z-index:50;
-  height:72px;display:flex;align-items:center;
-  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-}
-header .container{display:flex;align-items:center;justify-content:space-between;width:100%;}
-
-.brand{display:flex;align-items:baseline;gap:2px;font-size:1rem;}
-.brand .pi{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:1.65rem;color:var(--gold);line-height:1;margin-right:4px;}
-.brand .num{font-family:'Space Mono',monospace;color:var(--paper);letter-spacing:.02em;}
-.brand .me{font-family:'Space Mono',monospace;color:var(--paper-faint);}
-
-nav{display:flex;align-items:center;gap:24px;}
-.nav-link{
-  font-family:'Space Mono',monospace;font-size:.78rem;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--paper-dim);
-  display:flex;align-items:center;gap:6px;
-  transition:color .3s cubic-bezier(.2,.8,.2,1);
-}
-.nav-link:hover{color:var(--gold);}
-.nav-link svg{width:14px;height:14px;transition:transform .35s cubic-bezier(.2,.8,.2,1);}
-.nav-link:hover svg{transform:translateX(4px) translateY(-2px) rotate(-45deg);}
-
-.theme-toggle{
-  width:38px;height:38px;border-radius:100px;
-  border:1px solid var(--line);background:transparent;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--paper-dim);transition:all .3s cubic-bezier(.2,.8,.2,1);
-  flex-shrink:0;
-}
-.theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
-.theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.theme-toggle svg{width:17px;height:17px;}
-.theme-toggle .sun{display:none;}
-html[data-theme="light"] .theme-toggle .moon{display:none;}
-html[data-theme="light"] .theme-toggle .sun{display:block;}
-
-/* ---------- app head ---------- */
-.app-head{padding:150px 0 56px;position:relative;z-index:2;}
-.eyebrow{
-  font-family:'Space Mono',monospace;font-size:.76rem;letter-spacing:.28em;
-  text-transform:uppercase;color:var(--gold);margin:0 0 18px;
-  display:flex;align-items:center;gap:12px;
-}
-.eyebrow::before{content:'';width:22px;height:1px;background:var(--gold);display:inline-block;}
-h1{
-  font-family:'Fraunces',serif;font-weight:300;font-style:normal;
-  font-size:clamp(2.1rem,5.5vw,3.6rem);line-height:.98;letter-spacing:-.02em;
-  margin:0 0 18px;color:var(--paper);
-}
-h1 em{font-style:italic;font-weight:400;color:var(--gold-bright);}
-.app-head p{
-  font-size:1.05rem;color:var(--paper-dim);max-width:560px;margin:0;font-weight:300;
-}
-
-/* ---------- grid of tools ---------- */
-.grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
-  padding-bottom:130px;position:relative;z-index:2;
-}
-@media (max-width:980px){ .grid{grid-template-columns:repeat(2,1fr);} }
-@media (max-width:640px){ .grid{grid-template-columns:1fr;gap:18px;padding-bottom:90px;} }
-
-.card{
-  position:relative;
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
-  border:1px solid var(--line);
-  border-radius:var(--r);
-  padding:28px 26px 26px;
-  display:flex;flex-direction:column;gap:16px;
-  overflow:hidden;
-  min-width:0;
-  box-sizing:border-box;
-  transition:transform .4s cubic-bezier(.2,.8,.2,1), border-color .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s cubic-bezier(.2,.8,.2,1);
-}
-.card::before{
-  content:'';position:absolute;inset:0;pointer-events:none;border-radius:var(--r);
-  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%), var(--shadow), transparent 60%);
-  opacity:0;transition:opacity .4s ease;
-}
-.card:hover::before{opacity:.14;}
-.card:hover{transform:translateY(-6px);border-color:rgba(214,201,170,.28);box-shadow:0 22px 40px -22px var(--shadow);}
-.card.wide{grid-column:span 2;}
-@media (max-width:980px){ .card.wide{grid-column:span 2;} }
-@media (max-width:640px){ .card.wide{grid-column:span 1;} }
-
-.card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.card-title{
-  font-family:'Fraunces',serif;font-weight:500;font-size:1.18rem;letter-spacing:-.01em;
-  color:var(--paper);display:flex;align-items:center;gap:10px;
-}
-.card-title svg{width:19px;height:19px;color:var(--gold);flex-shrink:0;}
-.card-index{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--paper-faint);letter-spacing:.1em;}
-
-.stage{
-  flex:1;min-height:108px;
-  display:flex;align-items:center;justify-content:center;
-  text-align:center;
-}
-.stage-value{
-  font-family:'Fraunces',serif;font-weight:400;
-  font-size:clamp(1.8rem,4vw,2.5rem);color:var(--paper);
-  transition:opacity .25s ease;
-}
-.stage-value.muted{color:var(--paper-faint);font-family:'Space Mono',monospace;font-size:1rem;font-weight:400;letter-spacing:.05em;}
-.stage-value.win{color:var(--gold-bright);}
-.stage-value.lose{color:var(--paper-dim);}
-
-@keyframes settle{
-  0%{opacity:0;transform:translateY(8px) scale(.96);}
-  100%{opacity:1;transform:translateY(0) scale(1);}
-}
-.settle{animation:settle .42s cubic-bezier(.2,.8,.2,1);}
-@media (prefers-reduced-motion:reduce){ .settle{animation:none;} }
-
-/* shared form bits */
-.row{display:flex;gap:10px;align-items:center;min-width:0;width:100%;}
-.row.center{justify-content:center;}
-label.mini{
-  font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--paper-faint);white-space:nowrap;flex-shrink:0;
-}
-input[type="number"], input[type="text"], textarea{
-  width:100%;min-width:0;background:var(--ink-soft);border:1px solid var(--line);
-  border-radius:8px;color:var(--paper);font-family:'Space Mono',monospace;
-  font-size:.92rem;padding:9px 10px;transition:border-color .25s ease;
-}
-input::placeholder, textarea::placeholder{color:var(--paper-faint);font-family:'Space Grotesk',sans-serif;}
-input:focus, textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(216,180,106,.12);}
-input[type="number"]{text-align:center;}
-input[type="number"]::-webkit-inner-spin-button,input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
-input[type="number"]{-moz-appearance:textfield;}
-.num-mini{width:64px;flex:0 0 64px;min-width:0;}
-.row.center .num-mini{width:58px;flex:0 0 58px;}
-textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-sizing:border-box;}
-
-/* buttons */
-.btn{
-  border-radius:100px;font-family:'Space Grotesk',sans-serif;font-weight:500;
-  font-size:.9rem;padding:11px 20px;border:none;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  transition:transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s cubic-bezier(.2,.8,.2,1), border-color .3s ease, color .3s ease;
-  width:100%;
-}
-.btn svg{width:16px;height:16px;flex-shrink:0;}
-.btn-primary{background:var(--gold);color:var(--ink);}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 26px -12px var(--shadow);}
-.btn-primary:active{transform:translateY(0);}
-.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--paper);}
-.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-.btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.btn-sm{padding:7px 14px;font-size:.78rem;width:auto;}
-
-.hint{font-size:.78rem;color:var(--paper-faint);text-align:center;min-height:1.1em;}
-.hint.warn{color:var(--gold);}
-
-/* tally pills (yes/no, coin) */
-.tally{display:flex;gap:8px;justify-content:center;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--paper-faint);letter-spacing:.05em;}
-.tally span{color:var(--paper-dim);}
-
-/* dice */
-.dice-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;min-height:48px;align-items:center;}
-.die{
-  width:42px;height:42px;border-radius:9px;border:1px solid var(--line);
-  background:var(--ink-soft);display:flex;align-items:center;justify-content:center;
-  font-family:'Space Mono',monospace;font-size:1.1rem;color:var(--gold-bright);flex-shrink:0;
-}
-.dice-total{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--paper-faint);text-align:center;letter-spacing:.05em;}
-
-/* list shuffle results */
-.list-out{
-  background:var(--ink-soft);border:1px solid var(--line);border-radius:10px;
-  padding:10px 4px;max-height:190px;overflow-y:auto;
-  font-family:'Space Mono',monospace;font-size:.82rem;
-}
-.list-out .empty{color:var(--paper-faint);padding:14px 16px;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:.85rem;}
-.list-out ol{margin:0;padding:0;list-style:none;}
-.list-out li{
-  display:flex;gap:10px;padding:7px 16px;color:var(--paper);
-  border-bottom:1px solid var(--line);
-}
-.list-out li:last-child{border-bottom:none;}
-.list-out li .n{color:var(--gold);min-width:1.6em;}
-.list-out li.picked{background:rgba(216,180,106,.08);}
-
-/* wheel/spinner options */
-.opt-list{display:flex;flex-direction:column;gap:8px;max-height:172px;overflow-y:auto;padding-right:4px;min-width:0;}
-.opt-row{display:flex;gap:8px;align-items:center;min-width:0;}
-.opt-row input{min-width:0;}
-.opt-row .opt-color{width:9px;height:9px;border-radius:50%;background:var(--gold);flex-shrink:0;opacity:.55;}
-.opt-row button.del{
-  width:28px;height:28px;flex-shrink:0;border-radius:7px;border:1px solid var(--line);
-  background:transparent;color:var(--paper-faint);display:flex;align-items:center;justify-content:center;
-  transition:all .25s ease;
-}
-.opt-row button.del:hover{border-color:var(--gold);color:var(--gold);}
-.opt-row button.del svg{width:13px;height:13px;}
-.add-link{
-  display:inline-flex;align-items:center;gap:6px;color:var(--gold);
-  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.06em;
-  text-transform:uppercase;background:none;border:none;padding:4px 0;align-self:flex-start;
-  transition:opacity .25s ease;width:auto;
-}
-.add-link:hover{opacity:.7;}
-.add-link svg{width:13px;height:13px;}
-
-/* wheel disc */
-.wheel-wrap{display:flex;align-items:center;justify-content:center;padding:6px 0;}
-.wheel{position:relative;width:118px;height:118px;flex-shrink:0;}
-.wheel svg{width:100%;height:100%;transition:transform 2.6s cubic-bezier(.16,1,.3,1);}
-@media (prefers-reduced-motion:reduce){ .wheel svg{transition:none;} }
-.wheel .pointer{
-  position:absolute;top:-6px;left:50%;transform:translateX(-50%);
-  width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;
-  border-top:11px solid var(--gold-bright);z-index:2;
-}
-
-/* tournament */
-.duel{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;}
-.duel-card{
-  flex:1;min-width:0;background:var(--ink-soft);border:1px solid var(--line);border-radius:10px;
-  padding:14px 10px;text-align:center;font-family:'Space Grotesk',sans-serif;font-size:.92rem;
-  color:var(--paper);transition:all .3s cubic-bezier(.2,.8,.2,1);cursor:pointer;
-  word-break:break-word;
-}
-.duel-card:hover{border-color:var(--gold);transform:translateY(-2px);}
-.duel-card:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.duel-vs{font-family:'Space Mono',monospace;color:var(--paper-faint);font-size:.72rem;letter-spacing:.1em;flex-shrink:0;}
-.duel-round{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-faint);text-align:center;}
-.duel-champion{font-family:'Fraunces',serif;font-style:italic;font-weight:500;color:var(--gold-bright);}
-
-/* reveal */
-.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
-.reveal.in{opacity:1;transform:translateY(0);}
-@media (prefers-reduced-motion:reduce){ .reveal{opacity:1;transform:none;transition:none;} }
-
-/* footer */
-footer{
-  border-top:1px solid var(--line);padding:36px 0 48px;position:relative;z-index:2;
-}
-footer .container{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
-footer .fnote{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--paper-faint);letter-spacing:.04em;}
-footer .flinks{display:flex;gap:18px;}
-footer a.flink{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--paper-dim);letter-spacing:.04em;transition:color .3s ease;}
-footer a.flink:hover{color:var(--gold);}
-
-.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
-
-/* toast */
-#toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--panel);border:1px solid var(--line);border-radius:100px;
-  padding:11px 22px;font-family:'Space Mono',monospace;font-size:.78rem;color:var(--paper);
-  opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.2,.8,.2,1);z-index:100;
-  box-shadow:0 14px 32px -16px rgba(0,0,0,.5);
-}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  :root{
+    --ink:#0a0e14;--ink-soft:#111722;--panel:#141b27;--line:rgba(214,201,170,0.12);
+    --paper:#f4efe2;--paper-dim:#b9b2a1;--paper-faint:#6f6c63;
+    --gold:#d8b46a;--gold-bright:#f0cd84;
+    --field-base:rgba(10,14,20,0.12);
+    --header-a:rgba(10,14,20,0.85);--header-b:rgba(10,14,20,0);
+    --header-a2:rgba(10,14,20,0.95);--header-b2:rgba(10,14,20,0.6);
+    --shadow:rgba(216,180,106,.55);--r:14px;
+  }
+  html[data-theme="light"]{
+    --ink:#f6f3ea;--ink-soft:#fffefb;--panel:#fffefb;--line:rgba(60,52,33,0.14);
+    --paper:#1d2329;--paper-dim:#5a564c;--paper-faint:#8f8a7d;
+    --gold:#a9802e;--gold-bright:#8c6618;
+    --field-base:rgba(246,243,234,0.14);
+    --header-a:rgba(246,243,234,0.88);--header-b:rgba(246,243,234,0);
+    --header-a2:rgba(246,243,234,0.96);--header-b2:rgba(246,243,234,0.7);
+    --shadow:rgba(169,128,46,.32);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--ink);color:var(--paper);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;transition:background .5s ease,color .5s ease}
+  ::selection{background:var(--gold);color:var(--ink)}
+  a{color:inherit;text-decoration:none}
+  #digit-field{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
+  html[data-theme="light"] #digit-field{opacity:.6}
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  html[data-theme="light"] .grain{opacity:.02}
+  .wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 28px}
+  header{position:fixed;top:0;left:0;right:0;z-index:50;backdrop-filter:blur(12px);background:linear-gradient(180deg,var(--header-a),var(--header-b));transition:background .4s ease}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .mark{display:flex;align-items:center;gap:12px;font-family:'Space Mono',monospace;font-size:15px;letter-spacing:.04em}
+  .mark .glyph{font-family:'Fraunces',serif;font-size:26px;color:var(--gold);line-height:1;transform:translateY(1px)}
+  .mark .dim{color:var(--paper-faint)}
+  .nav-right{display:flex;align-items:center;gap:30px}
+  nav.top{display:flex;gap:30px;font-size:14px;color:var(--paper-dim)}
+  nav.top a{transition:color .25s;position:relative}
+  nav.top a:hover{color:var(--gold-bright)}
+  nav.top a::after{content:'';position:absolute;left:0;bottom:-4px;height:1px;width:0;background:var(--gold);transition:width .3s ease}
+  nav.top a:hover::after{width:100%}
+  @media(max-width:640px){nav.top{display:none}}
+  .theme-btn{width:40px;height:40px;border-radius:100px;border:1px solid var(--line);background:transparent;color:var(--paper-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .3s,color .3s,transform .4s cubic-bezier(.2,.8,.2,1)}
+  .theme-btn:hover{border-color:var(--gold);color:var(--gold-bright)}
+  .theme-btn:active{transform:scale(.92)}
+  .theme-btn svg{width:18px;height:18px}
+  .theme-btn .sun{display:none}
+  html[data-theme="light"] .theme-btn .sun{display:block}
+  html[data-theme="light"] .theme-btn .moon{display:none}
+  .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:72px;position:relative}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:12.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:30px;display:flex;align-items:center;gap:14px;opacity:0;animation:rise .9s .2s forwards}
+  .eyebrow::before{content:'';width:42px;height:1px;background:var(--gold);opacity:.6}
+  h1.display{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(3rem,9vw,7.5rem);line-height:.96;letter-spacing:-.02em;max-width:15ch}
+  h1.display em{font-style:italic;color:var(--gold-bright)}
+  h1.display .l1{opacity:0;animation:rise 1s .35s forwards}
+  h1.display .l2{opacity:0;animation:rise 1s .5s forwards}
+  .lede{margin-top:34px;max-width:50ch;font-size:clamp(1rem,1.5vw,1.18rem);color:var(--paper-dim);font-weight:300;opacity:0;animation:rise 1s .68s forwards}
+  .hero-cta{margin-top:46px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;opacity:0;animation:rise 1s .82s forwards}
+  .btn{font-family:'Space Grotesk';font-size:15px;padding:14px 26px;border-radius:100px;border:1px solid var(--gold);background:var(--gold);color:var(--ink);font-weight:500;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .3s;cursor:pointer}
+  .btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px -12px var(--shadow)}
+  .btn.ghost{background:transparent;color:var(--paper);border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--gold);color:var(--gold-bright);box-shadow:none}
+  .scroll-hint{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--paper-faint);display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:rise 1s 1.2s forwards}
+  .scroll-hint .rail{width:1px;height:46px;background:linear-gradient(var(--gold),transparent);position:relative;overflow:hidden}
+  .scroll-hint .rail::after{content:'';position:absolute;top:0;left:0;width:100%;height:14px;background:var(--gold-bright);animation:drip 2.2s ease-in-out infinite}
+  section.block{padding:130px 0;position:relative}
+  .sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:14px}
+  .sec-idx{font-family:'Space Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em}
+  .sec-title{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(1.9rem,4vw,2.9rem);letter-spacing:-.01em}
+  .sec-sub{color:var(--paper-dim);max-width:54ch;font-weight:300;margin-bottom:54px}
+  .cat{margin-bottom:64px}
+  .cat:last-child{margin-bottom:0}
+  .cat-head{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+  .cat-name{font-family:'Space Mono',monospace;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+  .cat-rule{flex:1;height:1px;background:var(--line)}
+  .cat-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--paper-faint)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:22px}
+  .card{position:relative;background:linear-gradient(160deg,var(--panel),var(--ink-soft));border:1px solid var(--line);border-radius:var(--r);padding:32px 30px 28px;overflow:hidden;transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .45s,box-shadow .45s;display:flex;flex-direction:column;min-height:212px}
+  html[data-theme="light"] .card{box-shadow:0 1px 2px rgba(60,52,33,.04)}
+  .card::before{content:'';position:absolute;inset:0;background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),var(--shadow),transparent 60%);opacity:0;transition:opacity .45s}
+  .card:hover{transform:translateY(-6px);border-color:var(--gold)}
+  html[data-theme="light"] .card:hover{box-shadow:0 16px 40px -18px rgba(60,52,33,.28)}
+  .card:hover::before{opacity:.5}
+  .card .icon{width:44px;height:44px;margin-bottom:18px;color:var(--gold)}
+  .card h3{font-family:'Fraunces',serif;font-weight:500;font-size:1.45rem;margin-bottom:8px;letter-spacing:-.01em}
+  .card p{color:var(--paper-dim);font-size:.93rem;font-weight:300;max-width:34ch}
+  .card .go{margin-top:auto;padding-top:18px;display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:.03em}
+  .card .go .arr{transition:transform .35s}
+  .card:hover .go .arr{transform:translateX(6px)}
+  .card.soon{opacity:.6}
+  .card.soon:hover{transform:none;border-color:var(--line);box-shadow:none}
+  .card.soon .go{color:var(--paper-faint)}
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.8,.2,1),transform .8s cubic-bezier(.2,.8,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+  .pi-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:42px 0;overflow:hidden;position:relative}
+  .pi-strip .track{font-family:'Space Mono',monospace;font-size:clamp(1.4rem,3.4vw,2.4rem);color:var(--paper-faint);white-space:nowrap;display:inline-block;animation:marquee 60s linear infinite;letter-spacing:.06em}
+  .pi-strip .track b{color:var(--gold)}
+  .about-body{max-width:62ch;color:var(--paper-dim);font-weight:300;font-size:clamp(1rem,1.4vw,1.1rem)}
+  .about-body strong{color:var(--paper);font-weight:500}
+  footer{padding:90px 0 60px;border-top:1px solid var(--line);position:relative;z-index:2}
+  .foot-grid{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:30px}
+  .foot-mark{font-family:'Fraunces',serif;font-size:clamp(2.5rem,8vw,5rem);font-weight:300;line-height:1;color:var(--paper)}
+  .foot-mark span{color:var(--gold)}
+  .foot-meta{font-family:'Space Mono',monospace;font-size:12.5px;color:var(--paper-faint);text-align:right;line-height:1.9}
+  .foot-meta a:hover{color:var(--gold-bright)}
+  @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  @keyframes drip{0%{transform:translateY(-14px)}100%{transform:translateY(46px)}}
+  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}.eyebrow,h1.display .l1,h1.display .l2,.lede,.hero-cta,.scroll-hint{opacity:1}}
+  @media(max-width:640px){.wrap{padding:0 20px}section.block{padding:90px 0}.grid{grid-template-columns:1fr}.foot-grid{flex-direction:column;align-items:flex-start}.foot-meta{text-align:left}.nav-right{gap:14px}}
 </style>
 </head>
 <body>
-
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
-
+<canvas id="digit-field"></canvas>
+<div class="grain"></div>
 <header>
-  <div class="container">
-    <a href="/" class="brand" aria-label="31415.me Startseite">
-      <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
-    </a>
-    <nav>
-      <a href="/" class="nav-link">
-        Alle Werkzeuge
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M7 17 17 7M7 7h10v10"/></svg>
-      </a>
-      <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">
-        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
-        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+  <div class="wrap bar">
+    <div class="mark"><span class="glyph">&#960;</span>31415<span class="dim">.me</span></div>
+    <div class="nav-right">
+      <nav class="top">
+        <a href="#tools">Werkzeuge</a>
+        <a href="#about">Idee</a>
+      </nav>
+      <button class="theme-btn" id="theme-toggle" aria-label="Helligkeit umschalten" title="Heller / dunkler">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
       </button>
-    </nav>
+    </div>
   </div>
 </header>
-
 <main>
-  <section class="app-head container reveal">
-    <p class="eyebrow">Werkzeug · Entscheidung</p>
-    <h1>Sieben Wege, <em>loszulassen</em></h1>
-    <p>Wenn das Abwägen nicht weiterhilft, hilft der Zufall. Sieben kleine Entscheider für alle Lagen — von der einfachen Münze bis zum Turnier. Alles bleibt in deinem Browser.</p>
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Ein digitales Taschenmesser</div>
+      <h1 class="display">
+        <span class="l1">Werkzeuge, die</span><br>
+        <span class="l2"><em>vielseitig</em> unterst&uuml;tzen.</span>
+      </h1>
+      <p class="lede">
+        Eine wachsende Sammlung kleiner Apps f&uuml;r Alltag und Arbeit. Jede tut
+        genau eine Sache &mdash; und sie gut. Kein Konto, keine Ablenkung,
+        sofort einsatzbereit im Browser.
+      </p>
+      <div class="hero-cta">
+        <a href="#tools" class="btn">Werkzeuge ansehen</a>
+        <a href="#about" class="btn ghost">Was soll das?</a>
+      </div>
+    </div>
+    <div class="scroll-hint"><span>3.1415&hellip;</span><div class="rail"></div></div>
   </section>
+  <div class="pi-strip" aria-hidden="true"><div class="track" id="pi-track"></div></div>
+  <section class="block" id="tools">
+    <div class="wrap">
+      <div class="sec-head reveal"><span class="sec-idx">01</span><h2 class="sec-title">Die Werkzeuge</h2></div>
+      <p class="sec-sub reveal">Nach Bereich sortiert. Alles l&auml;uft komplett im Browser &mdash; w&auml;hle, was du gerade brauchst.</p>
 
-  <section class="grid">
-
-    <!-- 1. Ja / Nein -->
-    <article class="card reveal" data-card>
-      <div class="card-head">
-        <h2 class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.4.9c0 1.8-2.8 2.6-2.8 2.6"/><path d="M12 16.2h.01"/></svg>
-          Ja oder Nein
-        </h2>
-        <span class="card-index">01</span>
-      </div>
-      <div class="stage">
-        <div class="stage-value muted" id="yn-stage">Stelle deine Frage</div>
-      </div>
-      <div class="tally" id="yn-tally"><span>Ja 0</span>·<span>Nein 0</span></div>
-      <button class="btn btn-primary" id="yn-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7"/></svg>
-        Entscheiden
-      </button>
-    </article>
-
-    <!-- 2. Münzwurf -->
-    <article class="card reveal" data-card>
-      <div class="card-head">
-        <h2 class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5-3 1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5"/></svg>
-          Münzwurf
-        </h2>
-        <span class="card-index">02</span>
-      </div>
-      <div class="stage">
-        <div class="stage-value muted" id="coin-stage">Kopf oder Zahl?</div>
-      </div>
-      <div class="tally" id="coin-tally"><span>Kopf 0</span>·<span>Zahl 0</span></div>
-      <button class="btn btn-primary" id="coin-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg>
-        Münze werfen
-      </button>
-    </article>
-
-    <!-- 3. Würfel -->
-    <article class="card reveal" data-card>
-      <div class="card-head">
-        <h2 class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="8.5" r=".6" fill="currentColor"/><circle cx="8.5" cy="15.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".6" fill="currentColor"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>
-          Würfel
-        </h2>
-        <span class="card-index">03</span>
-      </div>
-      <div class="row center" style="margin-bottom:-4px;">
-        <label class="mini" for="dice-count">Würfel</label>
-        <input type="number" id="dice-count" class="num-mini" value="2" min="1" max="8" inputmode="numeric">
-      </div>
-      <div class="stage" style="flex-direction:column;gap:8px;">
-        <div class="dice-row" id="dice-row" aria-live="polite">
-          <span class="stage-value muted" style="font-size:.85rem;">Bereit zum Wurf</span>
+      <div class="cat">
+        <div class="cat-head reveal"><span class="cat-name">Entscheiden &amp; Zufall</span><span class="cat-rule"></span><span class="cat-count">02</span></div>
+        <div class="grid">
+          <a href="/decide" class="card reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>
+            <h3>Decision Maker</h3>
+            <p>Optionen eingeben, gewichten, entscheiden lassen. Schluss mit dem Hin und Her.</p>
+            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
+          </a>
+          <a href="/dice" class="card reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.1" fill="currentColor"/><circle cx="16" cy="8" r="1.1" fill="currentColor"/><circle cx="12" cy="12" r="1.1" fill="currentColor"/><circle cx="8" cy="16" r="1.1" fill="currentColor"/><circle cx="16" cy="16" r="1.1" fill="currentColor"/></svg>
+            <h3>W&uuml;rfelraum</h3>
+            <p>W&uuml;rfel, M&uuml;nzen und Zufallszahlen f&uuml;r jede Entscheidung, die dem Gl&uuml;ck geh&ouml;rt.</p>
+            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
+          </a>
         </div>
-        <div class="dice-total" id="dice-total"></div>
       </div>
-      <button class="btn btn-primary" id="dice-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".6" fill="currentColor"/></svg>
-        Würfeln
-      </button>
-    </article>
 
-    <!-- 4. Zufallszahl -->
-    <article class="card reveal" data-card>
-      <div class="card-head">
-        <h2 class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="10" y1="4" x2="8" y2="20"/><line x1="16" y1="4" x2="14" y2="20"/></svg>
-          Zufallszahl
-        </h2>
-        <span class="card-index">04</span>
-      </div>
-      <div class="row center">
-        <input type="number" id="num-min" class="num-mini" value="1" inputmode="numeric" aria-label="Minimum">
-        <span class="mini">bis</span>
-        <input type="number" id="num-max" class="num-mini" value="100" inputmode="numeric" aria-label="Maximum">
-      </div>
-      <div class="stage">
-        <div class="stage-value muted" id="num-stage">—</div>
-      </div>
-      <div class="hint" id="num-hint">&nbsp;</div>
-      <button class="btn btn-primary" id="num-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="10" y1="4" x2="8" y2="20"/><line x1="16" y1="4" x2="14" y2="20"/></svg>
-        Zahl ziehen
-      </button>
-    </article>
-
-    <!-- 5. Liste mischen -->
-    <article class="card wide reveal" data-card>
-      <div class="card-head">
-        <h2 class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h12M3 12h7M3 17h4"/><path d="m16 7 3 3-3 3"/><path d="m21 17-3 3-3-3"/><path d="M19 8v6"/></svg>
-          Liste mischen
-        </h2>
-        <span class="card-index">05</span>
-      </div>
-      <textarea id="list-input" placeholder="Ein Eintrag pro Zeile, z. B.&#10;Pizza&#10;Sushi&#10;Curry"></textarea>
-      <div class="list-out" id="list-out"><p class="empty">Gemischte Reihenfolge erscheint hier.</p></div>
-      <div class="row" style="gap:10px;">
-        <button class="btn btn-ghost" id="list-clear" style="width:auto;flex:0 0 auto;">Leeren</button>
-        <button class="btn btn-primary" id="list-btn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h12M3 12h7M3 17h4"/><path d="m16 7 3 3-3 3"/><path d="m21 17-3 3-3-3"/><path d="M19 8v6"/></svg>
-          Mischen
-        </button>
-      </div>
-    </article>
-
-    <!-- 6. Glücksrad -->
-    <article class="card wide reveal" data-card>
-      <div class="card-head">
-        <h2 class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3v6.6M21 12h-6.6M12 21v-6.6M3 12h6.6"/></svg>
-          Glücksrad
-        </h2>
-        <span class="card-index">06</span>
-      </div>
-      <div class="row" style="align-items:flex-start;gap:24px;">
-        <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;">
-          <div class="opt-list" id="wheel-list"></div>
-          <button class="add-link" id="wheel-add">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-            Option hinzufügen
-          </button>
-        </div>
-        <div class="wheel-wrap" style="flex:0 0 auto;flex-direction:column;gap:10px;">
-          <div class="wheel" id="wheel">
-            <div class="pointer"></div>
-            <svg viewBox="0 0 100 100" id="wheel-svg"></svg>
+      <div class="cat">
+        <div class="cat-head reveal"><span class="cat-name">Text &amp; Lesen</span><span class="cat-rule"></span><span class="cat-count">02</span></div>
+        <div class="grid">
+          <a href="/read" class="card reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/><path d="M18 17l3 2-3 2"/></svg>
+            <h3>Fast Reader</h3>
+            <p>Wort f&uuml;r Wort im eigenen Takt. Lies Texte sp&uuml;rbar schneller, ohne zu hetzen.</p>
+            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
+          </a>
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h7"/><path d="M16 6l3 0M19 4v4"/></svg>
+            <h3>Markdown Formatter</h3>
+            <p>Markdown s&auml;ubern, formatieren und als Vorschau pr&uuml;fen.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
           </div>
         </div>
       </div>
-      <div class="stage" style="min-height:auto;padding-top:4px;">
-        <div class="stage-value muted" id="wheel-stage">—</div>
-      </div>
-      <div class="hint warn" id="wheel-hint">&nbsp;</div>
-      <button class="btn btn-primary" id="wheel-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.4"/></svg>
-        Rad drehen
-      </button>
-    </article>
 
-    <!-- 7. Mehrfachauswahl -->
-    <article class="card reveal" data-card>
-      <div class="card-head">
-        <h2 class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Mehrfachauswahl
-        </h2>
-        <span class="card-index">07</span>
-      </div>
-      <textarea id="pick-input" placeholder="Optionen, eine pro Zeile" style="min-height:72px;"></textarea>
-      <div class="row center">
-        <label class="mini" for="pick-count">Anzahl</label>
-        <input type="number" id="pick-count" class="num-mini" value="3" min="1" inputmode="numeric">
-      </div>
-      <div class="list-out" id="pick-out" style="min-height:60px;"><p class="empty">Auswahl erscheint hier.</p></div>
-      <button class="btn btn-primary" id="pick-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        Auswählen
-      </button>
-    </article>
-
-    <!-- 8. Turnier -->
-    <article class="card wide reveal" data-card>
-      <div class="card-head">
-        <h2 class="card-title">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z"/><path d="M7 5H4a2 2 0 0 0 0 4M17 5h3a2 2 0 0 1 0 4"/></svg>
-          Turnier
-        </h2>
-        <span class="card-index">08</span>
-      </div>
-      <div id="duel-setup">
-        <textarea id="duel-input" placeholder="Mindestens 2 Optionen, eine pro Zeile, z. B.&#10;Wandern&#10;Stadtbummel&#10;Museum&#10;Strand"></textarea>
-        <button class="btn btn-primary" id="duel-start" style="margin-top:14px;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          Turnier starten
-        </button>
-      </div>
-      <div id="duel-play" style="display:none;">
-        <div class="duel-round" id="duel-round">Runde 1</div>
-        <div class="duel" id="duel-pair" style="margin:14px 0;"></div>
-        <div class="row" style="justify-content:center;">
-          <button class="btn btn-ghost btn-sm" id="duel-reset">Neu starten</button>
+      <div class="cat">
+        <div class="cat-head reveal"><span class="cat-name">Netzwerk &amp; IT</span><span class="cat-rule"></span><span class="cat-count">03</span></div>
+        <div class="grid">
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="8.5" y="14" width="7" height="7" rx="1.5"/><path d="M6.5 10v2.5M17.5 10v2.5M6.5 12.5h11M12 12.5V14"/></svg>
+            <h3>Subnetting</h3>
+            <p>CIDR, Netzmaske, Host-Bereiche und Broadcast auf einen Blick berechnen.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
+          </div>
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l-1 7H8z"/><path d="M8 11l-1 9M16 11l1 9M9 20h6"/></svg>
+            <h3>UUID Generator</h3>
+            <p>v4-UUIDs einzeln oder im Batch erzeugen und direkt kopieren.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
+          </div>
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></svg>
+            <h3>Hash-Rechner</h3>
+            <p>MD5, SHA-1 und SHA-256 f&uuml;r Text und Dateien lokal berechnen.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
+          </div>
         </div>
       </div>
-    </article>
 
+      <div class="cat">
+        <div class="cat-head reveal"><span class="cat-name">Planen &amp; Organisieren</span><span class="cat-rule"></span><span class="cat-count">01</span></div>
+        <div class="grid">
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="5" height="6" rx="1"/><rect x="17" y="9" width="5" height="6" rx="1"/><rect x="9.5" y="4" width="5" height="6" rx="1"/><rect x="9.5" y="14" width="5" height="6" rx="1"/><path d="M7 12h2.5M14.5 7h.5a2 2 0 0 1 2 2M14.5 17h.5a2 2 0 0 0 2-2"/></svg>
+            <h3>Netzplan</h3>
+            <p>Vorg&auml;nge, Abh&auml;ngigkeiten und kritischer Pfad f&uuml;r die Projektplanung.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+  <section class="block" id="about">
+    <div class="wrap">
+      <div class="sec-head reveal"><span class="sec-idx">02</span><h2 class="sec-title">Warum &#960;?</h2></div>
+      <p class="about-body reveal">
+        &#960; ist die einfachste denkbare Frage &mdash; wie weit ist es einmal rund? &mdash;
+        mit einer Antwort, die nie endet. Genau das ist der Geist dieser Sammlung:
+        kleine, klare Fragen, sauber beantwortet. Jedes Werkzeug ist absichtlich
+        <strong>winzig, schnell und frei von allem, was es nicht braucht.</strong>
+        Kein Konto, keine Werbung, keine versteckten Server &mdash; nur Code, der im
+        Moment des &Ouml;ffnens seine Arbeit tut. Und so wie &#960; immer weiterl&auml;uft, kommen
+        hier mit der Zeit immer neue Werkzeuge dazu.
+      </p>
+    </div>
   </section>
 </main>
-
 <footer>
-  <div class="container">
-    <span class="fnote">31415.me · clientseitig, ohne Tracking</span>
-    <div class="flinks">
-      <a href="/" class="flink">Alle Werkzeuge</a>
+  <div class="wrap foot-grid">
+    <div class="foot-mark">31415<span>.me</span></div>
+    <div class="foot-meta">
+      Gebaut mit Sorgfalt &middot; Gehostet auf Cloudflare Pages<br>
+      <a href="#tools">Werkzeuge</a> &middot; <a href="#about">Idee</a><br>
+      &copy; <span id="yr"></span> &mdash; &#960; endet nie.
     </div>
   </div>
 </footer>
-
-<div id="toast" role="status" aria-live="polite"></div>
-
 <script>
-/* ============ Theme ============ */
 (function(){
-  const root = document.documentElement;
-  const saved = localStorage.getItem('theme');
-  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-  if(saved) root.setAttribute('data-theme', saved);
-  else if(prefersLight) root.setAttribute('data-theme','light');
-
-  function syncMeta(){
-    const isLight = root.getAttribute('data-theme') === 'light';
-    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
+  var root=document.documentElement,stored;
+  try{stored=localStorage.getItem('theme');}catch(e){}
+  var media=window.matchMedia('(prefers-color-scheme: light)');
+  function apply(t){
+    root.setAttribute('data-theme',t);
+    var meta=document.querySelector('meta[name=theme-color]');
+    if(meta)meta.setAttribute('content',t==='light'?'#f6f3ea':'#0a0e14');
   }
-  syncMeta();
-
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-    const next = current === 'light' ? 'dark' : 'light';
-    if(next === 'dark') root.removeAttribute('data-theme');
-    else root.setAttribute('data-theme','light');
-    localStorage.setItem('theme', next);
-    syncMeta();
+  apply(stored||(media.matches?'light':'dark'));
+  media.addEventListener('change',function(e){var s;try{s=localStorage.getItem('theme');}catch(_){}if(!s)apply(e.matches?'light':'dark');});
+  document.getElementById('theme-toggle').addEventListener('click',function(){
+    var next=root.getAttribute('data-theme')==='light'?'dark':'light';
+    apply(next);try{localStorage.setItem('theme',next);}catch(e){}
   });
-})();
-
-/* ============ Pi digit rain ============ */
-(function(){
-  const canvas = document.getElementById('digit-field');
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if(reduceMotion){ canvas.style.display = 'none'; return; }
-  const ctx = canvas.getContext('2d');
-  const PI_DIGITS = '3141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964428810975665933446128475648233786783165271201909145648566923460348610454326648213393607260249141273724587006606315588174881520920962829254091715364367892590360011330530548820466521384146951941511609';
-  let digits = [];
-  let w, h, dpr;
-
-  function resize(){
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    w = window.innerWidth; h = window.innerHeight;
-    canvas.width = w * dpr; canvas.height = h * dpr;
-    canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    const count = Math.max(18, Math.round((w*h)/42000));
-    digits = Array.from({length: count}, () => spawn());
+  document.getElementById('yr').textContent=new Date().getFullYear();
+  var piDigits="3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
+  var t=document.getElementById('pi-track');
+  var seg='<span>'+piDigits.replace(/(\d)/g,function(d,_,i){return (i%17===0)?'<b>'+d+'</b>':d})+'&nbsp;&nbsp;&#960;&nbsp;&nbsp;</span>';
+  t.innerHTML=seg+seg;
+  document.querySelectorAll('.card').forEach(function(c){
+    c.addEventListener('pointermove',function(e){var r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');});
+  });
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el,i){el.style.transitionDelay=(i%4*0.06)+'s';io.observe(el);});
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cv=document.getElementById('digit-field'),ctx=cv.getContext('2d'),W,H,cols,drops,fontSize,DPR;
+  var glyphs="3141592653589793238462643383279".split("");
+  function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';fontSize=(innerWidth<640?15:19)*DPR;cols=Math.floor(W/(fontSize*1.5));drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*-H;}
+  resize();addEventListener('resize',resize);
+  function draw(){
+    var light=root.getAttribute('data-theme')==='light';
+    ctx.fillStyle=getComputedStyle(root).getPropertyValue('--field-base');
+    ctx.fillRect(0,0,W,H);
+    ctx.font=fontSize+"px 'Space Mono', monospace";
+    for(var i=0;i<cols;i++){
+      var g=glyphs[Math.floor(Math.random()*glyphs.length)],x=i*fontSize*1.5,y=drops[i],grad=y/H;
+      ctx.fillStyle=light?'rgba(169,128,46,'+(0.10+grad*0.16)+')':'rgba(216,180,106,'+(0.16+grad*0.22)+')';
+      ctx.fillText(g,x,y);
+      if(y>H&&Math.random()>.985)drops[i]=Math.random()*-200;
+      drops[i]+=fontSize*0.4;
+    }
+    requestAnimationFrame(draw);
   }
-  function spawn(){
-    return {
-      x: Math.random()*w,
-      y: Math.random()*h - h,
-      speed: 14 + Math.random()*22,
-      size: 12 + Math.random()*10,
-      char: PI_DIGITS[Math.floor(Math.random()*PI_DIGITS.length)]
-    };
-  }
-  let last = performance.now();
-  function tick(now){
-    const dt = Math.min((now-last)/1000, .05); last = now;
-    ctx.clearRect(0,0,w,h);
-    for(const d of digits){
-      d.y += d.speed*dt;
-      if(d.y > h+20){ d.y = -20; d.x = Math.random()*w; d.char = PI_DIGITS[Math.floor(Math.random()*PI_DIGITS.length)]; }
-      const fade = Math.max(0, Math.min(1, d.y/h));
-      ctx.font = `400 ${d.size}px 'Space Mono', monospace`;
-      ctx.fillStyle = `rgba(216,180,106,${0.05 + fade*0.22})`;
-      ctx.fillText(d.char, d.x, d.y);
-    }
-    requestAnimationFrame(tick);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-  requestAnimationFrame(tick);
-})();
-
-/* ============ Scroll reveal ============ */
-(function(){
-  const els = document.querySelectorAll('.reveal');
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-    els.forEach(el => el.classList.add('in'));
-    return;
-  }
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, {threshold:.12});
-  els.forEach(el => io.observe(el));
-})();
-
-/* ============ Card spotlight ============ */
-(function(){
-  document.querySelectorAll('[data-card]').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      card.style.setProperty('--my', `${e.clientY - r.top}px`);
-    });
+  if(!reduce){draw();}else{cv.style.display='none';}
+  var hd=document.querySelector('header');
+  addEventListener('scroll',function(){
+    var s=getComputedStyle(root);
+    hd.style.background=scrollY>40?'linear-gradient(180deg,'+s.getPropertyValue('--header-a2')+','+s.getPropertyValue('--header-b2')+')':'linear-gradient(180deg,'+s.getPropertyValue('--header-a')+','+s.getPropertyValue('--header-b')+')';
   });
-})();
-
-/* ============ Helpers ============ */
-function rint(min, max){ min = Math.ceil(min); max = Math.floor(max); return Math.floor(Math.random()*(max-min+1))+min; }
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
-}
-function parseLines(textarea){
-  return textarea.value.split('\n').map(s=>s.trim()).filter(Boolean);
-}
-function settle(el){
-  el.classList.remove('settle'); void el.offsetWidth; el.classList.add('settle');
-}
-let toastTimer;
-function toast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>t.classList.remove('show'), 2600);
-}
-
-/* ============ 1. Ja/Nein ============ */
-(function(){
-  const btn = document.getElementById('yn-btn');
-  const stage = document.getElementById('yn-stage');
-  const tally = document.getElementById('yn-tally');
-  let yes=0, no=0;
-  btn.addEventListener('click', () => {
-    const result = Math.random() < .5;
-    if(result) yes++; else no++;
-    stage.textContent = result ? 'Ja' : 'Nein';
-    stage.className = 'stage-value ' + (result ? 'win' : 'lose');
-    settle(stage);
-    tally.innerHTML = `<span>Ja ${yes}</span>·<span>Nein ${no}</span>`;
-  });
-})();
-
-/* ============ 2. Münzwurf ============ */
-(function(){
-  const btn = document.getElementById('coin-btn');
-  const stage = document.getElementById('coin-stage');
-  const tally = document.getElementById('coin-tally');
-  let head=0, tail=0;
-  btn.addEventListener('click', () => {
-    const result = Math.random() < .5;
-    if(result) head++; else tail++;
-    stage.textContent = result ? 'Kopf' : 'Zahl';
-    stage.className = 'stage-value win';
-    settle(stage);
-    tally.innerHTML = `<span>Kopf ${head}</span>·<span>Zahl ${tail}</span>`;
-  });
-})();
-
-/* ============ 3. Würfel ============ */
-(function(){
-  const btn = document.getElementById('dice-btn');
-  const row = document.getElementById('dice-row');
-  const total = document.getElementById('dice-total');
-  const countInput = document.getElementById('dice-count');
-  btn.addEventListener('click', () => {
-    let count = parseInt(countInput.value, 10);
-    if(isNaN(count) || count < 1) count = 1;
-    if(count > 8) count = 8;
-    countInput.value = count;
-    row.innerHTML = '';
-    let sum = 0;
-    for(let i=0;i<count;i++){
-      const v = rint(1,6);
-      sum += v;
-      const die = document.createElement('div');
-      die.className = 'die settle';
-      die.textContent = v;
-      row.appendChild(die);
-    }
-    total.textContent = count > 1 ? `Summe: ${sum}` : '';
-  });
-})();
-
-/* ============ 4. Zufallszahl ============ */
-(function(){
-  const btn = document.getElementById('num-btn');
-  const stage = document.getElementById('num-stage');
-  const hint = document.getElementById('num-hint');
-  const minI = document.getElementById('num-min');
-  const maxI = document.getElementById('num-max');
-  btn.addEventListener('click', () => {
-    const min = parseInt(minI.value, 10);
-    const max = parseInt(maxI.value, 10);
-    hint.textContent = '\u00a0'; hint.classList.remove('warn');
-    if(isNaN(min) || isNaN(max)){
-      hint.textContent = 'Bitte gültige Zahlen für Minimum und Maximum eingeben.';
-      hint.classList.add('warn');
-      return;
-    }
-    if(min >= max){
-      hint.textContent = 'Minimum muss kleiner als Maximum sein.';
-      hint.classList.add('warn');
-      return;
-    }
-    const result = rint(min, max);
-    stage.textContent = result;
-    stage.className = 'stage-value win';
-    settle(stage);
-  });
-})();
-
-/* ============ 5. Liste mischen ============ */
-(function(){
-  const btn = document.getElementById('list-btn');
-  const clearBtn = document.getElementById('list-clear');
-  const input = document.getElementById('list-input');
-  const out = document.getElementById('list-out');
-  btn.addEventListener('click', () => {
-    const items = parseLines(input);
-    if(items.length < 2){
-      out.innerHTML = '<p class="empty">Trag mindestens zwei Einträge ein — einen pro Zeile.</p>';
-      return;
-    }
-    const shuffled = shuffle(items);
-    out.innerHTML = '<ol>' + shuffled.map((item,i)=>`<li class="settle"><span class="n">${i+1}.</span><span>${escapeHtml(item)}</span></li>`).join('') + '</ol>';
-  });
-  clearBtn.addEventListener('click', () => {
-    input.value = '';
-    out.innerHTML = '<p class="empty">Gemischte Reihenfolge erscheint hier.</p>';
-    input.focus();
-  });
-})();
-
-function escapeHtml(str){
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-}
-
-/* ============ 6. Glücksrad ============ */
-(function(){
-  const list = document.getElementById('wheel-list');
-  const addBtn = document.getElementById('wheel-add');
-  const spinBtn = document.getElementById('wheel-btn');
-  const stage = document.getElementById('wheel-stage');
-  const hint = document.getElementById('wheel-hint');
-  const svg = document.getElementById('wheel-svg');
-  const wheelEl = document.getElementById('wheel').querySelector('svg');
-  let rotation = 0;
-  let spinning = false;
-
-  function addRow(value=''){
-    const row = document.createElement('div');
-    row.className = 'opt-row';
-    row.innerHTML = `
-      <span class="opt-color"></span>
-      <input type="text" class="wheel-opt" placeholder="Option ${list.children.length+1}" value="${escapeHtml(value)}">
-      <button class="del" type="button" aria-label="Option entfernen">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1L6 6"/></svg>
-      </button>`;
-    row.querySelector('.del').addEventListener('click', () => { row.remove(); drawWheel(); });
-    row.querySelector('input').addEventListener('input', drawWheel);
-    list.appendChild(row);
-    drawWheel();
-  }
-
-  addBtn.addEventListener('click', () => addRow());
-  addRow('Pizza'); addRow('Sushi'); addRow('Döner');
-
-  const colors = ['var(--gold)','var(--paper-dim)','var(--gold-bright)','var(--paper-faint)'];
-
-  function getOptions(){
-    return Array.from(list.querySelectorAll('.wheel-opt')).map(i=>i.value.trim()).filter(Boolean);
-  }
-
-  function drawWheel(){
-    const opts = getOptions();
-    svg.innerHTML = '';
-    const n = Math.max(opts.length, 1);
-    const cx=50, cy=50, r=48;
-    for(let i=0;i<n;i++){
-      const a0 = (i/n)*2*Math.PI - Math.PI/2;
-      const a1 = ((i+1)/n)*2*Math.PI - Math.PI/2;
-      const x0 = cx + r*Math.cos(a0), y0 = cy + r*Math.sin(a0);
-      const x1 = cx + r*Math.cos(a1), y1 = cy + r*Math.sin(a1);
-      const large = (a1-a0) > Math.PI ? 1 : 0;
-      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('d', `M${cx},${cy} L${x0.toFixed(2)},${y0.toFixed(2)} A${r},${r} 0 ${large} 1 ${x1.toFixed(2)},${y1.toFixed(2)} Z`);
-      const baseColors = ['rgba(216,180,106,0.85)','rgba(180,170,150,0.35)'];
-      path.setAttribute('fill', n===1 ? baseColors[0] : baseColors[i%2]);
-      path.setAttribute('stroke', 'var(--ink)');
-      path.setAttribute('stroke-width', '0.6');
-      svg.appendChild(path);
-    }
-    const hub = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    hub.setAttribute('cx',50);hub.setAttribute('cy',50);hub.setAttribute('r',5);
-    hub.setAttribute('fill','var(--ink)');
-    hub.setAttribute('stroke','var(--gold)');
-    hub.setAttribute('stroke-width','1');
-    svg.appendChild(hub);
-  }
-  drawWheel();
-
-  spinBtn.addEventListener('click', () => {
-    if(spinning) return;
-    const opts = getOptions();
-    hint.textContent = '\u00a0';
-    if(opts.length < 2){
-      hint.textContent = 'Trag mindestens zwei Optionen ein.';
-      return;
-    }
-    spinning = true;
-    const n = opts.length;
-    const winnerIndex = rint(0, n-1);
-    const sliceDeg = 360/n;
-    const targetCenter = winnerIndex*sliceDeg + sliceDeg/2;
-    const spins = 4 + Math.floor(Math.random()*3);
-    const finalRotation = rotation - (rotation % 360) + spins*360 + (360 - targetCenter);
-    rotation = finalRotation;
-    wheelEl.style.transform = `rotate(${rotation}deg)`;
-    stage.className = 'stage-value muted';
-    stage.textContent = 'Das Rad dreht sich …';
-    setTimeout(() => {
-      stage.textContent = opts[winnerIndex];
-      stage.className = 'stage-value win';
-      settle(stage);
-      spinning = false;
-    }, 2650);
-  });
-})();
-
-/* ============ 7. Mehrfachauswahl ============ */
-(function(){
-  const btn = document.getElementById('pick-btn');
-  const input = document.getElementById('pick-input');
-  const countInput = document.getElementById('pick-count');
-  const out = document.getElementById('pick-out');
-  btn.addEventListener('click', () => {
-    const items = parseLines(input);
-    let count = parseInt(countInput.value, 10);
-    if(isNaN(count) || count < 1) count = 1;
-    if(items.length === 0){
-      out.innerHTML = '<p class="empty">Trag mindestens eine Option ein.</p>';
-      return;
-    }
-    if(count > items.length){
-      out.innerHTML = `<p class="empty">Du hast nur ${items.length} Optionen — wähle eine kleinere Anzahl.</p>`;
-      return;
-    }
-    const picked = shuffle(items).slice(0, count);
-    out.innerHTML = '<ol>' + picked.map((item,i)=>`<li class="settle picked"><span class="n">${i+1}.</span><span>${escapeHtml(item)}</span></li>`).join('') + '</ol>';
-  });
-})();
-
-/* ============ 8. Turnier ============ */
-(function(){
-  const setup = document.getElementById('duel-setup');
-  const play = document.getElementById('duel-play');
-  const input = document.getElementById('duel-input');
-  const startBtn = document.getElementById('duel-start');
-  const resetBtn = document.getElementById('duel-reset');
-  const roundLabel = document.getElementById('duel-round');
-  const pairEl = document.getElementById('duel-pair');
-
-  let queue = [];
-  let nextRound = [];
-  let roundNum = 1;
-  let totalRounds = 1;
-
-  startBtn.addEventListener('click', () => {
-    const items = parseLines(input);
-    if(items.length < 2){
-      toast('Trag mindestens zwei Optionen ein.');
-      return;
-    }
-    queue = shuffle(items);
-    nextRound = [];
-    roundNum = 1;
-    totalRounds = Math.ceil(Math.log2(queue.length));
-    setup.style.display = 'none';
-    play.style.display = 'block';
-    renderPair();
-  });
-
-  resetBtn.addEventListener('click', () => {
-    play.style.display = 'none';
-    setup.style.display = 'block';
-    input.focus();
-  });
-
-  function renderPair(){
-    if(queue.length === 0){
-      if(nextRound.length === 1){
-        showChampion(nextRound[0]);
-        return;
-      }
-      queue = shuffle(nextRound);
-      nextRound = [];
-      roundNum++;
-    }
-    if(queue.length === 1){
-      // odd one out advances automatically
-      nextRound.push(queue.shift());
-      renderPair();
-      return;
-    }
-    const a = queue.shift();
-    const b = queue.shift();
-    roundLabel.textContent = `Runde ${roundNum} von ${totalRounds} · noch ${queue.length + nextRound.length + 2} im Rennen`;
-    pairEl.innerHTML = `
-      <button class="duel-card settle" type="button" data-pick="a">${escapeHtml(a)}</button>
-      <span class="duel-vs">vs</span>
-      <button class="duel-card settle" type="button" data-pick="b">${escapeHtml(b)}</button>
-    `;
-    pairEl.querySelector('[data-pick="a"]').addEventListener('click', () => { nextRound.push(a); renderPair(); });
-    pairEl.querySelector('[data-pick="b"]').addEventListener('click', () => { nextRound.push(b); renderPair(); });
-  }
-
-  function showChampion(winner){
-    roundLabel.textContent = 'Ergebnis';
-    pairEl.innerHTML = `<div class="duel-champion settle" style="width:100%;text-align:center;font-size:1.6rem;">${escapeHtml(winner)}</div>`;
-  }
 })();
 </script>
 </body>
