@@ -3,523 +3,316 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>31415 · A collection of small, sharp tools</title>
-<meta name="description" content="Eine handverlesene Sammlung kleiner, durchdachter Web-Werkzeuge. Gebaut rund um die Zahl, die niemals endet.">
+<title>31415 · Ein digitales Taschenmesser</title>
+<meta name="description" content="Eine wachsende Sammlung kleiner, durchdachter Web-Werkzeuge für Alltag und Arbeit. Jedes tut genau eine Sache – und sie gut.">
+<meta name="theme-color" content="#0a0e14">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#0a0e14;
-    --ink-soft:#111722;
-    --panel:#141b27;
-    --line:rgba(214,201,170,0.12);
-    --paper:#f4efe2;
-    --paper-dim:#b9b2a1;
-    --paper-faint:#6f6c63;
-    --gold:#d8b46a;
-    --gold-bright:#f0cd84;
-    --azure:#7fa8c9;
-    --plum:#a98bb5;
-    --r:14px;
+    --ink:#0a0e14;--ink-soft:#111722;--panel:#141b27;--line:rgba(214,201,170,0.12);
+    --paper:#f4efe2;--paper-dim:#b9b2a1;--paper-faint:#6f6c63;
+    --gold:#d8b46a;--gold-bright:#f0cd84;
+    --field-base:rgba(10,14,20,0.12);
+    --header-a:rgba(10,14,20,0.85);--header-b:rgba(10,14,20,0);
+    --header-a2:rgba(10,14,20,0.95);--header-b2:rgba(10,14,20,0.6);
+    --shadow:rgba(216,180,106,.55);--r:14px;
   }
-
+  html[data-theme="light"]{
+    --ink:#f6f3ea;--ink-soft:#fffefb;--panel:#fffefb;--line:rgba(60,52,33,0.14);
+    --paper:#1d2329;--paper-dim:#5a564c;--paper-faint:#8f8a7d;
+    --gold:#a9802e;--gold-bright:#8c6618;
+    --field-base:rgba(246,243,234,0.14);
+    --header-a:rgba(246,243,234,0.88);--header-b:rgba(246,243,234,0);
+    --header-a2:rgba(246,243,234,0.96);--header-b2:rgba(246,243,234,0.7);
+    --shadow:rgba(169,128,46,.32);
+  }
   *{margin:0;padding:0;box-sizing:border-box}
-
   html{scroll-behavior:smooth}
-
-  body{
-    background:var(--ink);
-    color:var(--paper);
-    font-family:'Space Grotesk',system-ui,sans-serif;
-    line-height:1.6;
-    overflow-x:hidden;
-    -webkit-font-smoothing:antialiased;
-  }
-
+  body{background:var(--ink);color:var(--paper);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;transition:background .5s ease,color .5s ease}
   ::selection{background:var(--gold);color:var(--ink)}
-
   a{color:inherit;text-decoration:none}
-
-  /* ---------- ambient pi-digit field ---------- */
-  #digit-field{
-    position:fixed;
-    inset:0;
-    z-index:0;
-    pointer-events:none;
-    opacity:0.5;
-  }
-
-  .grain{
-    position:fixed;
-    inset:0;
-    z-index:1;
-    pointer-events:none;
-    opacity:0.035;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  }
-
-  .wrap{
-    position:relative;
-    z-index:2;
-    max-width:1180px;
-    margin:0 auto;
-    padding:0 28px;
-  }
-
-  /* ---------- top bar ---------- */
-  header{
-    position:fixed;
-    top:0;left:0;right:0;
-    z-index:50;
-    backdrop-filter:blur(12px);
-    background:linear-gradient(180deg,rgba(10,14,20,0.85),rgba(10,14,20,0));
-    transition:background .4s ease;
-  }
-  .bar{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    height:72px;
-  }
-  .mark{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    font-family:'Space Mono',monospace;
-    font-size:15px;
-    letter-spacing:0.04em;
-  }
-  .mark .glyph{
-    font-family:'Fraunces',serif;
-    font-size:26px;
-    color:var(--gold);
-    line-height:1;
-    transform:translateY(1px);
-  }
+  #digit-field{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
+  html[data-theme="light"] #digit-field{opacity:.6}
+  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  html[data-theme="light"] .grain{opacity:.02}
+  .wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 28px}
+  header{position:fixed;top:0;left:0;right:0;z-index:50;backdrop-filter:blur(12px);background:linear-gradient(180deg,var(--header-a),var(--header-b));transition:background .4s ease}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .mark{display:flex;align-items:center;gap:12px;font-family:'Space Mono',monospace;font-size:15px;letter-spacing:.04em}
+  .mark .glyph{font-family:'Fraunces',serif;font-size:26px;color:var(--gold);line-height:1;transform:translateY(1px)}
   .mark .dim{color:var(--paper-faint)}
+  .nav-right{display:flex;align-items:center;gap:30px}
   nav.top{display:flex;gap:30px;font-size:14px;color:var(--paper-dim)}
   nav.top a{transition:color .25s;position:relative}
   nav.top a:hover{color:var(--gold-bright)}
-  nav.top a::after{
-    content:'';position:absolute;left:0;bottom:-4px;height:1px;width:0;
-    background:var(--gold);transition:width .3s ease;
-  }
+  nav.top a::after{content:'';position:absolute;left:0;bottom:-4px;height:1px;width:0;background:var(--gold);transition:width .3s ease}
   nav.top a:hover::after{width:100%}
   @media(max-width:640px){nav.top{display:none}}
-
-  /* ---------- hero ---------- */
-  .hero{
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    padding-top:72px;
-    position:relative;
-  }
-  .eyebrow{
-    font-family:'Space Mono',monospace;
-    font-size:12.5px;
-    letter-spacing:0.32em;
-    text-transform:uppercase;
-    color:var(--gold);
-    margin-bottom:30px;
-    display:flex;align-items:center;gap:14px;
-    opacity:0;animation:rise .9s .2s forwards;
-  }
+  .theme-btn{width:40px;height:40px;border-radius:100px;border:1px solid var(--line);background:transparent;color:var(--paper-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .3s,color .3s,transform .4s cubic-bezier(.2,.8,.2,1)}
+  .theme-btn:hover{border-color:var(--gold);color:var(--gold-bright)}
+  .theme-btn:active{transform:scale(.92)}
+  .theme-btn svg{width:18px;height:18px}
+  .theme-btn .sun{display:none}
+  html[data-theme="light"] .theme-btn .sun{display:block}
+  html[data-theme="light"] .theme-btn .moon{display:none}
+  .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:72px;position:relative}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:12.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:30px;display:flex;align-items:center;gap:14px;opacity:0;animation:rise .9s .2s forwards}
   .eyebrow::before{content:'';width:42px;height:1px;background:var(--gold);opacity:.6}
-
-  h1.display{
-    font-family:'Fraunces',serif;
-    font-weight:300;
-    font-size:clamp(3rem,9vw,7.5rem);
-    line-height:0.96;
-    letter-spacing:-0.02em;
-    max-width:14ch;
-  }
-  h1.display em{
-    font-style:italic;
-    color:var(--gold-bright);
-  }
+  h1.display{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(3rem,9vw,7.5rem);line-height:.96;letter-spacing:-.02em;max-width:15ch}
+  h1.display em{font-style:italic;color:var(--gold-bright)}
   h1.display .l1{opacity:0;animation:rise 1s .35s forwards}
   h1.display .l2{opacity:0;animation:rise 1s .5s forwards}
-
-  .lede{
-    margin-top:34px;
-    max-width:48ch;
-    font-size:clamp(1rem,1.5vw,1.18rem);
-    color:var(--paper-dim);
-    font-weight:300;
-    opacity:0;animation:rise 1s .68s forwards;
-  }
-
-  .hero-cta{
-    margin-top:46px;
-    display:flex;gap:18px;align-items:center;flex-wrap:wrap;
-    opacity:0;animation:rise 1s .82s forwards;
-  }
-  .btn{
-    font-family:'Space Grotesk';
-    font-size:15px;
-    padding:14px 26px;
-    border-radius:100px;
-    border:1px solid var(--gold);
-    background:var(--gold);
-    color:var(--ink);
-    font-weight:500;
-    transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .3s;
-    cursor:pointer;
-  }
-  .btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px -12px rgba(216,180,106,.55)}
+  .lede{margin-top:34px;max-width:50ch;font-size:clamp(1rem,1.5vw,1.18rem);color:var(--paper-dim);font-weight:300;opacity:0;animation:rise 1s .68s forwards}
+  .hero-cta{margin-top:46px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;opacity:0;animation:rise 1s .82s forwards}
+  .btn{font-family:'Space Grotesk';font-size:15px;padding:14px 26px;border-radius:100px;border:1px solid var(--gold);background:var(--gold);color:var(--ink);font-weight:500;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .3s;cursor:pointer}
+  .btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px -12px var(--shadow)}
   .btn.ghost{background:transparent;color:var(--paper);border-color:var(--line)}
   .btn.ghost:hover{border-color:var(--gold);color:var(--gold-bright);box-shadow:none}
-
-  .scroll-hint{
-    position:absolute;
-    bottom:34px;left:50%;
-    transform:translateX(-50%);
-    font-family:'Space Mono',monospace;
-    font-size:11px;letter-spacing:0.25em;text-transform:uppercase;
-    color:var(--paper-faint);
-    display:flex;flex-direction:column;align-items:center;gap:10px;
-    opacity:0;animation:rise 1s 1.2s forwards;
-  }
+  .scroll-hint{position:absolute;bottom:34px;left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--paper-faint);display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;animation:rise 1s 1.2s forwards}
   .scroll-hint .rail{width:1px;height:46px;background:linear-gradient(var(--gold),transparent);position:relative;overflow:hidden}
   .scroll-hint .rail::after{content:'';position:absolute;top:0;left:0;width:100%;height:14px;background:var(--gold-bright);animation:drip 2.2s ease-in-out infinite}
-
-  /* ---------- section heading ---------- */
   section.block{padding:130px 0;position:relative}
   .sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:14px}
-  .sec-idx{
-    font-family:'Space Mono',monospace;
-    font-size:13px;color:var(--gold);letter-spacing:0.1em;
-  }
-  .sec-title{
-    font-family:'Fraunces',serif;
-    font-weight:400;
-    font-size:clamp(1.9rem,4vw,2.9rem);
-    letter-spacing:-0.01em;
-  }
+  .sec-idx{font-family:'Space Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em}
+  .sec-title{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(1.9rem,4vw,2.9rem);letter-spacing:-.01em}
   .sec-sub{color:var(--paper-dim);max-width:54ch;font-weight:300;margin-bottom:54px}
-
-  /* ---------- app grid ---------- */
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fill,minmax(330px,1fr));
-    gap:22px;
-  }
-  .card{
-    position:relative;
-    background:linear-gradient(160deg,var(--panel),var(--ink-soft));
-    border:1px solid var(--line);
-    border-radius:var(--r);
-    padding:34px 32px 30px;
-    overflow:hidden;
-    transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .45s;
-    display:flex;flex-direction:column;
-    min-height:248px;
-  }
-  .card::before{
-    content:'';
-    position:absolute;inset:0;
-    background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),rgba(216,180,106,.14),transparent 60%);
-    opacity:0;transition:opacity .45s;
-  }
-  .card:hover{transform:translateY(-6px);border-color:rgba(216,180,106,.4)}
-  .card:hover::before{opacity:1}
-  .card .ord{
-    font-family:'Space Mono',monospace;
-    font-size:12px;color:var(--paper-faint);letter-spacing:0.1em;
-    margin-bottom:auto;
-  }
-  .card .ord b{color:var(--gold)}
-  .card .icon{
-    width:50px;height:50px;margin-bottom:20px;
-    color:var(--gold);
-  }
-  .card h3{
-    font-family:'Fraunces',serif;
-    font-weight:500;
-    font-size:1.55rem;
-    margin-bottom:8px;
-    letter-spacing:-0.01em;
-  }
-  .card p{color:var(--paper-dim);font-size:0.95rem;font-weight:300;max-width:34ch}
-  .card .go{
-    margin-top:20px;
-    display:inline-flex;align-items:center;gap:9px;
-    font-size:13.5px;color:var(--gold);
-    font-family:'Space Mono',monospace;letter-spacing:0.03em;
-  }
+  .cat{margin-bottom:64px}
+  .cat:last-child{margin-bottom:0}
+  .cat-head{display:flex;align-items:center;gap:16px;margin-bottom:24px}
+  .cat-name{font-family:'Space Mono',monospace;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+  .cat-rule{flex:1;height:1px;background:var(--line)}
+  .cat-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--paper-faint)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:22px}
+  .card{position:relative;background:linear-gradient(160deg,var(--panel),var(--ink-soft));border:1px solid var(--line);border-radius:var(--r);padding:32px 30px 28px;overflow:hidden;transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .45s,box-shadow .45s;display:flex;flex-direction:column;min-height:212px}
+  html[data-theme="light"] .card{box-shadow:0 1px 2px rgba(60,52,33,.04)}
+  .card::before{content:'';position:absolute;inset:0;background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),var(--shadow),transparent 60%);opacity:0;transition:opacity .45s}
+  .card:hover{transform:translateY(-6px);border-color:var(--gold)}
+  html[data-theme="light"] .card:hover{box-shadow:0 16px 40px -18px rgba(60,52,33,.28)}
+  .card:hover::before{opacity:.5}
+  .card .icon{width:44px;height:44px;margin-bottom:18px;color:var(--gold)}
+  .card h3{font-family:'Fraunces',serif;font-weight:500;font-size:1.45rem;margin-bottom:8px;letter-spacing:-.01em}
+  .card p{color:var(--paper-dim);font-size:.93rem;font-weight:300;max-width:34ch}
+  .card .go{margin-top:auto;padding-top:18px;display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:.03em}
   .card .go .arr{transition:transform .35s}
   .card:hover .go .arr{transform:translateX(6px)}
-
-  .card.soon{opacity:0.62}
-  .card.soon:hover{transform:none;border-color:var(--line)}
+  .card.soon{opacity:.6}
+  .card.soon:hover{transform:none;border-color:var(--line);box-shadow:none}
   .card.soon .go{color:var(--paper-faint)}
-
-  /* reveal on scroll */
   .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.8,.2,1),transform .8s cubic-bezier(.2,.8,.2,1)}
   .reveal.in{opacity:1;transform:none}
-
-  /* ---------- pi strip ---------- */
-  .pi-strip{
-    border-top:1px solid var(--line);
-    border-bottom:1px solid var(--line);
-    padding:42px 0;
-    overflow:hidden;
-    position:relative;
-  }
-  .pi-strip .track{
-    font-family:'Space Mono',monospace;
-    font-size:clamp(1.4rem,3.4vw,2.4rem);
-    color:var(--paper-faint);
-    white-space:nowrap;
-    display:inline-block;
-    animation:marquee 60s linear infinite;
-    letter-spacing:0.06em;
-  }
+  .pi-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:42px 0;overflow:hidden;position:relative}
+  .pi-strip .track{font-family:'Space Mono',monospace;font-size:clamp(1.4rem,3.4vw,2.4rem);color:var(--paper-faint);white-space:nowrap;display:inline-block;animation:marquee 60s linear infinite;letter-spacing:.06em}
   .pi-strip .track b{color:var(--gold)}
-
-  /* ---------- footer ---------- */
+  .about-body{max-width:62ch;color:var(--paper-dim);font-weight:300;font-size:clamp(1rem,1.4vw,1.1rem)}
+  .about-body strong{color:var(--paper);font-weight:500}
   footer{padding:90px 0 60px;border-top:1px solid var(--line);position:relative;z-index:2}
   .foot-grid{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:30px}
   .foot-mark{font-family:'Fraunces',serif;font-size:clamp(2.5rem,8vw,5rem);font-weight:300;line-height:1;color:var(--paper)}
   .foot-mark span{color:var(--gold)}
   .foot-meta{font-family:'Space Mono',monospace;font-size:12.5px;color:var(--paper-faint);text-align:right;line-height:1.9}
   .foot-meta a:hover{color:var(--gold-bright)}
-
-  /* ---------- animations ---------- */
   @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
   @keyframes drip{0%{transform:translateY(-14px)}100%{transform:translateY(46px)}}
   @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-  @media(prefers-reduced-motion:reduce){
-    *{animation:none!important;transition:none!important}
-    .reveal{opacity:1;transform:none}
-    .eyebrow,h1.display .l1,h1.display .l2,.lede,.hero-cta,.scroll-hint{opacity:1}
-  }
-
-  @media(max-width:640px){
-    .wrap{padding:0 20px}
-    section.block{padding:90px 0}
-    .grid{grid-template-columns:1fr}
-    .foot-grid{flex-direction:column;align-items:flex-start}
-    .foot-meta{text-align:left}
-  }
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}.eyebrow,h1.display .l1,h1.display .l2,.lede,.hero-cta,.scroll-hint{opacity:1}}
+  @media(max-width:640px){.wrap{padding:0 20px}section.block{padding:90px 0}.grid{grid-template-columns:1fr}.foot-grid{flex-direction:column;align-items:flex-start}.foot-meta{text-align:left}.nav-right{gap:14px}}
 </style>
 </head>
 <body>
-
 <canvas id="digit-field"></canvas>
 <div class="grain"></div>
-
 <header>
   <div class="wrap bar">
-    <div class="mark"><span class="glyph">π</span>31415<span class="dim">.me</span></div>
-    <nav class="top">
-      <a href="#tools">Werkzeuge</a>
-      <a href="#about">Idee</a>
-      <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
-    </nav>
+    <div class="mark"><span class="glyph">&#960;</span>31415<span class="dim">.me</span></div>
+    <div class="nav-right">
+      <nav class="top">
+        <a href="#tools">Werkzeuge</a>
+        <a href="#about">Idee</a>
+      </nav>
+      <button class="theme-btn" id="theme-toggle" aria-label="Helligkeit umschalten" title="Heller / dunkler">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
   </div>
 </header>
-
 <main>
-  <!-- HERO -->
   <section class="hero">
     <div class="wrap">
-      <div class="eyebrow">Eine Sammlung kleiner, scharfer Werkzeuge</div>
+      <div class="eyebrow">Ein digitales Taschenmesser</div>
       <h1 class="display">
         <span class="l1">Werkzeuge, die</span><br>
-        <span class="l2">eine <em>Idee</em> ernst nehmen.</span>
+        <span class="l2"><em>vielseitig</em> unterst&uuml;tzen.</span>
       </h1>
       <p class="lede">
-        Keine Dashboards, keine Anmeldung, kein Ballast. Nur eine Handvoll
-        Apps, die jeweils genau eine Sache tun &mdash; und sie gut.
-        Benannt nach der Zahl, die nie aufhört, nie sich wiederholt.
+        Eine wachsende Sammlung kleiner Apps f&uuml;r Alltag und Arbeit. Jede tut
+        genau eine Sache &mdash; und sie gut. Kein Konto, keine Ablenkung,
+        sofort einsatzbereit im Browser.
       </p>
       <div class="hero-cta">
         <a href="#tools" class="btn">Werkzeuge ansehen</a>
         <a href="#about" class="btn ghost">Was soll das?</a>
       </div>
     </div>
-    <div class="scroll-hint">
-      <span>3.1415&hellip;</span>
-      <div class="rail"></div>
-    </div>
+    <div class="scroll-hint"><span>3.1415&hellip;</span><div class="rail"></div></div>
   </section>
-
-  <!-- PI STRIP -->
-  <div class="pi-strip" aria-hidden="true">
-    <div class="track" id="pi-track"></div>
-  </div>
-
-  <!-- TOOLS -->
+  <div class="pi-strip" aria-hidden="true"><div class="track" id="pi-track"></div></div>
   <section class="block" id="tools">
     <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="sec-idx">01</span>
-        <h2 class="sec-title">Die Werkzeuge</h2>
-      </div>
-      <p class="sec-sub reveal">
-        Jedes ist eigenständig, sofort einsatzbereit und läuft komplett im Browser.
-        Wähle eines.
-      </p>
+      <div class="sec-head reveal"><span class="sec-idx">01</span><h2 class="sec-title">Die Werkzeuge</h2></div>
+      <p class="sec-sub reveal">Nach Bereich sortiert. Alles l&auml;uft komplett im Browser &mdash; w&auml;hle, was du gerade brauchst.</p>
 
-      <div class="grid">
-
-        <a href="/decide" class="card reveal">
-          <div class="ord">REIHE &middot; <b>n&#8321;</b></div>
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/>
-            <circle cx="12" cy="12" r="3.2"/>
-          </svg>
-          <h3>Decision Maker</h3>
-          <p>Du kommst nicht weiter? Gib die Optionen ein und lass den Zufall &mdash; fair gewichtet &mdash; entscheiden.</p>
-          <span class="go">Öffnen <span class="arr">&rarr;</span></span>
-        </a>
-
-        <a href="/read" class="card reveal">
-          <div class="ord">REIHE &middot; <b>n&#8322;</b></div>
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 5h16M4 12h16M4 19h10"/>
-            <path d="M19 16l3 3-3 3" opacity="0"/>
-            <circle cx="20" cy="18" r="0" opacity="0"/>
-            <path d="M18 17l3 2-3 2"/>
-          </svg>
-          <h3>Fast Reader</h3>
-          <p>Ein Wort nach dem anderen, im Takt deiner Augen. Lies Texte spürbar schneller, ohne zu hetzen.</p>
-          <span class="go">Öffnen <span class="arr">&rarr;</span></span>
-        </a>
-
-        <a href="/dice" class="card reveal">
-          <div class="ord">REIHE &middot; <b>n&#8323;</b></div>
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="4"/>
-            <circle cx="8" cy="8" r="1.1" fill="currentColor"/>
-            <circle cx="16" cy="8" r="1.1" fill="currentColor"/>
-            <circle cx="12" cy="12" r="1.1" fill="currentColor"/>
-            <circle cx="8" cy="16" r="1.1" fill="currentColor"/>
-            <circle cx="16" cy="16" r="1.1" fill="currentColor"/>
-          </svg>
-          <h3>Würfelraum</h3>
-          <p>Würfel, Münzen, Zufallszahlen. Ein ruhiger Ort für jede Entscheidung, die dem Glück gehört.</p>
-          <span class="go">Öffnen <span class="arr">&rarr;</span></span>
-        </a>
-
-        <div class="card soon reveal">
-          <div class="ord">REIHE &middot; <b>n&#8324;</b></div>
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="9"/>
-            <path d="M12 7v5l3 2"/>
-          </svg>
-          <h3>Noch in Arbeit</h3>
-          <p>Die Reihe hört nie auf. Das nächste Werkzeug nimmt gerade Form an.</p>
-          <span class="go">Bald &middot;&middot;&middot;</span>
+      <div class="cat">
+        <div class="cat-head reveal"><span class="cat-name">Entscheiden &amp; Zufall</span><span class="cat-rule"></span><span class="cat-count">02</span></div>
+        <div class="grid">
+          <a href="/decide" class="card reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>
+            <h3>Decision Maker</h3>
+            <p>Optionen eingeben, gewichten, entscheiden lassen. Schluss mit dem Hin und Her.</p>
+            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
+          </a>
+          <a href="/dice" class="card reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.1" fill="currentColor"/><circle cx="16" cy="8" r="1.1" fill="currentColor"/><circle cx="12" cy="12" r="1.1" fill="currentColor"/><circle cx="8" cy="16" r="1.1" fill="currentColor"/><circle cx="16" cy="16" r="1.1" fill="currentColor"/></svg>
+            <h3>W&uuml;rfelraum</h3>
+            <p>W&uuml;rfel, M&uuml;nzen und Zufallszahlen f&uuml;r jede Entscheidung, die dem Gl&uuml;ck geh&ouml;rt.</p>
+            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
+          </a>
         </div>
-
       </div>
+
+      <div class="cat">
+        <div class="cat-head reveal"><span class="cat-name">Text &amp; Lesen</span><span class="cat-rule"></span><span class="cat-count">02</span></div>
+        <div class="grid">
+          <a href="/read" class="card reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/><path d="M18 17l3 2-3 2"/></svg>
+            <h3>Fast Reader</h3>
+            <p>Wort f&uuml;r Wort im eigenen Takt. Lies Texte sp&uuml;rbar schneller, ohne zu hetzen.</p>
+            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
+          </a>
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h7"/><path d="M16 6l3 0M19 4v4"/></svg>
+            <h3>Markdown Formatter</h3>
+            <p>Markdown s&auml;ubern, formatieren und als Vorschau pr&uuml;fen.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cat">
+        <div class="cat-head reveal"><span class="cat-name">Netzwerk &amp; IT</span><span class="cat-rule"></span><span class="cat-count">03</span></div>
+        <div class="grid">
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="8.5" y="14" width="7" height="7" rx="1.5"/><path d="M6.5 10v2.5M17.5 10v2.5M6.5 12.5h11M12 12.5V14"/></svg>
+            <h3>Subnetting</h3>
+            <p>CIDR, Netzmaske, Host-Bereiche und Broadcast auf einen Blick berechnen.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
+          </div>
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l-1 7H8z"/><path d="M8 11l-1 9M16 11l1 9M9 20h6"/></svg>
+            <h3>UUID Generator</h3>
+            <p>v4-UUIDs einzeln oder im Batch erzeugen und direkt kopieren.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
+          </div>
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></svg>
+            <h3>Hash-Rechner</h3>
+            <p>MD5, SHA-1 und SHA-256 f&uuml;r Text und Dateien lokal berechnen.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cat">
+        <div class="cat-head reveal"><span class="cat-name">Planen &amp; Organisieren</span><span class="cat-rule"></span><span class="cat-count">01</span></div>
+        <div class="grid">
+          <div class="card soon reveal">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="5" height="6" rx="1"/><rect x="17" y="9" width="5" height="6" rx="1"/><rect x="9.5" y="4" width="5" height="6" rx="1"/><rect x="9.5" y="14" width="5" height="6" rx="1"/><path d="M7 12h2.5M14.5 7h.5a2 2 0 0 1 2 2M14.5 17h.5a2 2 0 0 0 2-2"/></svg>
+            <h3>Netzplan</h3>
+            <p>Vorg&auml;nge, Abh&auml;ngigkeiten und kritischer Pfad f&uuml;r die Projektplanung.</p>
+            <span class="go">Bald &middot;&middot;&middot;</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
-
-  <!-- ABOUT -->
   <section class="block" id="about">
     <div class="wrap">
-      <div class="sec-head reveal">
-        <span class="sec-idx">02</span>
-        <h2 class="sec-title">Warum π?</h2>
-      </div>
-      <p class="sec-sub reveal" style="max-width:62ch">
-        π ist die einfachste denkbare Frage &mdash; wie weit ist es einmal rund? &mdash;
+      <div class="sec-head reveal"><span class="sec-idx">02</span><h2 class="sec-title">Warum &#960;?</h2></div>
+      <p class="about-body reveal">
+        &#960; ist die einfachste denkbare Frage &mdash; wie weit ist es einmal rund? &mdash;
         mit einer Antwort, die nie endet. Genau das ist der Geist dieser Sammlung:
         kleine, klare Fragen, sauber beantwortet. Jedes Werkzeug ist absichtlich
-        winzig, schnell und frei von allem, was es nicht braucht. Kein Konto, keine
-        Werbung, keine versteckten Server &mdash; nur Code, der im Moment des Öffnens
-        seine Arbeit tut.
+        <strong>winzig, schnell und frei von allem, was es nicht braucht.</strong>
+        Kein Konto, keine Werbung, keine versteckten Server &mdash; nur Code, der im
+        Moment des &Ouml;ffnens seine Arbeit tut. Und so wie &#960; immer weiterl&auml;uft, kommen
+        hier mit der Zeit immer neue Werkzeuge dazu.
       </p>
     </div>
   </section>
 </main>
-
 <footer>
   <div class="wrap foot-grid">
     <div class="foot-mark">31415<span>.me</span></div>
     <div class="foot-meta">
       Gebaut mit Sorgfalt &middot; Gehostet auf Cloudflare Pages<br>
-      <a href="#tools">Werkzeuge</a> &middot; <a href="#about">Idee</a> &middot; <a href="https://github.com/" target="_blank" rel="noopener">Quellcode</a><br>
-      &copy; <span id="yr"></span> &mdash; π endet nie.
+      <a href="#tools">Werkzeuge</a> &middot; <a href="#about">Idee</a><br>
+      &copy; <span id="yr"></span> &mdash; &#960; endet nie.
     </div>
   </div>
 </footer>
-
 <script>
 (function(){
-  document.getElementById('yr').textContent = new Date().getFullYear();
-
-  /* ---- pi marquee track ---- */
-  var piDigits = "3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
-  var t = document.getElementById('pi-track');
-  var seg = '<span>'+piDigits.replace(/(\d)/g,function(d,_,i){return (i%17===0)?'<b>'+d+'</b>':d})+'&nbsp;&nbsp;π&nbsp;&nbsp;</span>';
-  t.innerHTML = seg + seg;
-
-  /* ---- card spotlight ---- */
-  document.querySelectorAll('.card').forEach(function(c){
-    c.addEventListener('pointermove',function(e){
-      var r=c.getBoundingClientRect();
-      c.style.setProperty('--mx',(e.clientX-r.left)+'px');
-      c.style.setProperty('--my',(e.clientY-r.top)+'px');
-    });
-  });
-
-  /* ---- scroll reveal ---- */
-  var io=new IntersectionObserver(function(es){
-    es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});
-  },{threshold:0.12});
-  document.querySelectorAll('.reveal').forEach(function(el,i){
-    el.style.transitionDelay=(i%4*0.07)+'s';
-    io.observe(el);
-  });
-
-  /* ---- ambient falling pi digits ---- */
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var cv=document.getElementById('digit-field'), ctx=cv.getContext('2d');
-  var W,H,cols,drops,fontSize,DPR;
-  var glyphs="3141592653589793238462643383279".split("");
-  function resize(){
-    DPR=Math.min(window.devicePixelRatio||1,2);
-    W=cv.width=innerWidth*DPR; H=cv.height=innerHeight*DPR;
-    cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';
-    fontSize=(innerWidth<640?15:19)*DPR;
-    cols=Math.floor(W/(fontSize*1.5));
-    drops=[];
-    for(var i=0;i<cols;i++) drops[i]=Math.random()*-H;
+  var root=document.documentElement,stored;
+  try{stored=localStorage.getItem('theme');}catch(e){}
+  var media=window.matchMedia('(prefers-color-scheme: light)');
+  function apply(t){
+    root.setAttribute('data-theme',t);
+    var meta=document.querySelector('meta[name=theme-color]');
+    if(meta)meta.setAttribute('content',t==='light'?'#f6f3ea':'#0a0e14');
   }
-  resize();
-  addEventListener('resize',resize);
+  apply(stored||(media.matches?'light':'dark'));
+  media.addEventListener('change',function(e){var s;try{s=localStorage.getItem('theme');}catch(_){}if(!s)apply(e.matches?'light':'dark');});
+  document.getElementById('theme-toggle').addEventListener('click',function(){
+    var next=root.getAttribute('data-theme')==='light'?'dark':'light';
+    apply(next);try{localStorage.setItem('theme',next);}catch(e){}
+  });
+  document.getElementById('yr').textContent=new Date().getFullYear();
+  var piDigits="3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
+  var t=document.getElementById('pi-track');
+  var seg='<span>'+piDigits.replace(/(\d)/g,function(d,_,i){return (i%17===0)?'<b>'+d+'</b>':d})+'&nbsp;&nbsp;&#960;&nbsp;&nbsp;</span>';
+  t.innerHTML=seg+seg;
+  document.querySelectorAll('.card').forEach(function(c){
+    c.addEventListener('pointermove',function(e){var r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');});
+  });
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(el,i){el.style.transitionDelay=(i%4*0.06)+'s';io.observe(el);});
+  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cv=document.getElementById('digit-field'),ctx=cv.getContext('2d'),W,H,cols,drops,fontSize,DPR;
+  var glyphs="3141592653589793238462643383279".split("");
+  function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=cv.width=innerWidth*DPR;H=cv.height=innerHeight*DPR;cv.style.width=innerWidth+'px';cv.style.height=innerHeight+'px';fontSize=(innerWidth<640?15:19)*DPR;cols=Math.floor(W/(fontSize*1.5));drops=[];for(var i=0;i<cols;i++)drops[i]=Math.random()*-H;}
+  resize();addEventListener('resize',resize);
   function draw(){
-    ctx.fillStyle='rgba(10,14,20,0.12)';
+    var light=root.getAttribute('data-theme')==='light';
+    ctx.fillStyle=getComputedStyle(root).getPropertyValue('--field-base');
     ctx.fillRect(0,0,W,H);
     ctx.font=fontSize+"px 'Space Mono', monospace";
     for(var i=0;i<cols;i++){
-      var g=glyphs[Math.floor(Math.random()*glyphs.length)];
-      var x=i*fontSize*1.5, y=drops[i];
-      var grad=y/H;
-      ctx.fillStyle='rgba(216,180,106,'+(0.16+grad*0.22)+')';
+      var g=glyphs[Math.floor(Math.random()*glyphs.length)],x=i*fontSize*1.5,y=drops[i],grad=y/H;
+      ctx.fillStyle=light?'rgba(169,128,46,'+(0.10+grad*0.16)+')':'rgba(216,180,106,'+(0.16+grad*0.22)+')';
       ctx.fillText(g,x,y);
-      if(y>H && Math.random()>0.985) drops[i]=Math.random()*-200;
+      if(y>H&&Math.random()>.985)drops[i]=Math.random()*-200;
       drops[i]+=fontSize*0.4;
     }
     requestAnimationFrame(draw);
   }
-  if(!reduce){ draw(); } else { cv.style.display='none'; }
-
-  /* ---- header bg on scroll ---- */
+  if(!reduce){draw();}else{cv.style.display='none';}
   var hd=document.querySelector('header');
   addEventListener('scroll',function(){
-    hd.style.background = scrollY>40
-      ? 'linear-gradient(180deg,rgba(10,14,20,0.95),rgba(10,14,20,0.6))'
-      : 'linear-gradient(180deg,rgba(10,14,20,0.85),rgba(10,14,20,0))';
+    var s=getComputedStyle(root);
+    hd.style.background=scrollY>40?'linear-gradient(180deg,'+s.getPropertyValue('--header-a2')+','+s.getPropertyValue('--header-b2')+')':'linear-gradient(180deg,'+s.getPropertyValue('--header-a')+','+s.getPropertyValue('--header-b')+')';
   });
 })();
 </script>
