@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0e14">
+<title>Pomodoro — 31415.me</title>
+<meta name="description" content="Ein ruhiger Pomodoro-Timer für Fokus, kurze und lange Pausen. Frei einstellbar, läuft komplett im Browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{ /* DARK (Default) */
+    --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+    --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+    --gold:#d8b46a; --gold-bright:#f0cd84;
+    --field-base:rgba(10,14,20,0.12);
+    --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+    --shadow:rgba(216,180,106,.55); --r:14px;
+  }
+  html[data-theme="light"]{
+    --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+    --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+    --gold:#a9802e; --gold-bright:#8c6618;
+    --field-base:rgba(246,243,234,0.14);
+    --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+    --shadow:rgba(169,128,46,.32);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:400;
+    line-height:1.6;
+    min-height:100vh;
+    position:relative;
+    overflow-x:hidden;
+    transition:background .4s ease, color .4s ease;
+  }
+
+  /* ---------- Ambient layers ---------- */
+  #digit-field{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    opacity:.5;
+  }
+  .grain{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    opacity:.035;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode:overlay;
+  }
+  html[data-theme="light"] .grain{ opacity:.02; }
+
+  .wrap{ position:relative; z-index:2; }
+
+  /* ---------- Header ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    height:72px; display:flex; align-items:center;
+    background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  }
+  .header-inner{
+    max-width:1180px; margin:0 auto; padding:0 28px;
+    width:100%; display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:6px; text-decoration:none;
+    font-family:'Fraunces', serif;
+  }
+  .brand .pi{ color:var(--gold); font-size:26px; font-style:italic; line-height:1; }
+  .brand .num{ font-family:'Space Mono', monospace; font-size:16px; color:var(--paper); letter-spacing:.02em; }
+  .brand .me{ font-family:'Space Mono', monospace; font-size:16px; color:var(--paper-faint); }
+
+  .header-actions{ display:flex; align-items:center; gap:16px; }
+
+  .theme-toggle{
+    width:40px; height:40px; border-radius:100px;
+    border:1px solid var(--line); background:transparent;
+    color:var(--paper); cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .3s ease, color .3s ease, transform .3s cubic-bezier(.2,.8,.2,1);
+  }
+  .theme-toggle:hover{ border-color:var(--gold); color:var(--gold); transform:translateY(-2px); }
+  .theme-toggle:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .theme-toggle svg{ width:18px; height:18px; }
+
+  /* ---------- App head ---------- */
+  .app-head{
+    max-width:1180px; margin:0 auto; padding:150px 28px 50px;
+    text-align:center;
+  }
+  .eyebrow{
+    font-family:'Space Mono', monospace; font-size:12px;
+    letter-spacing:.32em; text-transform:uppercase;
+    color:var(--gold); display:block; margin-bottom:18px;
+  }
+  .app-head h1{
+    font-family:'Fraunces', serif; font-weight:300;
+    font-size:clamp(2.2rem, 6vw, 4rem);
+    letter-spacing:-.02em; line-height:.98;
+    color:var(--paper); margin-bottom:16px;
+  }
+  .app-head h1 em{ font-style:italic; color:var(--gold-bright); font-weight:400; }
+  .app-head p{
+    color:var(--paper-dim); font-size:1rem; max-width:480px;
+    margin:0 auto;
+  }
+
+  /* ---------- Main layout ---------- */
+  main{
+    max-width:760px; margin:0 auto; padding:0 28px 110px;
+  }
+
+  /* Phase pills */
+  .phase-row{
+    display:flex; justify-content:center; gap:10px; margin-bottom:48px;
+    flex-wrap:wrap;
+  }
+  .phase-pill{
+    font-family:'Space Mono', monospace; font-size:11px;
+    letter-spacing:.18em; text-transform:uppercase;
+    padding:9px 20px; border-radius:100px;
+    border:1px solid var(--line); color:var(--paper-faint);
+    background:transparent; cursor:pointer;
+    transition:all .35s cubic-bezier(.2,.8,.2,1);
+  }
+  .phase-pill:hover{ color:var(--paper); border-color:var(--paper-dim); }
+  .phase-pill:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .phase-pill.active{
+    color:var(--ink); background:var(--gold); border-color:var(--gold);
+    box-shadow:0 4px 18px var(--shadow);
+  }
+
+  /* Timer card */
+  .timer-card{
+    position:relative;
+    background:linear-gradient(165deg, var(--panel), var(--ink-soft));
+    border:1px solid var(--line); border-radius:calc(var(--r) * 2);
+    padding:64px 32px 52px;
+    display:flex; flex-direction:column; align-items:center;
+    overflow:hidden;
+    transition:transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s ease;
+  }
+  .timer-card::before{
+    content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(420px circle at var(--mx,50%) var(--my,30%), var(--shadow), transparent 70%);
+    opacity:0; transition:opacity .4s ease;
+  }
+  .timer-card:hover::before{ opacity:.16; }
+
+  .ring-wrap{
+    position:relative; width:min(320px, 78vw); height:min(320px, 78vw);
+    margin-bottom:40px; z-index:1;
+  }
+  .ring-wrap svg{ width:100%; height:100%; transform:rotate(-90deg); }
+  .ring-bg{ fill:none; stroke:var(--line); stroke-width:3; }
+  .ring-progress{
+    fill:none; stroke:var(--gold); stroke-width:3; stroke-linecap:round;
+    transition:stroke-dashoffset 1s linear, stroke .4s ease;
+  }
+  .ring-center{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:8px;
+  }
+  .time-display{
+    font-family:'Space Mono', monospace; font-weight:700;
+    font-size:clamp(2.6rem, 9vw, 3.6rem);
+    color:var(--paper); letter-spacing:.02em;
+    font-variant-numeric:tabular-nums;
+  }
+  .round-label{
+    font-family:'Space Mono', monospace; font-size:11px;
+    letter-spacing:.2em; text-transform:uppercase;
+    color:var(--paper-faint);
+  }
+  .round-label .gold{ color:var(--gold); }
+
+  .timer-card.running .ring-wrap{ animation:breathe 4s ease-in-out infinite; }
+  @keyframes breathe{
+    0%,100%{ transform:scale(1); }
+    50%{ transform:scale(1.012); }
+  }
+
+  /* Controls */
+  .controls{ display:flex; gap:14px; z-index:1; flex-wrap:wrap; justify-content:center; }
+
+  .btn{
+    font-family:'Space Grotesk', sans-serif; font-weight:500; font-size:.95rem;
+    border-radius:100px; padding:14px 32px; cursor:pointer;
+    border:none; display:inline-flex; align-items:center; gap:8px;
+    transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s ease, border-color .3s ease, color .3s ease;
+  }
+  .btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .btn-primary{ background:var(--gold); color:var(--ink); }
+  .btn-primary:hover{ transform:translateY(-3px); box-shadow:0 10px 26px var(--shadow); }
+  .btn-ghost{ background:transparent; color:var(--paper); border:1px solid var(--line); }
+  .btn-ghost:hover{ border-color:var(--gold); color:var(--gold); transform:translateY(-3px); }
+  .btn-icon{
+    width:52px; height:52px; padding:0; justify-content:center;
+    border-radius:100px; background:transparent; color:var(--paper-dim);
+    border:1px solid var(--line);
+  }
+  .btn-icon:hover{ border-color:var(--gold); color:var(--gold); transform:translateY(-3px) rotate(-12deg); }
+  .btn-icon svg{ width:18px; height:18px; }
+
+  /* Settings */
+  .settings{
+    margin-top:56px; border-top:1px solid var(--line); padding-top:40px;
+  }
+  .settings-toggle{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    width:100%; background:transparent; border:none; cursor:pointer;
+    color:var(--paper-faint); font-family:'Space Mono', monospace;
+    font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    padding:8px; transition:color .3s ease;
+  }
+  .settings-toggle:hover{ color:var(--gold); }
+  .settings-toggle:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+  .settings-toggle svg{ width:14px; height:14px; transition:transform .35s cubic-bezier(.2,.8,.2,1); }
+  .settings-toggle.open svg{ transform:rotate(180deg); }
+
+  .settings-panel{
+    max-height:0; overflow:hidden;
+    transition:max-height .45s cubic-bezier(.2,.8,.2,1), opacity .4s ease;
+    opacity:0;
+  }
+  .settings-panel.open{ opacity:1; }
+
+  .settings-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:18px;
+    margin-top:28px;
+  }
+  .field{ display:flex; flex-direction:column; gap:10px; }
+  .field label{
+    font-family:'Space Mono', monospace; font-size:10px;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--paper-faint);
+  }
+  .field input{
+    background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
+    color:var(--paper); font-family:'Space Mono', monospace; font-size:1.1rem;
+    padding:12px 14px; width:100%; text-align:center;
+    transition:border-color .3s ease;
+  }
+  html[data-theme="light"] .field input{ background:var(--panel); }
+  .field input:focus-visible{ outline:none; border-color:var(--gold); box-shadow:0 0 0 3px var(--shadow); }
+
+  .sound-row{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    margin-top:28px;
+  }
+  .switch{
+    position:relative; width:46px; height:26px; flex-shrink:0;
+  }
+  .switch input{ position:absolute; opacity:0; width:100%; height:100%; cursor:pointer; margin:0; }
+  .switch .track{
+    position:absolute; inset:0; background:var(--field-base); border:1px solid var(--line);
+    border-radius:100px; transition:background .3s ease, border-color .3s ease;
+  }
+  .switch .thumb{
+    position:absolute; top:3px; left:3px; width:18px; height:18px; border-radius:50%;
+    background:var(--paper-faint); transition:transform .3s cubic-bezier(.2,.8,.2,1), background .3s ease;
+  }
+  .switch input:checked + .track{ border-color:var(--gold); }
+  .switch input:checked + .track + .thumb{ transform:translateX(20px); background:var(--gold); }
+  .switch input:focus-visible + .track{ outline:2px solid var(--gold); outline-offset:2px; }
+  .sound-row span{ color:var(--paper-dim); font-size:.9rem; }
+
+  /* Footer */
+  footer{
+    position:relative; z-index:2;
+    border-top:1px solid var(--line);
+    padding:32px 28px; text-align:center;
+  }
+  footer p{
+    font-family:'Space Mono', monospace; font-size:11px;
+    letter-spacing:.1em; color:var(--paper-faint);
+  }
+  footer a{ color:var(--paper-faint); text-decoration:none; border-bottom:1px solid var(--line); transition:color .3s ease, border-color .3s ease; }
+  footer a:hover{ color:var(--gold); border-color:var(--gold); }
+
+  /* Reveal */
+  .reveal{ opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion:reduce){
+    *{ transition-duration:.001ms !important; animation-duration:.001ms !important; }
+    .reveal{ opacity:1; transform:none; }
+    .timer-card.running .ring-wrap{ animation:none; }
+    #digit-field{ display:none; }
+  }
+
+  @media (max-width:560px){
+    .app-head{ padding:140px 20px 40px; }
+    main{ padding:0 20px 90px; }
+    .settings-grid{ grid-template-columns:1fr; }
+    .timer-card{ padding:48px 20px 40px; }
+    .controls{ width:100%; }
+    .btn-primary, .btn-ghost{ flex:1; justify-content:center; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <div class="header-inner">
+      <a href="/" class="brand" aria-label="Zur 31415.me Startseite">
+        <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
+      </a>
+      <div class="header-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten" type="button">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="app-head reveal">
+    <span class="eyebrow">Werkzeug · Zeitmanagement</span>
+    <h1>Bleib <em>fokussiert</em>,<br>eine Runde nach der anderen.</h1>
+    <p>Klassischer Pomodoro-Rhythmus: Fokus, kurze Pause, lange Pause. Frei einstellbar, läuft komplett lokal in deinem Browser.</p>
+  </section>
+
+  <main>
+    <div class="phase-row reveal">
+      <button class="phase-pill active" data-phase="focus" type="button">Fokus</button>
+      <button class="phase-pill" data-phase="short" type="button">Kurze Pause</button>
+      <button class="phase-pill" data-phase="long" type="button">Lange Pause</button>
+    </div>
+
+    <div class="timer-card reveal" id="timerCard">
+      <div class="ring-wrap" id="ringWrap">
+        <svg viewBox="0 0 200 200">
+          <circle class="ring-bg" cx="100" cy="100" r="92"></circle>
+          <circle class="ring-progress" id="ringProgress" cx="100" cy="100" r="92"
+                  stroke-dasharray="578.05" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="ring-center">
+          <div class="time-display" id="timeDisplay">25:00</div>
+          <div class="round-label" id="roundLabel">Runde <span class="gold">1</span> · Fokus</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-primary" id="startPauseBtn" type="button">Starten</button>
+        <button class="btn btn-icon" id="resetBtn" type="button" aria-label="Timer zurücksetzen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"></polyline>
+            <path d="M3.51 15a9 9 0 1 0 .49-7.86L1 10"></path>
+          </svg>
+        </button>
+        <button class="btn btn-icon" id="skipBtn" type="button" aria-label="Phase überspringen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 4 15 12 5 20 5 4"></polygon>
+            <line x1="19" y1="5" x2="19" y2="19"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="settings">
+        <button class="settings-toggle" id="settingsToggle" type="button" aria-expanded="false" aria-controls="settingsPanel">
+          Einstellungen
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+        <div class="settings-panel" id="settingsPanel">
+          <div class="settings-grid">
+            <div class="field">
+              <label for="focusInput">Fokus (Min.)</label>
+              <input type="number" id="focusInput" min="1" max="180" value="25" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="shortInput">Kurze Pause (Min.)</label>
+              <input type="number" id="shortInput" min="1" max="60" value="5" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="longInput">Lange Pause (Min.)</label>
+              <input type="number" id="longInput" min="1" max="90" value="15" inputmode="numeric">
+            </div>
+          </div>
+          <div class="sound-row">
+            <label class="switch">
+              <input type="checkbox" id="soundToggle" checked>
+              <span class="track"></span>
+              <span class="thumb"></span>
+            </label>
+            <span>Ton bei Phasenwechsel</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p><a href="/">31415.me</a> — kleine Werkzeuge, gut gemacht. Läuft nur in deinem Browser, nichts wird gespeichert oder gesendet.</p>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Theme ---------- */
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const themeIcon = document.getElementById('themeIcon');
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+
+  const sunPath = '<circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"></path>';
+  const moonPath = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path>';
+
+  function applyTheme(t){
+    if(t === 'light'){ root.setAttribute('data-theme','light'); }
+    else { root.removeAttribute('data-theme'); }
+    themeIcon.innerHTML = t === 'light' ? sunPath : moonPath;
+    metaTheme.setAttribute('content', t === 'light' ? '#f6f3ea' : '#0a0e14');
+  }
+
+  let stored;
+  try{ stored = localStorage.getItem('theme'); }catch(e){ stored = null; }
+  const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+  let currentTheme = stored || (prefersLight ? 'light' : 'dark');
+  applyTheme(currentTheme);
+
+  themeToggle.addEventListener('click', function(){
+    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+    applyTheme(currentTheme);
+    try{ localStorage.setItem('theme', currentTheme); }catch(e){}
+  });
+
+  /* ---------- Reveal on scroll ---------- */
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const revealEls = document.querySelectorAll('.reveal');
+  if(reduceMotion){
+    revealEls.forEach(function(el){ el.classList.add('in'); });
+  } else if('IntersectionObserver' in window){
+    const obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
+      });
+    }, { threshold: 0.15 });
+    revealEls.forEach(function(el){ obs.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('in'); });
+  }
+
+  /* ---------- Digit rain ---------- */
+  const canvas = document.getElementById('digit-field');
+  const ctx = canvas ? canvas.getContext('2d') : null;
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+
+  let drops = [];
+  function sizeCanvas(){
+    if(!canvas) return;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function initDrops(){
+    if(!canvas) return;
+    const count = Math.max(14, Math.floor(window.innerWidth / 90));
+    drops = [];
+    for(let i = 0; i < count; i++){
+      drops.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height * -1,
+        speed: 0.35 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)],
+        size: 13 + Math.random() * 9
+      });
+    }
+  }
+
+  function drawDigits(){
+    if(!canvas || !ctx) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drops.forEach(function(d){
+      const fade = Math.min(1, d.y / canvas.height);
+      ctx.font = d.size + 'px "Space Mono", monospace';
+      ctx.fillStyle = 'rgba(216,180,106,' + (0.08 + fade * 0.32) + ')';
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > canvas.height + 20){
+        d.y = -20;
+        d.x = Math.random() * canvas.width;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    rafId = requestAnimationFrame(drawDigits);
+  }
+
+  let rafId = null;
+  if(canvas && !reduceMotion){
+    sizeCanvas();
+    initDrops();
+    drawDigits();
+    window.addEventListener('resize', function(){
+      sizeCanvas();
+      initDrops();
+    });
+  } else if(canvas){
+    canvas.style.display = 'none';
+  }
+
+  /* ---------- Spotlight on card ---------- */
+  const timerCard = document.getElementById('timerCard');
+  if(timerCard && !reduceMotion){
+    timerCard.addEventListener('mousemove', function(e){
+      const rect = timerCard.getBoundingClientRect();
+      const mx = ((e.clientX - rect.left) / rect.width) * 100;
+      const my = ((e.clientY - rect.top) / rect.height) * 100;
+      timerCard.style.setProperty('--mx', mx + '%');
+      timerCard.style.setProperty('--my', my + '%');
+    });
+  }
+
+  /* ---------- Pomodoro logic ---------- */
+  const PHASES = {
+    focus: { label: 'Fokus', color: null },
+    short: { label: 'Kurze Pause', color: null },
+    long:  { label: 'Lange Pause', color: null }
+  };
+
+  const focusInput = document.getElementById('focusInput');
+  const shortInput = document.getElementById('shortInput');
+  const longInput = document.getElementById('longInput');
+  const soundToggle = document.getElementById('soundToggle');
+
+  const phasePills = document.querySelectorAll('.phase-pill');
+  const timeDisplay = document.getElementById('timeDisplay');
+  const roundLabel = document.getElementById('roundLabel');
+  const ringProgress = document.getElementById('ringProgress');
+  const startPauseBtn = document.getElementById('startPauseBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const skipBtn = document.getElementById('skipBtn');
+  const settingsToggle = document.getElementById('settingsToggle');
+  const settingsPanel = document.getElementById('settingsPanel');
+
+  const RING_CIRC = 2 * Math.PI * 92;
+  ringProgress.setAttribute('stroke-dasharray', RING_CIRC.toFixed(2));
+
+  const STORAGE_KEY = 'pomodoro-settings';
+
+  function loadSettings(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const s = JSON.parse(raw);
+        if(s.focus) focusInput.value = s.focus;
+        if(s.short) shortInput.value = s.short;
+        if(s.long) longInput.value = s.long;
+        if(typeof s.sound === 'boolean') soundToggle.checked = s.sound;
+      }
+    }catch(e){}
+  }
+  function saveSettings(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        focus: clampInput(focusInput, 1, 180),
+        short: clampInput(shortInput, 1, 60),
+        long: clampInput(longInput, 1, 90),
+        sound: soundToggle.checked
+      }));
+    }catch(e){}
+  }
+  function clampInput(el, min, max){
+    let v = parseInt(el.value, 10);
+    if(isNaN(v)) v = min;
+    v = Math.min(max, Math.max(min, v));
+    el.value = v;
+    return v;
+  }
+
+  loadSettings();
+
+  let currentPhase = 'focus';
+  let round = 1; // 1..4, increments after each focus session
+  let totalSeconds = clampInput(focusInput, 1, 180) * 60;
+  let remaining = totalSeconds;
+  let running = false;
+  let intervalId = null;
+
+  function phaseMinutes(phase){
+    if(phase === 'focus') return clampInput(focusInput, 1, 180);
+    if(phase === 'short') return clampInput(shortInput, 1, 60);
+    return clampInput(longInput, 1, 90);
+  }
+
+  function setPhase(phase, resetRemaining){
+    currentPhase = phase;
+    phasePills.forEach(function(p){
+      p.classList.toggle('active', p.dataset.phase === phase);
+    });
+    totalSeconds = phaseMinutes(phase) * 60;
+    if(resetRemaining !== false){ remaining = totalSeconds; }
+    updateDisplay();
+  }
+
+  function formatTime(s){
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+  }
+
+  function updateDisplay(){
+    timeDisplay.textContent = formatTime(Math.max(0, remaining));
+    const progress = totalSeconds > 0 ? (totalSeconds - remaining) / totalSeconds : 0;
+    const offset = RING_CIRC * (1 - progress);
+    ringProgress.style.strokeDashoffset = offset.toFixed(2);
+    roundLabel.innerHTML = 'Runde <span class="gold">' + Math.min(round, 4) + '</span> · ' + PHASES[currentPhase].label;
+    document.title = (running ? formatTime(remaining) + ' · ' : '') + PHASES[currentPhase].label + ' — Pomodoro · 31415.me';
+  }
+
+  function nextPhase(){
+    if(currentPhase === 'focus'){
+      if(round >= 4){
+        round = 1;
+        setPhase('long');
+      } else {
+        round += 1;
+        setPhase('short');
+      }
+    } else {
+      setPhase('focus');
+    }
+  }
+
+  function tick(){
+    remaining -= 1;
+    if(remaining <= 0){
+      remaining = 0;
+      updateDisplay();
+      playChime();
+      pause();
+      nextPhase();
+      return;
+    }
+    updateDisplay();
+  }
+
+  function start(){
+    if(running) return;
+    running = true;
+    startPauseBtn.textContent = 'Pause';
+    timerCard.classList.add('running');
+    intervalId = setInterval(tick, 1000);
+    updateDisplay();
+  }
+
+  function pause(){
+    running = false;
+    startPauseBtn.textContent = 'Fortsetzen';
+    timerCard.classList.remove('running');
+    if(intervalId){ clearInterval(intervalId); intervalId = null; }
+    updateDisplay();
+  }
+
+  function reset(){
+    pause();
+    startPauseBtn.textContent = 'Starten';
+    remaining = totalSeconds;
+    updateDisplay();
+  }
+
+  startPauseBtn.addEventListener('click', function(){
+    if(running){ pause(); } else { start(); }
+  });
+
+  resetBtn.addEventListener('click', reset);
+
+  skipBtn.addEventListener('click', function(){
+    pause();
+    startPauseBtn.textContent = 'Starten';
+    nextPhase();
+  });
+
+  phasePills.forEach(function(pill){
+    pill.addEventListener('click', function(){
+      pause();
+      startPauseBtn.textContent = 'Starten';
+      setPhase(pill.dataset.phase);
+    });
+  });
+
+  [focusInput, shortInput, longInput].forEach(function(input){
+    input.addEventListener('change', function(){
+      clampInput(input, parseInt(input.min,10), parseInt(input.max,10));
+      if(!running){
+        setPhase(currentPhase);
+      }
+      saveSettings();
+    });
+  });
+
+  soundToggle.addEventListener('change', saveSettings);
+
+  settingsToggle.addEventListener('click', function(){
+    const isOpen = settingsPanel.classList.toggle('open');
+    settingsToggle.classList.toggle('open', isOpen);
+    settingsToggle.setAttribute('aria-expanded', String(isOpen));
+    if(isOpen){
+      settingsPanel.style.maxHeight = settingsPanel.scrollHeight + 'px';
+    } else {
+      settingsPanel.style.maxHeight = '0px';
+    }
+  });
+
+  /* ---------- Sound via Web Audio ---------- */
+  let audioCtx = null;
+  function ensureAudio(){
+    if(!audioCtx){
+      try{
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }catch(e){ audioCtx = null; }
+    }
+    return audioCtx;
+  }
+  // Unlock audio context on first user interaction (mobile policy)
+  ['click','keydown'].forEach(function(evt){
+    window.addEventListener(evt, function once(){
+      ensureAudio();
+      window.removeEventListener(evt, once);
+    }, { once: true });
+  });
+
+  function playChime(){
+    if(!soundToggle.checked) return;
+    const ctxA = ensureAudio();
+    if(!ctxA) return;
+    const now = ctxA.currentTime;
+    const freqs = [880, 1108.73]; // gentle two-note chime
+    freqs.forEach(function(freq, i){
+      const osc = ctxA.createOscillator();
+      const gain = ctxA.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const start = now + i * 0.16;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.16, start + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.9);
+      osc.connect(gain);
+      gain.connect(ctxA.destination);
+      osc.start(start);
+      osc.stop(start + 1);
+    });
+  }
+
+  /* ---------- Init ---------- */
+  setPhase('focus');
+  updateDisplay();
+})();
+</script>
+
+</body>
+</html>
