@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0e14">
+<title>JSON Datensatz-Generator — 31415.me</title>
+<meta name="description" content="Felder definieren oder JSON-Beispiel einlesen, Daten tabellarisch befüllen, als JSON exportieren. Läuft komplett im Browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--ink); color:var(--paper);
+  font-family:'Space Grotesk',sans-serif; font-weight:400; line-height:1.6;
+  -webkit-font-smoothing:antialiased; min-height:100vh; position:relative; overflow-x:hidden;
+}
+a{color:inherit;}
+
+/* ---------- ambient layers ---------- */
+#digit-field{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;}
+.grain{
+  position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.035; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+.wrap{position:relative; z-index:2;}
+.container{max-width:1180px; margin:0 auto; padding:0 28px;}
+@media (max-width:640px){ .container{padding:0 20px;} }
+
+/* ---------- header ---------- */
+header{
+  position:fixed; top:0; left:0; right:0; height:72px; z-index:50;
+  display:flex; align-items:center;
+  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+header .container{display:flex; align-items:center; justify-content:space-between; width:100%;}
+.brand{display:flex; align-items:center; gap:2px; text-decoration:none; font-family:'Space Mono',monospace; font-size:18px; letter-spacing:.02em;}
+.brand .pi{font-family:'Fraunces',serif; font-style:italic; font-size:26px; color:var(--gold); margin-right:4px; line-height:1;}
+.brand .num{color:var(--paper);}
+.brand .me{color:var(--paper-faint);}
+
+.theme-toggle{
+  display:flex; align-items:center; justify-content:center; width:40px; height:40px;
+  border-radius:100px; border:1px solid var(--line); background:transparent; color:var(--paper);
+  cursor:pointer; transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover, .theme-toggle:focus-visible{border-color:var(--gold); color:var(--gold);}
+.theme-toggle svg{width:18px; height:18px;}
+
+:focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:4px;}
+
+/* ---------- app head ---------- */
+.app-head{padding:150px 0 50px;}
+.eyebrow{
+  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.28em; text-transform:uppercase;
+  color:var(--gold); display:flex; align-items:center; gap:10px; margin-bottom:18px;
+}
+.eyebrow::before{content:''; width:18px; height:1px; background:var(--gold);}
+h1{
+  font-family:'Fraunces',serif; font-weight:300; letter-spacing:-.02em; line-height:.96;
+  font-size:clamp(1.9rem,5vw,3.2rem); margin:0 0 16px; color:var(--paper);
+}
+h1 em{font-style:italic; color:var(--gold);}
+.app-desc{font-size:16px; color:var(--paper-dim); max-width:640px; margin:0;}
+
+/* ---------- footer ---------- */
+footer{padding:60px 0 50px; border-top:1px solid var(--line); margin-top:60px;}
+footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;}
+footer p{font-family:'Space Mono',monospace; font-size:12px; color:var(--paper-faint); margin:0;}
+footer a{color:var(--paper-faint); text-decoration:none; border-bottom:1px solid transparent; transition:border-color .3s, color .3s;}
+footer a:hover{color:var(--gold); border-color:var(--gold);}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition-duration:.001ms !important; animation-duration:.001ms !important;}
+}
+
+/* ================= APP ================= */
+
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .5s cubic-bezier(.2,.8,.2,1), transform .5s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+/* mode switch (Quelle: manuell / import) */
+.source-tabs{display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap;}
+.tab-btn{
+  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:500; color:var(--paper-dim);
+  background:transparent; border:1px solid var(--line); border-radius:100px; padding:10px 20px;
+  cursor:pointer; transition:all .3s cubic-bezier(.2,.8,.2,1);
+}
+.tab-btn:hover{border-color:var(--gold); color:var(--paper);}
+.tab-btn.active{background:var(--gold); border-color:var(--gold); color:var(--ink); font-weight:600;}
+
+.panel{
+  background:linear-gradient(165deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line); border-radius:var(--r); padding:28px; margin-bottom:24px;
+  position:relative;
+}
+@media (max-width:640px){ .panel{padding:20px;} }
+
+.panel-title{
+  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--paper-faint); margin:0 0 18px;
+}
+
+/* --- manual field builder --- */
+.field-row{
+  display:grid; grid-template-columns: 1fr 140px 36px; gap:10px; margin-bottom:10px; align-items:center;
+}
+@media (max-width:560px){ .field-row{grid-template-columns: 1fr 110px 32px;} }
+
+input[type=text], input[type=number], select, textarea{
+  width:100%; background:var(--ink-soft); border:1px solid var(--line); border-radius:8px;
+  color:var(--paper); font-family:'Space Grotesk',sans-serif; font-size:14px; padding:10px 12px;
+  transition:border-color .25s cubic-bezier(.2,.8,.2,1);
+}
+input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus{
+  border-color:var(--gold); outline:none;
+}
+.mono-input{font-family:'Space Mono',monospace; font-size:13px;}
+select{cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23d8b46a'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:30px;}
+
+.icon-btn{
+  display:flex; align-items:center; justify-content:center; width:36px; height:36px;
+  border-radius:8px; border:1px solid var(--line); background:transparent; color:var(--paper-faint);
+  cursor:pointer; transition:all .25s cubic-bezier(.2,.8,.2,1); flex-shrink:0;
+}
+.icon-btn:hover{border-color:var(--gold); color:var(--gold);}
+.icon-btn svg{width:16px; height:16px;}
+@media (max-width:560px){ .icon-btn{width:32px; height:32px;} }
+
+.add-field-btn{
+  display:flex; align-items:center; gap:8px; margin-top:6px;
+  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:500; color:var(--gold);
+  background:transparent; border:1px dashed var(--line); border-radius:8px; padding:10px 16px;
+  cursor:pointer; transition:all .25s cubic-bezier(.2,.8,.2,1); width:100%; justify-content:center;
+}
+.add-field-btn:hover{border-color:var(--gold); background:rgba(216,180,106,0.06);}
+
+/* --- import box --- */
+textarea#jsonInput{
+  width:100%; min-height:160px; resize:vertical; font-family:'Space Mono',monospace; font-size:13px;
+  line-height:1.5;
+}
+.import-row{display:flex; gap:12px; margin-top:14px; flex-wrap:wrap;}
+.import-status{
+  font-family:'Space Mono',monospace; font-size:12px; color:var(--paper-faint); margin-top:12px;
+  display:flex; align-items:center; gap:8px; min-height:18px;
+}
+.import-status.ok{color:var(--gold);}
+.import-status.err{color:#d88a6a;}
+
+/* --- buttons --- */
+.btn{
+  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600; border-radius:100px;
+  padding:12px 26px; cursor:pointer; border:1px solid transparent; transition:all .35s cubic-bezier(.2,.8,.2,1);
+  display:inline-flex; align-items:center; gap:8px;
+}
+.btn-primary{background:var(--gold); color:var(--ink);}
+.btn-primary:hover{transform:translateY(-3px); box-shadow:0 10px 24px var(--shadow);}
+.btn-ghost{background:transparent; border-color:var(--line); color:var(--paper);}
+.btn-ghost:hover{border-color:var(--gold); color:var(--gold);}
+.btn:disabled{opacity:.4; cursor:not-allowed; transform:none !important; box-shadow:none !important;}
+
+/* --- mode toggle: single / table --- */
+.editor-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:22px;}
+.mode-switch{display:flex; gap:8px; background:var(--ink-soft); border:1px solid var(--line); border-radius:100px; padding:4px;}
+.mode-switch button{
+  font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+  border:none; background:transparent; color:var(--paper-faint); padding:8px 16px; border-radius:100px;
+  cursor:pointer; transition:all .25s cubic-bezier(.2,.8,.2,1);
+}
+.mode-switch button.active{background:var(--gold); color:var(--ink);}
+
+/* --- single record form --- */
+.record-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px;}
+.record-field label{
+  display:block; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--paper-faint); margin-bottom:8px;
+}
+.record-field label .type-hint{color:var(--gold); margin-left:6px; text-transform:none; letter-spacing:0;}
+
+/* --- table mode --- */
+.table-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r);}
+table.data-table{width:100%; border-collapse:collapse; min-width:560px;}
+table.data-table th{
+  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--paper-faint); text-align:left; padding:12px 14px; border-bottom:1px solid var(--line);
+  background:var(--ink-soft); white-space:nowrap;
+}
+table.data-table th .type-hint{color:var(--gold); margin-left:5px; text-transform:none;}
+table.data-table td{padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:middle;}
+table.data-table td input, table.data-table td select{border-radius:6px; padding:8px 10px; font-size:13px;}
+table.data-table tr:last-child td{border-bottom:none;}
+table.data-table td.row-actions{width:44px; text-align:center;}
+table.data-table tbody tr:hover{background:rgba(216,180,106,0.04);}
+
+.add-row-btn{margin-top:14px;}
+
+/* --- complex field notice --- */
+.complex-note{
+  font-family:'Space Mono',monospace; font-size:11px; color:var(--paper-faint); margin-top:6px;
+  display:flex; gap:6px; align-items:flex-start;
+}
+.complex-note svg{width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--gold);}
+
+/* --- output --- */
+.output-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;}
+pre#jsonOutput{
+  background:var(--ink-soft); border:1px solid var(--line); border-radius:var(--r); padding:20px;
+  font-family:'Space Mono',monospace; font-size:13px; line-height:1.6; color:var(--paper);
+  overflow-x:auto; max-height:480px; margin:0; white-space:pre;
+}
+.output-actions{display:flex; gap:10px; flex-wrap:wrap;}
+
+.empty-state{
+  text-align:center; padding:40px 20px; color:var(--paper-faint); font-size:14px;
+}
+
+.section-label{
+  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold); margin:0 0 14px; display:flex; align-items:center; gap:10px;
+}
+.section-label::before{content:''; width:14px; height:1px; background:var(--gold);}
+
+.app-section{padding:14px 0 60px;}
+
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); z-index:100;
+  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:600;
+  font-size:14px; padding:12px 24px; border-radius:100px; box-shadow:0 10px 30px var(--shadow);
+  opacity:0; pointer-events:none; transition:all .35s cubic-bezier(.2,.8,.2,1);
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+/* --- tree editor (nested structures) --- */
+.tree-banner{
+  display:flex; align-items:flex-start; gap:10px; background:rgba(216,180,106,0.07);
+  border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:22px;
+  font-size:13px; color:var(--paper-dim); line-height:1.55;
+}
+.tree-banner svg{width:16px; height:16px; flex-shrink:0; margin-top:2px; color:var(--gold);}
+.tree-banner strong{color:var(--paper); font-weight:600;}
+
+.tree-row{
+  display:grid; grid-template-columns: 1fr minmax(180px, 340px); gap:16px; align-items:center;
+  padding:9px 0; border-bottom:1px solid var(--line);
+}
+.tree-row:last-child{border-bottom:none;}
+@media (max-width:640px){
+  .tree-row{grid-template-columns:1fr; gap:6px; padding:12px 0;}
+}
+
+.tree-key{
+  display:flex; align-items:center; gap:8px; min-width:0;
+  font-family:'Space Mono',monospace; font-size:13px;
+}
+.tree-key .indent{flex-shrink:0; display:inline-flex;}
+.tree-key .branch{
+  width:14px; height:14px; flex-shrink:0; color:var(--paper-faint); opacity:.5;
+}
+.tree-key .key-name{color:var(--paper); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.tree-key .key-idx{color:var(--gold); font-size:11px;}
+.tree-key .type-hint{
+  font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+  color:var(--paper-faint); background:var(--ink-soft); border:1px solid var(--line); border-radius:5px;
+  padding:2px 6px; flex-shrink:0; margin-left:4px;
+}
+
+.tree-node-label{
+  font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:500; color:var(--paper-dim);
+  padding:10px 0 4px;
+}
+.tree-node-label.nested{padding-top:18px;}
+
+.tree-value-cell input, .tree-value-cell select, .tree-value-cell textarea{
+  font-size:13px; padding:8px 10px;
+}
+.tree-value-cell textarea{min-height:54px; resize:vertical;}
+
+.tree-scope-note{
+  font-family:'Space Mono',monospace; font-size:11px; color:var(--paper-faint);
+  margin:4px 0 12px; padding-left:2px;
+}
+</style>
+</head>
+<body>
+
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header>
+    <div class="container">
+      <a href="/" class="brand" aria-label="Zur Startseite von 31415.me">
+        <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten" type="button">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="app-head">
+      <div class="eyebrow">JSON-Werkzeug</div>
+      <h1>JSON <em>Datensatz</em>-Generator</h1>
+      <p class="app-desc">Felder selbst anlegen oder ein Beispiel-JSON einlesen — dann Werte wie in einer Tabelle eintragen und als JSON exportieren.</p>
+    </div>
+
+    <!-- APP CONTENT FOLLOWS -->
+    <section class="app-section">
+
+      <div class="panel reveal">
+        <p class="panel-title">01 — Felder festlegen</p>
+        <div class="source-tabs" role="tablist" aria-label="Quelle der Felder">
+          <button class="tab-btn active" id="tabManual" role="tab" aria-selected="true" type="button">Felder selbst anlegen</button>
+          <button class="tab-btn" id="tabImport" role="tab" aria-selected="false" type="button">JSON-Beispiel einlesen</button>
+        </div>
+
+        <!-- manual builder -->
+        <div id="manualBuilder">
+          <div id="fieldRows"></div>
+          <button class="add-field-btn" id="addFieldBtn" type="button">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Feld hinzufügen
+          </button>
+        </div>
+
+        <!-- import builder -->
+        <div id="importBuilder" style="display:none;">
+          <textarea id="jsonInput" class="mono-input" placeholder='{
+  "id": 1,
+  "name": "Beispiel GmbH",
+  "aktiv": true,
+  "tags": ["a", "b"]
+}' aria-label="Beispiel-JSON einfügen"></textarea>
+          <div class="import-row">
+            <button class="btn btn-primary" id="parseBtn" type="button">Felder erkennen</button>
+            <button class="btn btn-ghost" id="clearImportBtn" type="button">Leeren</button>
+          </div>
+          <div class="import-status" id="importStatus" role="status"></div>
+        </div>
+      </div>
+
+      <div class="panel reveal" id="editorPanel" style="display:none;">
+        <div class="editor-head">
+          <p class="panel-title" style="margin:0;">02 — Daten eintragen</p>
+          <div class="mode-switch" id="modeSwitchWrap" role="tablist" aria-label="Editor-Modus">
+            <button id="modeSingle" class="active" role="tab" aria-selected="true" type="button">Einzeln</button>
+            <button id="modeTable" role="tab" aria-selected="false" type="button">Tabelle</button>
+          </div>
+        </div>
+
+        <div id="treeBanner" class="tree-banner" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>
+          <span><strong>Verschachteltes Schema erkannt.</strong> Felder erscheinen als Baum mit Pfad-Einrückung. Arrays werden mit einem Beispiel-Eintrag angelegt — Werte rechts eintragen, das exportierte JSON behält die Struktur bei.</span>
+        </div>
+
+        <div id="singleEditor"></div>
+        <div id="tableEditor" style="display:none;">
+          <div class="table-scroll">
+            <table class="data-table" id="dataTable">
+              <thead><tr id="tableHeadRow"></tr></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+          <button class="btn btn-ghost add-row-btn" id="addRowBtn" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Zeile hinzufügen
+          </button>
+        </div>
+
+        <div id="treeEditor" style="display:none;"></div>
+      </div>
+
+      <div class="panel reveal" id="outputPanel" style="display:none;">
+        <div class="output-head">
+          <p class="panel-title" style="margin:0;">03 — JSON-Ergebnis</p>
+          <div class="output-actions">
+            <button class="btn btn-ghost" id="copyBtn" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              Kopieren
+            </button>
+            <button class="btn btn-primary" id="downloadBtn" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              Als .json herunterladen
+            </button>
+          </div>
+        </div>
+        <pre id="jsonOutput"></pre>
+      </div>
+
+      <div class="panel reveal" id="emptyPanel">
+        <div class="empty-state">Lege zuerst Felder an oder lies ein Beispiel-JSON ein — der Editor erscheint dann hier.</div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>31415.me — digitales Taschenmesser</p>
+      <p><a href="/">&larr; Alle Werkzeuge</a></p>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ---------- theme ---------- */
+(function(){
+  const root=document.documentElement;
+  const saved=localStorage.getItem('theme');
+  const sysLight=window.matchMedia('(prefers-color-scheme: light)').matches;
+  const initial=saved || (sysLight?'light':'dark');
+  root.setAttribute('data-theme', initial);
+  updateMeta(initial);
+  document.getElementById('themeToggle').addEventListener('click', function(){
+    const cur=root.getAttribute('data-theme')==='light'?'dark':'light';
+    root.setAttribute('data-theme', cur);
+    localStorage.setItem('theme', cur);
+    updateMeta(cur);
+  });
+  function updateMeta(t){
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', t==='light' ? '#f6f3ea' : '#0a0e14');
+  }
+})();
+
+/* ---------- pi digit rain ---------- */
+(function(){
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const canvas = document.getElementById('digit-field');
+  if(reduce){ canvas.style.display='none'; return; }
+  const ctx = canvas.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+  function resize(){
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const cols = Math.floor(canvas.width / 28);
+    drops = Array.from({length: cols}, (_, i) => ({
+      x: i*28 + 14, y: Math.random()*canvas.height, speed: 0.4 + Math.random()*0.6,
+      char: PI_DIGITS[Math.floor(Math.random()*PI_DIGITS.length)]
+    }));
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d=>{
+      const grad_alpha = 0.05 + (d.y/canvas.height)*0.35;
+      ctx.fillStyle = `rgba(216,180,106,${grad_alpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > canvas.height){ d.y = -20; d.char = PI_DIGITS[Math.floor(Math.random()*PI_DIGITS.length)]; }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ---------- scroll reveal ---------- */
+(function(){
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const els = document.querySelectorAll('.reveal');
+  if(reduce){ els.forEach(e=>e.classList.add('in')); return; }
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
+  }, {threshold:.12});
+  els.forEach(e=>obs.observe(e));
+})();
+
+/* ================= JSON BUILDER APP ================= */
+(function(){
+  'use strict';
+
+  const MAX_DEPTH = 5;
+
+  // ---- state ----
+  // fields: [{id, name, type}]  type in: string|number|boolean|null  (flat mode only)
+  let fields = [];
+  let mode = 'single'; // 'single' | 'table'  (flat mode only)
+  let singleRecord = {};      // {fieldId: value}
+  let tableRows = [];         // [{fieldId: value}, ...]
+  let fieldSeq = 0;
+
+  let appMode = 'flat'; // 'flat' | 'tree'
+  let treeSchema = null;   // recursive schema node (see buildSchema)
+  let treeValues = {};     // path -> value, for tree mode
+
+  const TYPE_LABELS = {string:'Text', number:'Zahl', boolean:'Wahrheitswert', null:'Null', json:'Komplex (max. Tiefe)'};
+
+  // ---- DOM refs ----
+  const tabManual = document.getElementById('tabManual');
+  const tabImport = document.getElementById('tabImport');
+  const manualBuilder = document.getElementById('manualBuilder');
+  const importBuilder = document.getElementById('importBuilder');
+  const fieldRows = document.getElementById('fieldRows');
+  const addFieldBtn = document.getElementById('addFieldBtn');
+  const jsonInput = document.getElementById('jsonInput');
+  const parseBtn = document.getElementById('parseBtn');
+  const clearImportBtn = document.getElementById('clearImportBtn');
+  const importStatus = document.getElementById('importStatus');
+
+  const editorPanel = document.getElementById('editorPanel');
+  const emptyPanel = document.getElementById('emptyPanel');
+  const outputPanel = document.getElementById('outputPanel');
+  const modeSwitchWrap = document.getElementById('modeSwitchWrap');
+  const modeSingleBtn = document.getElementById('modeSingle');
+  const modeTableBtn = document.getElementById('modeTable');
+  const singleEditor = document.getElementById('singleEditor');
+  const tableEditor = document.getElementById('tableEditor');
+  const tableHeadRow = document.getElementById('tableHeadRow');
+  const tableBody = document.getElementById('tableBody');
+  const addRowBtn = document.getElementById('addRowBtn');
+  const treeBanner = document.getElementById('treeBanner');
+  const treeEditor = document.getElementById('treeEditor');
+  const jsonOutput = document.getElementById('jsonOutput');
+  const copyBtn = document.getElementById('copyBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+
+  // ---- helpers ----
+  function uid(){ return 'f' + (++fieldSeq); }
+  function trashIcon(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>'; }
+  function infoIcon(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></svg>'; }
+  function branchIcon(){ return '<svg class="branch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v12a3 3 0 0 0 3 3h9M6 3 3 6m3-3 3 3"/></svg>'; }
+
+  function defaultValueFor(type){
+    if(type==='string') return '';
+    if(type==='number') return '';
+    if(type==='boolean') return false;
+    if(type==='null') return null;
+    return '';
+  }
+
+  function coerceValue(type, raw){
+    if(type==='number'){
+      if(raw==='' || raw===null || raw===undefined) return null;
+      const n = Number(raw);
+      return isNaN(n) ? null : n;
+    }
+    if(type==='boolean') return !!raw;
+    if(type==='null') return null;
+    if(type==='json'){
+      try{ return JSON.parse(raw); } catch(e){ return raw; } // fallback: keep raw string if invalid
+    }
+    return raw; // string
+  }
+
+  function escapeAttr(s){
+    return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  }
+  function escapeHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function valueType(val){
+    if(val === null) return 'null';
+    if(Array.isArray(val)) return 'array';
+    if(typeof val === 'object') return 'object';
+    if(typeof val === 'string') return 'string';
+    if(typeof val === 'number') return 'number';
+    if(typeof val === 'boolean') return 'boolean';
+    return 'string';
+  }
+
+  // ---- detect whether a parsed value is "flat" (object with only primitive props) ----
+  function isFlatObject(obj){
+    if(typeof obj !== 'object' || obj === null || Array.isArray(obj)) return false;
+    return Object.values(obj).every(v => v === null || typeof v !== 'object');
+  }
+
+  // ---- recursive schema builder for tree mode ----
+  // returns: {type:'object', children:[{key, node}]} | {type:'array', item: node} | {type:'string'|'number'|'boolean'|'null'|'json', value}
+  function buildSchema(val, depth){
+    const t = valueType(val);
+    if(depth >= MAX_DEPTH && (t==='object' || t==='array')){
+      // depth cut-off: treat as opaque leaf, store raw JSON, re-parsed on export
+      return {type:'json', value: JSON.stringify(val, null, 2)};
+    }
+    if(t === 'object'){
+      const children = Object.keys(val).map(key => ({ key, node: buildSchema(val[key], depth+1) }));
+      return {type:'object', children};
+    }
+    if(t === 'array'){
+      if(val.length === 0){
+        return {type:'array', item: {type:'string', value:''}, empty:true};
+      }
+      return {type:'array', item: buildSchema(val[0], depth+1)};
+    }
+    // primitive
+    return {type:t, value: t==='null' ? null : val};
+  }
+
+  function schemaHasNesting(node){
+    if(node.type === 'object' || node.type === 'array') return true;
+    return false;
+  }
+
+  function schemaContainsNesting(node){
+    if(node.type === 'object'){
+      return node.children.some(c => schemaContainsNesting(c.node));
+    }
+    if(node.type === 'array'){
+      return true; // arrays always render as a nested level visually
+    }
+    return false;
+  }
+
+  // ---- flatten schema into rows for rendering, with path + depth ----
+  // path uses dot/bracket notation: data[0].attributes.title
+  function flattenSchema(node, path, depth, rows){
+    if(node.type === 'object'){
+      node.children.forEach(c=>{
+        const childPath = path ? `${path}.${c.key}` : c.key;
+        const childNested = schemaHasNesting(c.node);
+        rows.push({kind:'label', path:childPath, key:c.key, depth, nested:childNested, arrayIndex:false});
+        if(childNested){
+          flattenSchema(c.node, childPath, depth+1, rows);
+        } else {
+          rows.push({kind:'leaf', path:childPath, key:c.key, depth: depth+1, type:c.node.type, value:c.node.value});
+        }
+      });
+    } else if(node.type === 'array'){
+      const idxPath = `${path}[0]`;
+      const itemNested = schemaHasNesting(node.item);
+      rows.push({kind:'label', path:idxPath, key:'[0]', depth, nested:itemNested, arrayIndex:true, empty:node.empty});
+      if(node.empty){
+        // empty array: nothing to edit, stays [] on export
+        return;
+      }
+      if(itemNested){
+        flattenSchema(node.item, idxPath, depth+1, rows);
+      } else {
+        rows.push({kind:'leaf', path:idxPath, key:'[0]', depth: depth+1, type:node.item.type, value:node.item.value});
+      }
+    }
+  }
+
+  // ---- read a value out of parsed JSON by path, for pre-filling tree values ----
+  function readPath(data, path){
+    // path like: data[0].attributes.title  -> tokens
+    const tokens = path.match(/[^.\[\]]+|\[\d+\]/g) || [];
+    let cur = data;
+    for(const tok of tokens){
+      if(cur === undefined || cur === null) return undefined;
+      if(/^\[\d+\]$/.test(tok)){
+        cur = cur[parseInt(tok.slice(1,-1),10)];
+      } else {
+        cur = cur[tok];
+      }
+    }
+    return cur;
+  }
+
+  // ---- build nested JSON object from treeValues + schema ----
+  function buildFromSchema(node, path){
+    if(node.type === 'object'){
+      const obj = {};
+      node.children.forEach(c=>{
+        const childPath = path ? `${path}.${c.key}` : c.key;
+        obj[c.key] = buildFromSchema(c.node, childPath);
+      });
+      return obj;
+    }
+    if(node.type === 'array'){
+      if(node.empty) return [];
+      const idxPath = `${path}[0]`;
+      return [buildFromSchema(node.item, idxPath)];
+    }
+    // primitive leaf -> read current value from treeValues
+    const raw = (path in treeValues) ? treeValues[path] : node.value;
+    return coerceValue(node.type, raw);
+  }
+
+  // ---- manual field rows ----
+  function addField(name, type){
+    fields.push({id: uid(), name: name || '', type: type || 'string'});
+    renderFieldRows();
+  }
+
+  function renderFieldRows(){
+    fieldRows.innerHTML = '';
+    fields.forEach(f=>{
+      const row = document.createElement('div');
+      row.className = 'field-row';
+      row.innerHTML = `
+        <input type="text" class="mono-input field-name" placeholder="Feldname, z. B. email" value="${escapeAttr(f.name)}" aria-label="Feldname">
+        <select class="field-type" aria-label="Feldtyp">
+          <option value="string"${f.type==='string'?' selected':''}>Text</option>
+          <option value="number"${f.type==='number'?' selected':''}>Zahl</option>
+          <option value="boolean"${f.type==='boolean'?' selected':''}>Wahrheitswert</option>
+          <option value="null"${f.type==='null'?' selected':''}>Null</option>
+        </select>
+        <button class="icon-btn remove-field" type="button" aria-label="Feld entfernen">${trashIcon()}</button>
+      `;
+      const nameInput = row.querySelector('.field-name');
+      const typeSelect = row.querySelector('.field-type');
+      const removeBtn = row.querySelector('.remove-field');
+      nameInput.addEventListener('input', ()=>{ f.name = nameInput.value; rebuildEditors(); });
+      typeSelect.addEventListener('change', ()=>{ f.type = typeSelect.value; rebuildEditors(); });
+      removeBtn.addEventListener('click', ()=>{ removeField(f.id); });
+      fieldRows.appendChild(row);
+    });
+    refreshVisibility();
+  }
+
+  function removeField(id){
+    fields = fields.filter(f=>f.id!==id);
+    delete singleRecord[id];
+    tableRows.forEach(r=>delete r[id]);
+    renderFieldRows();
+    rebuildEditors();
+  }
+
+  // ---- JSON import parsing ----
+  function parseImport(){
+    const raw = jsonInput.value.trim();
+    if(!raw){
+      setImportStatus('Füge zuerst ein Beispiel-JSON ein.', 'err');
+      return;
+    }
+    let data;
+    try{
+      data = JSON.parse(raw);
+    } catch(e){
+      setImportStatus('Ungültiges JSON: ' + e.message + ' — prüfe Kommas, Klammern und Anführungszeichen.', 'err');
+      return;
+    }
+
+    // top-level array of flat objects -> classic table-friendly flow
+    if(Array.isArray(data)){
+      if(data.length === 0){
+        setImportStatus('Das Array ist leer — es gibt keine Felder zu erkennen.', 'err');
+        return;
+      }
+      if(isFlatObject(data[0])){
+        loadFlatSchema(data[0], data);
+        return;
+      }
+      // array of nested objects -> treat as schema source via wrapping
+      loadTreeSchema(data, true);
+      return;
+    }
+
+    if(typeof data !== 'object' || data === null){
+      setImportStatus('Das JSON muss ein Objekt sein (oder ein Array von Objekten).', 'err');
+      return;
+    }
+
+    if(isFlatObject(data)){
+      loadFlatSchema(data, null);
+    } else {
+      loadTreeSchema(data, false);
+    }
+  }
+
+  function loadFlatSchema(source, arrayData){
+    appMode = 'flat';
+    const newFields = [];
+    Object.keys(source).forEach(key=>{
+      const val = source[key];
+      let type = valueType(val);
+      if(type==='object' || type==='array') type = 'string'; // shouldn't happen, isFlatObject guards this
+      newFields.push({id: uid(), name: key, type});
+    });
+    fields = newFields;
+    singleRecord = {};
+    fields.forEach(f=>{ singleRecord[f.id] = (source[f.name] !== undefined) ? source[f.name] : defaultValueFor(f.type); });
+
+    if(arrayData && arrayData.length){
+      tableRows = arrayData.map(item=>{
+        const row = {};
+        fields.forEach(f=>{ row[f.id] = (item && Object.prototype.hasOwnProperty.call(item, f.name)) ? item[f.name] : defaultValueFor(f.type); });
+        return row;
+      });
+      mode = 'table';
+    } else {
+      tableRows = [emptyTableRow()];
+      mode = 'single';
+    }
+
+    renderFieldRows();
+    setImportStatus(`${fields.length} Feld${fields.length===1?'':'er'} erkannt — alle flach.`, 'ok');
+    syncModeButtons();
+    rebuildEditors();
+  }
+
+  function loadTreeSchema(data, isTopLevelArray){
+    appMode = 'tree';
+    treeSchema = buildSchema(data, 0);
+    // prefill values by walking the rendered rows and reading from original data
+    const rows = [];
+    flattenSchema(treeSchema, '', 0, rows);
+    treeValues = {};
+    rows.filter(r=>r.kind==='leaf').forEach(r=>{
+      const v = readPath(data, r.path);
+      let val = (v===undefined) ? (r.value!==undefined?r.value:defaultValueFor(r.type)) : v;
+      if(r.type === 'json' && typeof val !== 'string'){
+        val = JSON.stringify(val, null, 2); // normalize: json-leaves are always edited as text
+      }
+      treeValues[r.path] = val;
+    });
+
+    const leafCount = rows.filter(r=>r.kind==='leaf').length;
+    setImportStatus(`Verschachteltes Schema erkannt — ${leafCount} Feld${leafCount===1?'':'er'} über mehrere Ebenen.`, 'ok');
+    rebuildEditors();
+  }
+
+  function setImportStatus(msg, kind){
+    importStatus.textContent = msg;
+    importStatus.className = 'import-status' + (kind ? ' '+kind : '');
+  }
+
+  // ---- editors ----
+  function emptyTableRow(){
+    const row = {};
+    fields.forEach(f=>{ row[f.id] = defaultValueFor(f.type); });
+    return row;
+  }
+
+  function refreshVisibility(){
+    const hasFields = (appMode==='flat' && fields.length > 0) || (appMode==='tree' && treeSchema !== null);
+    editorPanel.style.display = hasFields ? '' : 'none';
+    outputPanel.style.display = hasFields ? '' : 'none';
+    emptyPanel.style.display = hasFields ? 'none' : '';
+  }
+
+  function rebuildEditors(){
+    refreshVisibility();
+
+    if(appMode === 'tree'){
+      modeSwitchWrap.style.display = 'none';
+      treeBanner.style.display = '';
+      singleEditor.style.display = 'none';
+      tableEditor.style.display = 'none';
+      treeEditor.style.display = '';
+      renderTreeEditor();
+      updateOutput();
+      return;
+    }
+
+    // flat mode
+    modeSwitchWrap.style.display = '';
+    treeBanner.style.display = 'none';
+    treeEditor.style.display = 'none';
+
+    if(fields.length === 0){
+      jsonOutput.textContent = '';
+      return;
+    }
+    fields.forEach(f=>{
+      if(!(f.id in singleRecord)) singleRecord[f.id] = defaultValueFor(f.type);
+    });
+    if(tableRows.length === 0) tableRows.push(emptyTableRow());
+    tableRows.forEach(row=>{
+      fields.forEach(f=>{
+        if(!(f.id in row)) row[f.id] = defaultValueFor(f.type);
+      });
+    });
+
+    renderSingleEditor();
+    renderTableEditor();
+    syncModeButtons();
+    updateOutput();
+  }
+
+  function fieldInputEl(type, value, onChange, mono){
+    let el;
+    if(type==='boolean'){
+      el = document.createElement('select');
+      el.innerHTML = `<option value="true"${value?' selected':''}>true</option><option value="false"${!value?' selected':''}>false</option>`;
+      el.addEventListener('change', ()=>onChange(el.value==='true'));
+    } else if(type==='null'){
+      el = document.createElement('input');
+      el.type = 'text'; el.value = 'null'; el.disabled = true; el.className='mono-input';
+    } else if(type==='json'){
+      el = document.createElement('textarea');
+      el.className = 'mono-input';
+      el.rows = 3;
+      el.value = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+      el.addEventListener('input', ()=>onChange(el.value));
+    } else if(type==='number'){
+      el = document.createElement('input');
+      el.type = 'number'; el.className = 'mono-input';
+      el.value = (value===null||value===undefined) ? '' : value;
+      el.addEventListener('input', ()=>onChange(el.value));
+    } else {
+      el = document.createElement('input');
+      el.type = 'text';
+      if(mono) el.className = 'mono-input';
+      el.value = value===null||value===undefined ? '' : value;
+      el.addEventListener('input', ()=>onChange(el.value));
+    }
+    return el;
+  }
+
+  function renderSingleEditor(){
+    singleEditor.innerHTML = '';
+    const grid = document.createElement('div');
+    grid.className = 'record-grid';
+    fields.forEach(f=>{
+      const wrap = document.createElement('div');
+      wrap.className = 'record-field';
+      const label = document.createElement('label');
+      label.innerHTML = `${escapeHtml(f.name || '(ohne Namen)')}<span class="type-hint">${TYPE_LABELS[f.type]}</span>`;
+      wrap.appendChild(label);
+      const input = fieldInputEl(f.type, singleRecord[f.id], (val)=>{ singleRecord[f.id]=val; updateOutput(); });
+      wrap.appendChild(input);
+      grid.appendChild(wrap);
+    });
+    singleEditor.appendChild(grid);
+  }
+
+  function renderTableEditor(){
+    tableHeadRow.innerHTML = '';
+    fields.forEach(f=>{
+      const th = document.createElement('th');
+      th.innerHTML = `${escapeHtml(f.name || '(ohne Namen)')}<span class="type-hint">${TYPE_LABELS[f.type]}</span>`;
+      tableHeadRow.appendChild(th);
+    });
+    const thActions = document.createElement('th');
+    thActions.textContent = '';
+    tableHeadRow.appendChild(thActions);
+
+    tableBody.innerHTML = '';
+    tableRows.forEach((row, idx)=>{
+      const tr = document.createElement('tr');
+      fields.forEach(f=>{
+        const td = document.createElement('td');
+        const input = fieldInputEl(f.type, row[f.id], (val)=>{ row[f.id]=val; updateOutput(); });
+        td.appendChild(input);
+        tr.appendChild(td);
+      });
+      const tdActions = document.createElement('td');
+      tdActions.className = 'row-actions';
+      const delBtn = document.createElement('button');
+      delBtn.className = 'icon-btn'; delBtn.type='button'; delBtn.setAttribute('aria-label','Zeile entfernen');
+      delBtn.innerHTML = trashIcon();
+      delBtn.addEventListener('click', ()=>{
+        tableRows.splice(idx,1);
+        if(tableRows.length===0) tableRows.push(emptyTableRow());
+        renderTableEditor();
+        updateOutput();
+      });
+      tdActions.appendChild(delBtn);
+      tr.appendChild(tdActions);
+      tableBody.appendChild(tr);
+    });
+  }
+
+  // ---- tree editor rendering ----
+  function renderTreeEditor(){
+    treeEditor.innerHTML = '';
+    if(!treeSchema) return;
+    const rows = [];
+    flattenSchema(treeSchema, '', 0, rows);
+
+    rows.forEach(r=>{
+      if(r.kind === 'label'){
+        const row = document.createElement('div');
+        row.className = 'tree-row';
+        const keyCell = document.createElement('div');
+        keyCell.className = 'tree-key';
+        let indentHtml = '';
+        for(let i=0;i<r.depth;i++) indentHtml += '<span class="indent">' + branchIcon() + '</span>';
+        const nameHtml = r.arrayIndex
+          ? `<span class="key-idx">${escapeHtml(r.key)}</span>`
+          : `<span class="key-name">${escapeHtml(r.key)}</span>`;
+        keyCell.innerHTML = `${indentHtml}${nameHtml}<span class="type-hint">${r.arrayIndex ? (r.empty ? 'leeres array' : 'array-eintrag') : 'objekt'}</span>`;
+        row.appendChild(keyCell);
+        const spacer = document.createElement('div');
+        row.appendChild(spacer);
+        treeEditor.appendChild(row);
+      } else {
+        const row = document.createElement('div');
+        row.className = 'tree-row';
+        const keyCell = document.createElement('div');
+        keyCell.className = 'tree-key';
+        let indentHtml = '';
+        for(let i=0;i<r.depth;i++) indentHtml += '<span class="indent">' + branchIcon() + '</span>';
+        const nameHtml = r.arrayIndex
+          ? `<span class="key-idx">${escapeHtml(r.key)}</span>`
+          : `<span class="key-name">${escapeHtml(r.key)}</span>`;
+        keyCell.innerHTML = `${indentHtml}${nameHtml}<span class="type-hint">${TYPE_LABELS[r.type] || r.type}</span>`;
+        row.appendChild(keyCell);
+
+        const valCell = document.createElement('div');
+        valCell.className = 'tree-value-cell';
+        const currentVal = (r.path in treeValues) ? treeValues[r.path] : r.value;
+        const input = fieldInputEl(r.type, currentVal, (val)=>{ treeValues[r.path] = val; updateOutput(); }, true);
+        valCell.appendChild(input);
+        row.appendChild(valCell);
+        treeEditor.appendChild(row);
+      }
+    });
+  }
+
+  function buildRecordObject(rowData){
+    const obj = {};
+    fields.forEach(f=>{
+      const key = f.name || f.id;
+      obj[key] = coerceValue(f.type, rowData[f.id]);
+    });
+    return obj;
+  }
+
+  function updateOutput(){
+    if(appMode === 'tree'){
+      if(!treeSchema){ jsonOutput.textContent=''; return; }
+      const result = buildFromSchema(treeSchema, '');
+      jsonOutput.textContent = JSON.stringify(result, null, 2);
+      return;
+    }
+    if(fields.length===0){ jsonOutput.textContent=''; return; }
+    let result;
+    if(mode==='single'){
+      result = buildRecordObject(singleRecord);
+    } else {
+      result = tableRows.map(r=>buildRecordObject(r));
+    }
+    jsonOutput.textContent = JSON.stringify(result, null, 2);
+  }
+
+  function syncModeButtons(){
+    const single = mode==='single';
+    modeSingleBtn.classList.toggle('active', single);
+    modeTableBtn.classList.toggle('active', !single);
+    modeSingleBtn.setAttribute('aria-selected', single);
+    modeTableBtn.setAttribute('aria-selected', !single);
+    singleEditor.style.display = single ? '' : 'none';
+    tableEditor.style.display = single ? 'none' : '';
+  }
+
+  // ---- toast ----
+  function showToast(msg){
+    let toast = document.getElementById('toast');
+    if(!toast){
+      toast = document.createElement('div');
+      toast.id = 'toast'; toast.className = 'toast'; toast.setAttribute('role','status');
+      document.body.appendChild(toast);
+    }
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=>toast.classList.remove('show'), 2200);
+  }
+
+  // ---- events: source tabs ----
+  tabManual.addEventListener('click', ()=>{
+    tabManual.classList.add('active'); tabImport.classList.remove('active');
+    tabManual.setAttribute('aria-selected','true'); tabImport.setAttribute('aria-selected','false');
+    manualBuilder.style.display=''; importBuilder.style.display='none';
+    if(appMode === 'tree'){
+      appMode = 'flat';
+      if(fields.length === 0){ addField('name', 'string'); }
+      rebuildEditors();
+    }
+  });
+  tabImport.addEventListener('click', ()=>{
+    tabImport.classList.add('active'); tabManual.classList.remove('active');
+    tabImport.setAttribute('aria-selected','true'); tabManual.setAttribute('aria-selected','false');
+    importBuilder.style.display=''; manualBuilder.style.display='none';
+  });
+
+  addFieldBtn.addEventListener('click', ()=>{
+    if(appMode === 'tree'){ appMode = 'flat'; fields = []; }
+    addField('', 'string'); rebuildEditors();
+  });
+  parseBtn.addEventListener('click', parseImport);
+  clearImportBtn.addEventListener('click', ()=>{ jsonInput.value=''; setImportStatus('',''); jsonInput.focus(); });
+
+  modeSingleBtn.addEventListener('click', ()=>{ mode='single'; syncModeButtons(); updateOutput(); });
+  modeTableBtn.addEventListener('click', ()=>{ mode='table'; syncModeButtons(); updateOutput(); });
+
+  addRowBtn.addEventListener('click', ()=>{
+    tableRows.push(emptyTableRow());
+    renderTableEditor();
+    updateOutput();
+  });
+
+  copyBtn.addEventListener('click', async ()=>{
+    const text = jsonOutput.textContent;
+    if(!text){ showToast('Es gibt noch nichts zu kopieren.'); return; }
+    try{
+      await navigator.clipboard.writeText(text);
+      showToast('JSON kopiert.');
+    } catch(e){
+      showToast('Kopieren nicht möglich — bitte manuell markieren.');
+    }
+  });
+
+  downloadBtn.addEventListener('click', ()=>{
+    const text = jsonOutput.textContent;
+    if(!text){ showToast('Es gibt noch nichts zum Herunterladen.'); return; }
+    const blob = new Blob([text], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'datensatz.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Download gestartet.');
+  });
+
+  // ---- init: start with two example fields so the UI isn't blank ----
+  addField('name', 'string');
+  addField('aktiv', 'boolean');
+  rebuildEditors();
+  syncModeButtons();
+
+})();
+</script>
+
+</body>
+</html>
