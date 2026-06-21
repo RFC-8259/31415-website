@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UUID-Generator — 31415.me</title>
+<meta name="description" content="UUIDs erzeugen — v1, v4 und v7, einzeln oder in Mengen. Direkt im Browser, ohne Server.">
+<meta name="theme-color" content="#0a0e14">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--ink); color:var(--paper);
+  font-family:'Space Grotesk',sans-serif; font-weight:400; line-height:1.6;
+  min-height:100vh; position:relative; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  transition:background .4s cubic-bezier(.2,.8,.2,1), color .4s cubic-bezier(.2,.8,.2,1);
+}
+
+#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+a{color:inherit;text-decoration:none;}
+.container{max-width:1180px;margin:0 auto;padding:0 28px;position:relative;z-index:2;}
+@media (max-width:640px){.container{padding:0 20px;}}
+
+/* HEADER */
+header{
+  position:fixed;top:0;left:0;right:0;height:72px;z-index:50;
+  display:flex;align-items:center;
+  background:linear-gradient(to bottom,var(--header-a),var(--header-b));
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+header .container{display:flex;align-items:center;justify-content:space-between;width:100%;}
+.brand{display:flex;align-items:center;gap:.45rem;font-size:1.1rem;}
+.brand .pi{font-family:'Fraunces',serif;font-weight:500;color:var(--gold);font-size:1.7rem;line-height:1;}
+.brand .num{font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.02em;color:var(--paper);}
+.brand .dotme{font-family:'Space Mono',monospace;color:var(--paper-faint);}
+.brand:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:4px;}
+
+.theme-toggle{
+  width:42px;height:42px;border-radius:100px;border:1px solid var(--line);
+  background:transparent;color:var(--paper);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
+.theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.theme-toggle svg{width:18px;height:18px;}
+.icon-sun{display:none;}
+html[data-theme="light"] .icon-moon{display:none;}
+html[data-theme="light"] .icon-sun{display:block;}
+
+/* APP HEAD */
+.app-head{padding:150px 0 56px;}
+.eyebrow{
+  font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.28em;
+  font-size:.72rem;color:var(--gold);margin:0 0 18px;
+}
+h1{
+  font-family:'Fraunces',serif;font-weight:300;letter-spacing:-.02em;line-height:.96;
+  font-size:clamp(2.2rem,6vw,3.6rem);margin:0 0 18px;color:var(--paper);
+}
+h1 em{font-style:italic;font-weight:400;color:var(--gold-bright);}
+.app-head p{
+  max-width:560px;color:var(--paper-dim);font-size:1.02rem;margin:0;
+}
+
+/* WORKBENCH */
+.workbench{padding-bottom:120px;}
+.controls-card, .output-card{
+  background:linear-gradient(160deg,var(--panel),var(--ink-soft));
+  border:1px solid var(--line); border-radius:var(--r);
+  padding:28px; position:relative; overflow:hidden;
+  --mx:50%; --my:50%;
+}
+.controls-card::before, .output-card::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
+}
+.controls-card:hover::before, .output-card:hover::before{opacity:.14;}
+.controls-card > *, .output-card > *{position:relative;z-index:1;}
+
+.layout{display:grid;grid-template-columns:340px 1fr;gap:24px;align-items:start;}
+@media (max-width:880px){.layout{grid-template-columns:1fr;}}
+
+.controls-card{margin-bottom:0;}
+.field-group{margin-bottom:26px;}
+.field-group:last-child{margin-bottom:0;}
+.field-label{
+  display:block; font-family:'Space Mono',monospace; text-transform:uppercase;
+  letter-spacing:.14em; font-size:.68rem; color:var(--paper-faint); margin-bottom:12px;
+}
+
+/* version segmented control */
+.seg{display:flex; border:1px solid var(--line); border-radius:100px; padding:3px; gap:2px;}
+.seg button{
+  flex:1; border:none; background:transparent; color:var(--paper-dim);
+  font-family:'Space Mono',monospace; font-size:.82rem; font-weight:700;
+  padding:9px 6px; border-radius:100px; cursor:pointer;
+  transition:background .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.seg button.active{background:var(--gold); color:var(--ink);}
+.seg button:not(.active):hover{color:var(--paper);}
+.seg button:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.version-hint{font-size:.82rem; color:var(--paper-faint); margin-top:10px; line-height:1.5;}
+
+/* count stepper */
+.count-row{display:flex; align-items:center; gap:10px;}
+.count-row button{
+  width:38px;height:38px;flex:none; border-radius:100px; border:1px solid var(--line);
+  background:transparent; color:var(--paper); font-size:1.1rem; cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.count-row button:hover{border-color:var(--gold); color:var(--gold);}
+.count-row button:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.count-row input{
+  width:100%; text-align:center; background:var(--ink-soft); border:1px solid var(--line);
+  border-radius:10px; color:var(--paper); font-family:'Space Mono',monospace; font-size:1rem;
+  padding:9px 6px; transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.count-row input:focus-visible, .count-row input:focus{outline:none; border-color:var(--gold);}
+.count-range{display:flex;justify-content:space-between;font-size:.72rem;color:var(--paper-faint);margin-top:8px;font-family:'Space Mono',monospace;}
+
+/* checkboxes */
+.opt{display:flex; align-items:center; gap:11px; padding:9px 0; cursor:pointer; user-select:none;}
+.opt input{
+  appearance:none; width:19px; height:19px; flex:none; border-radius:5px;
+  border:1px solid var(--line); background:var(--ink-soft); cursor:pointer; position:relative;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), background .3s cubic-bezier(.2,.8,.2,1);
+}
+.opt input:checked{background:var(--gold); border-color:var(--gold);}
+.opt input:checked::after{
+  content:""; position:absolute; left:6px; top:2px; width:5px; height:9px;
+  border:solid var(--ink); border-width:0 2px 2px 0; transform:rotate(45deg);
+}
+.opt input:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.opt span{font-size:.92rem; color:var(--paper);}
+.opt small{display:block;font-size:.76rem;color:var(--paper-faint);margin-top:1px;}
+.opt-text{display:flex;flex-direction:column;}
+
+.btn-generate{
+  width:100%; margin-top:8px; border:none; border-radius:100px;
+  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif;
+  font-weight:600; font-size:.98rem; padding:15px 20px; cursor:pointer;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-generate:hover{transform:translateY(-3px); box-shadow:0 14px 28px -10px var(--shadow);}
+.btn-generate:focus-visible{outline:2px solid var(--gold-bright); outline-offset:3px;}
+.btn-generate:active{transform:translateY(-1px);}
+
+/* output */
+.output-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap:12px; flex-wrap:wrap;}
+.output-count{font-family:'Space Mono',monospace; font-size:.78rem; color:var(--paper-faint); letter-spacing:.06em;}
+.output-count strong{color:var(--gold); font-weight:700;}
+.output-actions{display:flex; gap:10px;}
+
+.btn-ghost{
+  border:1px solid var(--line); background:transparent; color:var(--paper);
+  font-family:'Space Grotesk',sans-serif; font-size:.84rem; font-weight:500;
+  padding:9px 18px; border-radius:100px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-ghost:hover{border-color:var(--gold); color:var(--gold);}
+.btn-ghost:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.btn-ghost svg{width:14px;height:14px;}
+
+.list{
+  display:flex; flex-direction:column; gap:8px; max-height:520px; overflow-y:auto;
+  padding-right:4px;
+}
+.list::-webkit-scrollbar{width:6px;}
+.list::-webkit-scrollbar-thumb{background:var(--line); border-radius:10px;}
+
+.row{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
+  padding:13px 16px; transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.row:hover{border-color:var(--line); }
+.row .uuid-text{
+  font-family:'Space Mono',monospace; font-size:.92rem; color:var(--paper);
+  word-break:break-all; letter-spacing:.01em;
+}
+.row .copy-btn{
+  flex:none; width:34px; height:34px; border-radius:8px; border:1px solid var(--line);
+  background:transparent; color:var(--paper-faint); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:border-color .25s cubic-bezier(.2,.8,.2,1), color .25s cubic-bezier(.2,.8,.2,1), background .25s cubic-bezier(.2,.8,.2,1);
+}
+.row .copy-btn:hover{border-color:var(--gold); color:var(--gold);}
+.row .copy-btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.row .copy-btn.copied{background:var(--gold); border-color:var(--gold); color:var(--ink);}
+.row .copy-btn svg{width:15px;height:15px;}
+
+.empty-state{
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:70px 20px; color:var(--paper-faint); gap:10px; min-height:340px;
+}
+.empty-state .pi-big{font-family:'Fraunces',serif; font-style:italic; font-size:2.6rem; color:var(--gold); opacity:.5; margin-bottom:6px;}
+.empty-state p{margin:0; max-width:320px; font-size:.95rem;}
+
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translate(-50%,20px);
+  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif;
+  font-weight:600; font-size:.88rem; padding:13px 24px; border-radius:100px;
+  box-shadow:0 16px 32px -8px var(--shadow); opacity:0; pointer-events:none; z-index:100;
+  transition:opacity .35s cubic-bezier(.2,.8,.2,1), transform .35s cubic-bezier(.2,.8,.2,1);
+}
+.toast.show{opacity:1; transform:translate(-50%,0);}
+
+footer{padding:50px 0 70px; border-top:1px solid var(--line); margin-top:0;}
+footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
+footer p{margin:0; font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); letter-spacing:.05em;}
+footer a{color:var(--paper-faint); transition:color .3s cubic-bezier(.2,.8,.2,1);}
+footer a:hover{color:var(--gold);}
+
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important;}
+  .reveal{opacity:1; transform:none;}
+  #digit-field{display:none;}
+}
+@media (max-width:640px){
+  .app-head{padding:120px 0 40px;}
+  .controls-card, .output-card{padding:20px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <div class="container">
+    <a href="/" class="brand" aria-label="Zur 31415.me Startseite">
+      <span class="pi">π</span><span class="num">31415</span><span class="dotme">.me</span>
+    </a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="app-head">
+    <div class="container">
+      <p class="eyebrow reveal">Werkzeug · UUID</p>
+      <h1 class="reveal"><em>UUIDs</em> erzeugen</h1>
+      <p class="reveal">Version 1, 4 oder 7 — einzeln oder gleich hundert auf einmal. Läuft komplett in deinem Browser, nichts verlässt dein Gerät.</p>
+    </div>
+  </section>
+
+  <section class="workbench">
+    <div class="container">
+      <div class="layout">
+
+        <div class="controls-card reveal">
+          <div class="field-group">
+            <span class="field-label">Version</span>
+            <div class="seg" role="group" aria-label="UUID-Version wählen">
+              <button type="button" class="version-btn active" data-version="4" aria-pressed="true">v4</button>
+              <button type="button" class="version-btn" data-version="1" aria-pressed="false">v1</button>
+              <button type="button" class="version-btn" data-version="7" aria-pressed="false">v7</button>
+            </div>
+            <p class="version-hint" id="versionHint">Zufallsbasiert — keine erkennbaren Muster, keine Zeitspur.</p>
+          </div>
+
+          <div class="field-group">
+            <span class="field-label">Anzahl</span>
+            <div class="count-row">
+              <button type="button" id="countMinus" aria-label="Anzahl verringern">−</button>
+              <input type="number" id="countInput" value="1" min="1" max="500" inputmode="numeric">
+              <button type="button" id="countPlus" aria-label="Anzahl erhöhen">+</button>
+            </div>
+            <div class="count-range"><span>1</span><span>500</span></div>
+          </div>
+
+          <div class="field-group">
+            <span class="field-label">Format</span>
+            <label class="opt">
+              <input type="checkbox" id="optUpper">
+              <span class="opt-text"><span>Großschreibung</span></span>
+            </label>
+            <label class="opt">
+              <input type="checkbox" id="optNoDash">
+              <span class="opt-text"><span>Ohne Bindestriche</span></span>
+            </label>
+            <label class="opt">
+              <input type="checkbox" id="optBraces">
+              <span class="opt-text"><span>Mit {Klammern}</span></span>
+            </label>
+          </div>
+
+          <button class="btn-generate" id="generateBtn">Erzeugen</button>
+        </div>
+
+        <div class="output-card reveal">
+          <div class="output-head">
+            <span class="output-count" id="outputCount">Noch keine UUIDs erzeugt</span>
+            <div class="output-actions" id="outputActions" style="display:none;">
+              <button class="btn-ghost" id="copyAllBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+                Alle kopieren
+              </button>
+              <button class="btn-ghost" id="downloadBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+                .txt laden
+              </button>
+            </div>
+          </div>
+
+          <div id="listContainer">
+            <div class="empty-state" id="emptyState">
+              <span class="pi-big">π</span>
+              <p>Wähle Version und Anzahl links, dann klick auf „Erzeugen" — deine UUIDs erscheinen hier.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>Teil von <a href="/">31415.me</a> — läuft vollständig lokal in deinem Browser.</p>
+    <p>Keine Daten verlassen dieses Gerät.</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast">Kopiert</div>
+
+<script>
+/* ---------- Theme ---------- */
+(function(){
+  const root = document.documentElement;
+  const stored = localStorage.getItem('theme');
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  if(stored){ root.setAttribute('data-theme', stored); }
+  else if(prefersLight){ root.setAttribute('data-theme','light'); }
+
+  function updateMeta(){
+    const isLight = root.getAttribute('data-theme') === 'light';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
+  }
+  updateMeta();
+
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    localStorage.setItem('theme', next);
+    updateMeta();
+  });
+})();
+
+/* ---------- Reduced motion ---------- */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Pi digit rain ---------- */
+(function(){
+  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
+  const cv = document.getElementById('digit-field');
+  const ctx = cv.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    const cols = Math.floor(cv.width / 28);
+    drops = [];
+    for(let i=0;i<cols;i++){
+      drops.push({
+        x: i*28 + 14,
+        y: Math.random() * cv.height,
+        speed: 0.4 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
+      });
+    }
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d => {
+      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
+      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > cv.height){
+        d.y = -20;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ---------- Spotlight on cards ---------- */
+document.querySelectorAll('.controls-card, .output-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  });
+});
+
+/* ---------- Scroll reveal ---------- */
+(function(){
+  const els = document.querySelectorAll('.reveal');
+  if(reduceMotion){ els.forEach(el => el.classList.add('in')); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
+    });
+  }, {threshold:.15});
+  els.forEach(el => obs.observe(el));
+})();
+
+/* ---------- UUID generation ---------- */
+function randomBytes(n){
+  const arr = new Uint8Array(n);
+  crypto.getRandomValues(arr);
+  return arr;
+}
+
+function bytesToUuidString(bytes){
+  const hex = Array.from(bytes, b => b.toString(16).padStart(2,'0'));
+  return `${hex[0]}${hex[1]}${hex[2]}${hex[3]}-${hex[4]}${hex[5]}-${hex[6]}${hex[7]}-${hex[8]}${hex[9]}-${hex[10]}${hex[11]}${hex[12]}${hex[13]}${hex[14]}${hex[15]}`;
+}
+
+function generateV4(){
+  if(crypto.randomUUID){ return crypto.randomUUID(); }
+  const b = randomBytes(16);
+  b[6] = (b[6] & 0x0f) | 0x40;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  return bytesToUuidString(b);
+}
+
+// v7: time-ordered. 48-bit ms timestamp + version/variant bits + random
+function generateV7(){
+  const b = randomBytes(16);
+  const ts = BigInt(Date.now());
+  b[0] = Number((ts >> 40n) & 0xffn);
+  b[1] = Number((ts >> 32n) & 0xffn);
+  b[2] = Number((ts >> 24n) & 0xffn);
+  b[3] = Number((ts >> 16n) & 0xffn);
+  b[4] = Number((ts >> 8n) & 0xffn);
+  b[5] = Number(ts & 0xffn);
+  b[6] = (b[6] & 0x0f) | 0x70; // version 7
+  b[8] = (b[8] & 0x3f) | 0x80; // variant
+  return bytesToUuidString(b);
+}
+
+// v1: time-based with random node/clock-seq (no real MAC address — privacy-friendly approximation)
+let v1ClockSeq = (randomBytes(2)[0] << 8 | randomBytes(2)[1]) & 0x3fff;
+let v1LastTime = 0n;
+function generateV1(){
+  const GREGORIAN_OFFSET = 122192928000000000n; // 100ns intervals between 1582-10-15 and 1970-01-01
+  let now = BigInt(Date.now()) * 10000n + GREGORIAN_OFFSET;
+  if(now <= v1LastTime){ now = v1LastTime + 1n; }
+  v1LastTime = now;
+
+  const timeLow = now & 0xffffffffn;
+  const timeMid = (now >> 32n) & 0xffffn;
+  const timeHi = (now >> 48n) & 0x0fffn;
+
+  const node = randomBytes(6);
+  node[0] |= 0x01; // mark as multicast/random to signal it's not a real MAC
+
+  const clockSeqHi = ((v1ClockSeq >> 8) & 0x3f) | 0x80;
+  const clockSeqLow = v1ClockSeq & 0xff;
+
+  const hex = n => n.toString(16).padStart(8,'0');
+  const timeLowHex = timeLow.toString(16).padStart(8,'0');
+  const timeMidHex = timeMid.toString(16).padStart(4,'0');
+  const timeHiHex = (timeHi | 0x1000n).toString(16).padStart(4,'0'); // version 1
+  const clockSeqHex = clockSeqHi.toString(16).padStart(2,'0') + clockSeqLow.toString(16).padStart(2,'0');
+  const nodeHex = Array.from(node, b => b.toString(16).padStart(2,'0')).join('');
+
+  return `${timeLowHex}-${timeMidHex}-${timeHiHex}-${clockSeqHex}-${nodeHex}`;
+}
+
+function generateOne(version){
+  if(version === '1') return generateV1();
+  if(version === '7') return generateV7();
+  return generateV4();
+}
+
+/* ---------- UI state ---------- */
+let currentVersion = '4';
+let currentList = [];
+
+const versionHints = {
+  '4': 'Zufallsbasiert — keine erkennbaren Muster, keine Zeitspur.',
+  '1': 'Zeitbasiert mit zufälliger Geräte-Kennung — kein echtes MAC-Adressrisiko.',
+  '7': 'Zeitsortiert — ideal als Datenbank-Schlüssel, sortiert sich selbst chronologisch.'
+};
+
+document.querySelectorAll('.version-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.version-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed','true');
+    currentVersion = btn.dataset.version;
+    document.getElementById('versionHint').textContent = versionHints[currentVersion];
+  });
+});
+
+const countInput = document.getElementById('countInput');
+document.getElementById('countMinus').addEventListener('click', () => {
+  countInput.value = Math.max(1, (parseInt(countInput.value)||1) - 1);
+});
+document.getElementById('countPlus').addEventListener('click', () => {
+  countInput.value = Math.min(500, (parseInt(countInput.value)||1) + 1);
+});
+countInput.addEventListener('change', () => {
+  let v = parseInt(countInput.value) || 1;
+  v = Math.max(1, Math.min(500, v));
+  countInput.value = v;
+});
+
+function formatUuid(uuid){
+  let out = uuid;
+  if(document.getElementById('optNoDash').checked) out = out.replace(/-/g,'');
+  if(document.getElementById('optUpper').checked) out = out.toUpperCase();
+  if(document.getElementById('optBraces').checked) out = `{${out}}`;
+  return out;
+}
+
+function renderList(){
+  const container = document.getElementById('listContainer');
+  const actions = document.getElementById('outputActions');
+  const countLabel = document.getElementById('outputCount');
+
+  if(currentList.length === 0){
+    container.innerHTML = `<div class="empty-state" id="emptyState">
+      <span class="pi-big">π</span>
+      <p>Wähle Version und Anzahl links, dann klick auf „Erzeugen" — deine UUIDs erscheinen hier.</p>
+    </div>`;
+    actions.style.display = 'none';
+    countLabel.textContent = 'Noch keine UUIDs erzeugt';
+    return;
+  }
+
+  actions.style.display = 'flex';
+  countLabel.innerHTML = `<strong>${currentList.length}</strong> UUID${currentList.length > 1 ? 's' : ''} · v${currentVersion}`;
+
+  const list = document.createElement('div');
+  list.className = 'list';
+  currentList.forEach((uuid, i) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `
+      <span class="uuid-text">${formatUuid(uuid)}</span>
+      <button class="copy-btn" aria-label="UUID kopieren" data-index="${i}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+      </button>`;
+    list.appendChild(row);
+  });
+  container.innerHTML = '';
+  container.appendChild(list);
+
+  container.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.index);
+      copyText(formatUuid(currentList[idx]));
+      btn.classList.add('copied');
+      setTimeout(() => btn.classList.remove('copied'), 1100);
+      showToast('Kopiert');
+    });
+  });
+}
+
+function copyText(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); } catch(e){}
+  document.body.removeChild(ta);
+}
+
+let toastTimer;
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+document.getElementById('generateBtn').addEventListener('click', () => {
+  const count = Math.max(1, Math.min(500, parseInt(countInput.value) || 1));
+  currentList = Array.from({length: count}, () => generateOne(currentVersion));
+  renderList();
+});
+
+document.getElementById('copyAllBtn').addEventListener('click', () => {
+  if(currentList.length === 0) return;
+  const text = currentList.map(formatUuid).join('\n');
+  copyText(text);
+  showToast(`${currentList.length} UUID${currentList.length > 1 ? 's' : ''} kopiert`);
+});
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  if(currentList.length === 0) return;
+  const text = currentList.map(formatUuid).join('\n');
+  const blob = new Blob([text], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `uuids-v${currentVersion}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('Datei wird geladen');
+});
+
+// re-render formatting if options change after a list already exists
+['optUpper','optNoDash','optBraces'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    if(currentList.length > 0) renderList();
+  });
+});
+</script>
+</body>
+</html>
