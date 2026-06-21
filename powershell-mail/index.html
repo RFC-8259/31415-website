@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0e14">
+<title>Mail-Befehl — 31415.me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--ink); color:var(--paper);
+  font-family:'Space Grotesk',sans-serif; font-weight:400; line-height:1.6;
+  -webkit-font-smoothing:antialiased; min-height:100vh; position:relative;
+  transition:background .3s, color .3s;
+}
+
+#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+.wrap{max-width:1180px; margin:0 auto; padding:0 28px; position:relative; z-index:2;}
+@media (max-width:640px){ .wrap{padding:0 20px;} }
+
+header{
+  position:fixed; top:0; left:0; right:0; height:72px; z-index:50;
+  display:flex; align-items:center;
+  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+  backdrop-filter:blur(12px);
+}
+header .wrap{display:flex; align-items:center; justify-content:space-between; width:100%;}
+.brand{display:flex; align-items:center; gap:8px; text-decoration:none; color:inherit;}
+.brand .pi{font-family:'Fraunces',serif; font-size:26px; color:var(--gold); font-style:italic; line-height:1;}
+.brand .num{font-family:'Space Mono',monospace; font-size:15px; color:var(--paper); letter-spacing:.02em;}
+.brand .me{font-family:'Space Mono',monospace; font-size:15px; color:var(--paper-faint);}
+
+.theme-toggle{
+  background:transparent; border:1px solid var(--line); color:var(--paper-dim);
+  border-radius:100px; padding:8px 16px; font-family:'Space Mono',monospace; font-size:.7rem;
+  letter-spacing:.1em; text-transform:uppercase; cursor:pointer;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover, .theme-toggle:focus-visible{ border-color:var(--gold); color:var(--gold); }
+.theme-toggle:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+
+.app-head{ padding:150px 0 56px; }
+@media (max-width:640px){ .app-head{ padding:120px 0 40px; } }
+.eyebrow{
+  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--gold); margin:0 0 18px;
+}
+.app-head h1{
+  font-family:'Fraunces',serif; font-weight:300; font-size:clamp(2.2rem,6vw,3.6rem);
+  letter-spacing:-.02em; line-height:.96; margin:0 0 18px; color:var(--paper);
+}
+.app-head h1 em{ font-style:italic; font-weight:400; color:var(--gold-bright); }
+.app-head p{
+  color:var(--paper-dim); font-size:1.02rem; max-width:560px; margin:0;
+}
+
+main{ padding-bottom:130px; }
+@media (max-width:640px){ main{ padding-bottom:90px; } }
+
+.layout{ display:grid; grid-template-columns:1.1fr .9fr; gap:28px; align-items:start; }
+@media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+
+.card{
+  position:relative; background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line); border-radius:var(--r); padding:32px;
+  --mx:50%; --my:50%; overflow:hidden;
+}
+.card::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
+}
+.card:hover::before{ opacity:.14; }
+.card > *{ position:relative; z-index:1; }
+
+.card + .card{ margin-top:28px; }
+
+.section-title{
+  font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--paper-faint); margin:0 0 22px; display:flex; align-items:center; gap:10px;
+}
+.section-title .idx{ color:var(--gold); }
+
+.provider-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; }
+.provider-btn{
+  flex:1; min-width:130px; display:flex; align-items:center; justify-content:center; gap:8px;
+  background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
+  color:var(--paper-dim); font-family:'Space Grotesk',sans-serif; font-size:.85rem; font-weight:500;
+  padding:11px 14px; cursor:pointer;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1), background .3s cubic-bezier(.2,.8,.2,1);
+}
+.provider-btn:hover{ border-color:var(--gold); color:var(--gold-bright); }
+.provider-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+.provider-btn.active{ border-color:var(--gold); color:var(--gold-bright); background:rgba(216,180,106,0.08); }
+.provider-btn .dot{ width:7px; height:7px; border-radius:50%; background:var(--gold); flex-shrink:0; opacity:0; transition:opacity .3s; }
+.provider-btn.active .dot{ opacity:1; }
+
+.field{ margin-bottom:18px; }
+.field:last-child{ margin-bottom:0; }
+.field-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media (max-width:480px){ .field-row{ grid-template-columns:1fr; } }
+
+label{
+  display:block; font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--paper-faint); margin-bottom:8px;
+}
+label .opt{ color:var(--paper-faint); font-style:italic; text-transform:none; letter-spacing:0; }
+
+input[type=text], input[type=number], input[type=password], textarea, select{
+  width:100%; background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
+  color:var(--paper); font-family:'Space Grotesk',sans-serif; font-size:.92rem; padding:11px 14px;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+input::placeholder, textarea::placeholder{ color:var(--paper-faint); opacity:.7; }
+input:focus-visible, textarea:focus-visible, select:focus-visible{
+  outline:2px solid var(--gold); outline-offset:2px; border-color:var(--gold);
+}
+textarea{ min-height:90px; resize:vertical; font-family:'Space Grotesk',sans-serif; }
+.mono-input{ font-family:'Space Mono',monospace; }
+
+.hint{ font-size:.78rem; color:var(--paper-faint); margin-top:6px; line-height:1.5; }
+
+.checkbox-row{
+  display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;
+}
+.checkbox-row input[type=checkbox]{
+  width:18px; height:18px; accent-color:var(--gold); cursor:pointer; flex-shrink:0;
+}
+.checkbox-row span{ font-size:.88rem; color:var(--paper); }
+
+.radio-group{ display:flex; gap:10px; flex-wrap:wrap; }
+.radio-pill{
+  position:relative; flex:1; min-width:140px;
+}
+.radio-pill input{ position:absolute; opacity:0; width:0; height:0; }
+.radio-pill label{
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  margin:0; padding:11px 14px; border:1px solid var(--line); border-radius:10px;
+  background:var(--ink-soft); color:var(--paper-dim); font-family:'Space Grotesk',sans-serif;
+  font-size:.85rem; text-transform:none; letter-spacing:0; cursor:pointer;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1), background .3s cubic-bezier(.2,.8,.2,1);
+}
+.radio-pill input:checked + label{
+  border-color:var(--gold); color:var(--gold-bright); background:rgba(216,180,106,0.08);
+}
+.radio-pill input:focus-visible + label{ outline:2px solid var(--gold); outline-offset:2px; }
+
+details.advanced{ border-top:1px solid var(--line); margin-top:26px; padding-top:20px; }
+details.advanced summary{
+  cursor:pointer; list-style:none; font-family:'Space Mono',monospace; font-size:.72rem;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--gold); display:flex;
+  align-items:center; gap:8px; outline:none;
+}
+details.advanced summary:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; border-radius:4px; }
+details.advanced summary::-webkit-details-marker{ display:none; }
+details.advanced summary .chev{
+  display:inline-block; transition:transform .3s cubic-bezier(.2,.8,.2,1); font-size:.9em;
+}
+details.advanced[open] summary .chev{ transform:rotate(90deg); }
+details.advanced .advanced-body{ margin-top:22px; display:flex; flex-direction:column; gap:18px; }
+
+.output-card{ position:sticky; top:96px; }
+@media (max-width:900px){ .output-card{ position:relative; top:0; } }
+
+pre.cmd-output{
+  background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:18px 16px;
+  font-family:'Space Mono',monospace; font-size:.78rem; line-height:1.7; color:var(--paper-dim);
+  white-space:pre-wrap; word-break:break-word; margin:0 0 18px; max-height:420px; overflow-y:auto;
+}
+pre.cmd-output .kw{ color:var(--gold-bright); }
+pre.cmd-output .str{ color:var(--paper); }
+pre.cmd-output .comment{ color:var(--paper-faint); font-style:italic; }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  border:none; cursor:pointer; font-family:'Space Grotesk',sans-serif; font-weight:500;
+  font-size:.9rem; border-radius:100px; padding:13px 26px;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s cubic-bezier(.2,.8,.2,1), border-color .3s, color .3s;
+  width:100%;
+}
+.btn-primary{ background:var(--gold); color:var(--ink); }
+.btn-primary:hover{ transform:translateY(-3px); box-shadow:0 14px 28px -10px var(--shadow); }
+.btn-primary:focus-visible{ outline:2px solid var(--gold-bright); outline-offset:3px; }
+.btn-ghost{
+  background:transparent; border:1px solid var(--line); color:var(--paper); margin-top:10px;
+}
+.btn-ghost:hover{ border-color:var(--gold); color:var(--gold); }
+.btn-ghost:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; }
+
+.warn{
+  display:flex; gap:10px; align-items:flex-start; margin-top:18px; padding:13px 14px;
+  background:rgba(216,180,106,0.07); border:1px solid var(--line); border-radius:10px;
+  font-size:.8rem; color:var(--paper-dim); line-height:1.55;
+}
+.warn .ic{ color:var(--gold); flex-shrink:0; font-family:'Space Mono',monospace; }
+
+.toast{
+  position:fixed; bottom:32px; left:50%; transform:translate(-50%, 20px); z-index:100;
+  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:500;
+  font-size:.85rem; padding:11px 22px; border-radius:100px; opacity:0; pointer-events:none;
+  transition:opacity .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.toast.show{ opacity:1; transform:translate(-50%, 0); }
+
+footer{
+  border-top:1px solid var(--line); padding:28px 0; position:relative; z-index:2;
+}
+footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+footer p{ margin:0; font-size:.78rem; color:var(--paper-faint); }
+footer a{ color:var(--paper-faint); text-decoration:none; }
+footer a:hover{ color:var(--gold); }
+
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important; }
+}
+</style>
+</head>
+<body>
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="Zur Startseite von 31415.me">
+      <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
+    </a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">Light</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap app-head">
+    <p class="eyebrow">Werkzeug · PowerShell</p>
+    <h1>Mail-<em>Befehl</em> bauen</h1>
+    <p>Fülle die Felder aus — der fertige <code>Send-MailMessage</code>-Befehl entsteht live, fix zum Kopieren.</p>
+  </div>
+
+  <div class="wrap layout">
+    <!-- Eingabebereich -->
+    <div class="controls-col">
+      <div class="card controls-card">
+        <p class="section-title"><span class="idx">01</span> Grunddaten</p>
+
+        <div class="provider-row" role="group" aria-label="Anbieter-Vorauswahl">
+          <button type="button" class="provider-btn" id="providerM365" data-provider="m365">
+            <span class="dot"></span> Microsoft 365 / Outlook
+          </button>
+          <button type="button" class="provider-btn active" id="providerCustom" data-provider="custom">
+            <span class="dot"></span> Eigener Server
+          </button>
+        </div>
+
+        <div class="field">
+          <label for="smtp">SMTP-Server</label>
+          <input type="text" id="smtp" class="mono-input" placeholder="smtp.example.de" autocomplete="off">
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="port">Port <span class="opt">(optional)</span></label>
+            <input type="number" id="port" class="mono-input" placeholder="587" min="1" max="65535">
+          </div>
+          <div class="field">
+            <label for="useSsl">Verbindung</label>
+            <div class="checkbox-row" style="height:42px;">
+              <input type="checkbox" id="useSsl" checked>
+              <label for="useSsl" style="margin:0; text-transform:none; letter-spacing:0; font-family:'Space Grotesk',sans-serif; font-size:.88rem; color:var(--paper); cursor:pointer;">SSL/TLS verwenden</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="from">Absender (-From)</label>
+          <input type="text" id="from" class="mono-input" placeholder="absender@example.de" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="to">Empfänger (-To)</label>
+          <input type="text" id="to" class="mono-input" placeholder="empfänger1@example.de, empfänger2@example.de" autocomplete="off">
+          <p class="hint">Mehrere Adressen mit Komma trennen.</p>
+        </div>
+
+        <div class="field">
+          <label for="subject">Betreff (-Subject)</label>
+          <input type="text" id="subject" placeholder="Betreff der Nachricht" autocomplete="off">
+        </div>
+
+        <div class="field">
+          <label for="body">Nachricht (-Body)</label>
+          <textarea id="body" placeholder="Inhalt der E-Mail …"></textarea>
+        </div>
+
+        <div class="field">
+          <div class="checkbox-row">
+            <input type="checkbox" id="bodyHtml">
+            <label for="bodyHtml"><span>Nachricht als HTML formatiert (-BodyAsHtml)</span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="card controls-card">
+        <p class="section-title"><span class="idx">02</span> Anmeldung</p>
+        <div class="field">
+          <label for="username">Benutzername (-Credential)</label>
+          <input type="text" id="username" class="mono-input" placeholder="benutzer@example.de" autocomplete="off">
+          <p class="hint">Beim Ausführen öffnet sich ein eigenes Windows-Anmeldefenster — das Passwort wird dort eingegeben, nie im Skript gespeichert.</p>
+          <p class="hint" id="m365Hint" style="display:none; margin-top:10px;">Bei Microsoft 365 wird oft kein normales Konto-Kennwort akzeptiert, sondern ein <strong>App-Kennwort</strong> — besonders wenn die Zwei-Faktor-Authentifizierung aktiv ist. Im Anmeldefenster genau das eingeben.</p>
+        </div>
+      </div>
+
+      <div class="card controls-card">
+        <details class="advanced">
+          <summary><span class="chev">▸</span> Erweiterte Optionen</summary>
+          <div class="advanced-body">
+
+            <div class="field">
+              <label for="cc">Cc <span class="opt">(optional)</span></label>
+              <input type="text" id="cc" class="mono-input" placeholder="cc@example.de" autocomplete="off">
+            </div>
+
+            <div class="field">
+              <label for="bcc">Bcc <span class="opt">(optional)</span></label>
+              <input type="text" id="bcc" class="mono-input" placeholder="bcc@example.de" autocomplete="off">
+            </div>
+
+            <div class="field">
+              <label for="replyTo">Antwort an (-ReplyTo) <span class="opt">(optional)</span></label>
+              <input type="text" id="replyTo" class="mono-input" placeholder="antwort@example.de" autocomplete="off">
+            </div>
+
+            <div class="field">
+              <label for="attachments">Anhänge (-Attachments) <span class="opt">(optional)</span></label>
+              <textarea id="attachments" placeholder="C:\Pfad\Datei1.pdf&#10;C:\Pfad\Datei2.docx" style="min-height:64px;"></textarea>
+              <p class="hint">Ein Pfad pro Zeile.</p>
+            </div>
+
+            <div class="field">
+              <label for="priority">Priorität (-Priority)</label>
+              <select id="priority">
+                <option value="">Normal (Standard, kein Parameter)</option>
+                <option value="High">Hoch</option>
+                <option value="Low">Niedrig</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="encoding">Zeichenkodierung (-Encoding)</label>
+              <select id="encoding">
+                <option value="">Standard (kein Parameter)</option>
+                <option value="UTF8">UTF8</option>
+                <option value="ASCII">ASCII</option>
+                <option value="Unicode">Unicode</option>
+                <option value="UTF32">UTF32</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="deliveryNotif">Zustellbenachrichtigung (-DeliveryNotificationOption)</label>
+              <select id="deliveryNotif">
+                <option value="">Keine (kein Parameter)</option>
+                <option value="OnSuccess">Bei Erfolg</option>
+                <option value="OnFailure">Bei Fehlschlag</option>
+                <option value="Delay">Bei Verzögerung</option>
+                <option value="Never">Nie</option>
+              </select>
+            </div>
+
+          </div>
+        </details>
+      </div>
+    </div>
+
+    <!-- Ausgabe -->
+    <div class="output-col">
+      <div class="card output-card">
+        <p class="section-title"><span class="idx">03</span> Fertiger Befehl</p>
+        <pre class="cmd-output" id="cmdOutput" aria-live="polite"></pre>
+        <button class="btn btn-primary" id="copyBtn">Kopieren</button>
+        <button class="btn btn-ghost" id="resetBtn">Zurücksetzen</button>
+        <div class="warn">
+          <span class="ic">i</span>
+          <span>Diese App läuft komplett im Browser. Keine Eingabe wird gespeichert oder irgendwohin gesendet — beim Schließen der Seite ist alles weg.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast">Kopiert</div>
+
+<footer>
+  <div class="wrap">
+    <p>Teil von <a href="/">31415.me</a> — digitales Taschenmesser</p>
+    <p>Läuft vollständig lokal im Browser</p>
+  </div>
+</footer>
+
+<script>
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Theme ---------- */
+(function(){
+  const root = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+  function applyLabel(){
+    const current = root.getAttribute('data-theme') || 'dark';
+    btn.textContent = current === 'light' ? 'Dark' : 'Light';
+  }
+  const saved = localStorage.getItem('theme');
+  if(saved){
+    root.setAttribute('data-theme', saved);
+  } else if(window.matchMedia('(prefers-color-scheme: light)').matches){
+    root.setAttribute('data-theme', 'light');
+  }
+  applyLabel();
+  btn.addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') || 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    applyLabel();
+  });
+})();
+
+/* ---------- Hilfsfunktionen ---------- */
+function escapePs(str){
+  return str.replace(/`/g, '``').replace(/"/g, '`"').replace(/\$/g, '`$');
+}
+function splitList(str){
+  return str.split(',').map(s => s.trim()).filter(Boolean);
+}
+function splitLines(str){
+  return str.split('\n').map(s => s.trim()).filter(Boolean);
+}
+function psArray(items){
+  return items.map(i => `"${escapePs(i)}"`).join(', ');
+}
+
+/* ---------- Befehl bauen ---------- */
+const ids = ['smtp','port','useSsl','from','to','subject','body','bodyHtml','username',
+  'cc','bcc','replyTo','attachments','priority','encoding','deliveryNotif'];
+const els = {};
+ids.forEach(id => els[id] = document.getElementById(id));
+
+function buildCommand(){
+  const lines = [];
+  const username = els.username.value.trim();
+
+  if(username){
+    lines.push(`$cred = Get-Credential -UserName "${escapePs(username)}" -Message "Anmeldedaten für den Mailversand"`);
+    lines.push('');
+  }
+
+  const params = [];
+
+  const to = splitList(els.to.value);
+  if(to.length){
+    params.push(['-To', psArray(to)]);
+  } else {
+    params.push(['-To', '"empfänger@example.de"']);
+  }
+
+  const from = els.from.value.trim();
+  params.push(['-From', `"${from ? escapePs(from) : 'absender@example.de'}"`]);
+
+  const smtp = els.smtp.value.trim();
+  if(smtp) params.push(['-SmtpServer', `"${escapePs(smtp)}"`]);
+
+  const subject = els.subject.value.trim();
+  if(subject) params.push(['-Subject', `"${escapePs(subject)}"`]);
+
+  const body = els.body.value.trim();
+  if(body) params.push(['-Body', `"${escapePs(body)}"`]);
+
+  if(els.bodyHtml.checked) params.push(['-BodyAsHtml', null]);
+
+  const cc = splitList(els.cc.value);
+  if(cc.length) params.push(['-Cc', psArray(cc)]);
+
+  const bcc = splitList(els.bcc.value);
+  if(bcc.length) params.push(['-Bcc', psArray(bcc)]);
+
+  const replyTo = splitList(els.replyTo.value);
+  if(replyTo.length) params.push(['-ReplyTo', psArray(replyTo)]);
+
+  const attachments = splitLines(els.attachments.value);
+  if(attachments.length) params.push(['-Attachments', psArray(attachments)]);
+
+  const port = els.port.value.trim();
+  if(port) params.push(['-Port', port]);
+
+  if(els.useSsl.checked) params.push(['-UseSsl', null]);
+
+  if(els.priority.value) params.push(['-Priority', els.priority.value]);
+  if(els.encoding.value) params.push(['-Encoding', els.encoding.value]);
+  if(els.deliveryNotif.value) params.push(['-DeliveryNotificationOption', els.deliveryNotif.value]);
+
+  if(username) params.push(['-Credential', '$cred']);
+
+  const cmdLines = ['Send-MailMessage `'];
+  params.forEach((p, i) => {
+    const isLast = i === params.length - 1;
+    const text = p[1] === null ? `    ${p[0]}` : `    ${p[0]} ${p[1]}`;
+    cmdLines.push(text + (isLast ? '' : ' `'));
+  });
+
+  lines.push(cmdLines.join('\n'));
+  return lines.join('\n');
+}
+
+function highlight(cmd){
+  return cmd
+    .split('\n')
+    .map(line => {
+      let escaped = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      escaped = escaped.replace(/(-[A-Za-z]+)/g, '<span class="kw">$1</span>');
+      escaped = escaped.replace(/(Send-MailMessage|Get-Credential)/g, '<span class="kw">$1</span>');
+      escaped = escaped.replace(/(&quot;[^&]*?&quot;)/g, '<span class="str">$1</span>');
+      return escaped;
+    })
+    .join('\n');
+}
+
+function render(){
+  const cmd = buildCommand();
+  document.getElementById('cmdOutput').innerHTML = highlight(cmd);
+  document.getElementById('cmdOutput').dataset.raw = cmd;
+}
+
+document.querySelectorAll('input, textarea, select').forEach(el => {
+  el.addEventListener('input', render);
+  el.addEventListener('change', render);
+});
+
+render();
+
+/* ---------- M365-Schnellauswahl ---------- */
+const providerBtns = document.querySelectorAll('.provider-btn');
+function setActiveProvider(id){
+  providerBtns.forEach(b => b.classList.toggle('active', b.id === id));
+}
+document.getElementById('providerM365').addEventListener('click', () => {
+  els.smtp.value = 'smtp-mail.outlook.com';
+  els.port.value = '587';
+  els.useSsl.checked = true;
+  // Bei M365 ist der Anmeldename die eigene E-Mail-Adresse —
+  // vom Absender übernehmen, falls dort schon etwas steht.
+  if(els.from.value.trim() && !els.username.value.trim()){
+    els.username.value = els.from.value.trim();
+  }
+  setActiveProvider('providerM365');
+  document.getElementById('m365Hint').style.display = 'block';
+  render();
+});
+document.getElementById('providerCustom').addEventListener('click', () => {
+  setActiveProvider('providerCustom');
+  document.getElementById('m365Hint').style.display = 'none';
+});
+// Wenn Felder manuell verändert werden, gilt das nicht mehr automatisch als "M365 erkannt" —
+// die Markierung bleibt aber stehen, bis der Nutzer bewusst "Eigener Server" wählt,
+// damit ein versehentlicher Tastendruck im Absenderfeld die Auswahl nicht zurücksetzt.
+
+
+/* ---------- Kopieren ---------- */
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const raw = document.getElementById('cmdOutput').dataset.raw || '';
+  try{
+    await navigator.clipboard.writeText(raw);
+  } catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = raw;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+});
+
+/* ---------- Zurücksetzen ---------- */
+document.getElementById('resetBtn').addEventListener('click', () => {
+  document.querySelectorAll('input[type=text], input[type=number], textarea').forEach(el => el.value = '');
+  document.getElementById('useSsl').checked = true;
+  document.getElementById('bodyHtml').checked = false;
+  document.getElementById('priority').value = '';
+  document.getElementById('encoding').value = '';
+  document.getElementById('deliveryNotif').value = '';
+  setActiveProvider('providerCustom');
+  document.getElementById('m365Hint').style.display = 'none';
+  render();
+});
+
+/* ---------- Gold-Spotlight ---------- */
+document.querySelectorAll('.controls-card, .output-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  });
+});
+
+/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
+  const cv = document.getElementById('digit-field');
+  const ctx = cv.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    const cols = Math.floor(cv.width / 28);
+    drops = [];
+    for(let i=0;i<cols;i++){
+      drops.push({
+        x: i*28 + 14,
+        y: Math.random() * cv.height,
+        speed: 0.4 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
+      });
+    }
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d => {
+      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
+      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > cv.height){
+        d.y = -20;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
