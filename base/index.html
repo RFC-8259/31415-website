@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0e14">
+<title>Base-Konverter — 31415.me</title>
+<meta name="description" content="Base64, Base64URL, Base32 und TOTP-Codes — alles lokal im Browser, ohne Server.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--ink); color:var(--paper);
+  font-family:'Space Grotesk',sans-serif; font-weight:400; line-height:1.6;
+  -webkit-font-smoothing:antialiased; min-height:100vh;
+  transition:background .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+a{color:inherit; text-decoration:none;}
+
+#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+.container{max-width:1180px; margin:0 auto; padding:0 28px; position:relative; z-index:2;}
+@media (max-width:640px){ .container{padding:0 20px;} }
+
+/* ---- Header ---- */
+header{
+  position:fixed; top:0; left:0; right:0; height:72px; z-index:50;
+  display:flex; align-items:center;
+  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+header .container{display:flex; align-items:center; justify-content:space-between; width:100%;}
+.brand{display:flex; align-items:baseline; gap:2px; font-size:1.1rem;}
+.brand .pi{font-family:'Fraunces',serif; font-size:1.5rem; color:var(--gold); font-style:italic; line-height:1;}
+.brand .num{font-family:'Space Mono',monospace; color:var(--paper); letter-spacing:.02em;}
+.brand .dot{font-family:'Space Mono',monospace; color:var(--paper-faint);}
+
+nav{display:flex; align-items:center; gap:20px;}
+.back-link{
+  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--paper-dim); display:flex; align-items:center; gap:6px;
+  transition:color .3s cubic-bezier(.2,.8,.2,1);
+}
+.back-link:hover{color:var(--gold);}
+.back-link .arrow{display:inline-block; transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+.back-link:hover .arrow{transform:translateX(-4px);}
+
+.theme-toggle{
+  width:38px; height:38px; border-radius:100px; border:1px solid var(--line);
+  background:transparent; color:var(--paper); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+  flex-shrink:0;
+}
+.theme-toggle:hover, .theme-toggle:focus-visible{border-color:var(--gold); color:var(--gold);}
+.theme-toggle svg{width:17px; height:17px;}
+.theme-toggle .sun{display:none;}
+html[data-theme="light"] .theme-toggle .moon{display:none;}
+html[data-theme="light"] .theme-toggle .sun{display:block;}
+
+:focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:4px;}
+
+/* ---- App head ---- */
+.app-head{padding:150px 0 56px;}
+@media (max-width:640px){ .app-head{padding:120px 0 40px;} }
+.eyebrow{
+  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.22em; text-transform:uppercase;
+  color:var(--gold); display:flex; align-items:center; gap:10px; margin-bottom:18px;
+}
+.eyebrow::before{content:""; width:22px; height:1px; background:var(--gold);}
+h1{
+  font-family:'Fraunces',serif; font-weight:300; font-size:clamp(2.2rem,6vw,3.6rem);
+  letter-spacing:-.02em; line-height:.96; margin:0 0 18px;
+}
+h1 em{font-style:italic; color:var(--gold); font-weight:400;}
+.lede{color:var(--paper-dim); font-size:1.02rem; max-width:560px; margin:0;}
+
+/* ---- Tabs ---- */
+.tabs{
+  display:flex; gap:8px; margin-bottom:36px; border-bottom:1px solid var(--line);
+  overflow-x:auto; scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none;}
+.tab-btn{
+  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+  background:none; border:none; color:var(--paper-faint); padding:14px 18px 16px;
+  cursor:pointer; position:relative; white-space:nowrap;
+  transition:color .3s cubic-bezier(.2,.8,.2,1);
+}
+.tab-btn::after{
+  content:""; position:absolute; left:18px; right:18px; bottom:-1px; height:2px;
+  background:var(--gold); opacity:0; transform:scaleX(0); transform-origin:left;
+  transition:opacity .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.tab-btn:hover{color:var(--paper);}
+.tab-btn.active{color:var(--gold);}
+.tab-btn.active::after{opacity:1; transform:scaleX(1);}
+
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* ---- Cards ---- */
+.card{
+  position:relative; background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line); border-radius:var(--r); padding:32px;
+  margin-bottom:24px; overflow:hidden; --mx:50%; --my:50%;
+}
+.card::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
+}
+.card:hover::before{opacity:.14;}
+.card > *{position:relative; z-index:1;}
+@media (max-width:640px){ .card{padding:22px;} }
+
+.card-row{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+@media (max-width:880px){ .card-row{grid-template-columns:1fr;} }
+
+.field-label{
+  font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--paper-faint); display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px;
+}
+.field-label .hint{color:var(--paper-faint); font-weight:400; text-transform:none; letter-spacing:0;}
+
+textarea, input[type="text"]{
+  width:100%; background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
+  color:var(--paper); font-family:'Space Mono',monospace; font-size:.92rem; padding:14px 16px;
+  resize:vertical; transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+textarea{min-height:160px; line-height:1.55;}
+textarea:focus, input[type="text"]:focus{border-color:var(--gold); outline:none;}
+textarea::placeholder, input::placeholder{color:var(--paper-faint); font-family:'Space Grotesk',sans-serif;}
+
+.err-msg{
+  font-family:'Space Mono',monospace; font-size:.78rem; color:var(--gold-bright);
+  margin-top:8px; display:none; line-height:1.5;
+}
+.err-msg.show{display:block;}
+
+.field-actions{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;}
+
+button{font-family:'Space Grotesk',sans-serif; cursor:pointer;}
+
+.btn{
+  display:inline-flex; align-items:center; gap:8px; font-size:.85rem; font-weight:500;
+  padding:10px 20px; border-radius:100px; border:1px solid var(--line);
+  background:transparent; color:var(--paper); white-space:nowrap;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn:hover{border-color:var(--gold); color:var(--gold); transform:translateY(-3px);}
+.btn.primary{background:var(--gold); border-color:var(--gold); color:var(--ink);}
+.btn.primary:hover{color:var(--ink); box-shadow:0 14px 28px -10px var(--shadow); background:var(--gold-bright); border-color:var(--gold-bright);}
+.btn svg{width:14px; height:14px; flex-shrink:0;}
+
+.swap-btn{
+  display:flex; align-items:center; justify-content:center; width:44px; height:44px;
+  border-radius:100px; border:1px solid var(--line); background:transparent; color:var(--gold);
+  margin:8px auto; transition:transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.swap-btn:hover{border-color:var(--gold); transform:rotate(180deg);}
+.swap-btn svg{width:16px; height:16px;}
+.swap-wrap{display:flex; justify-content:center;}
+
+/* ---- File drop ---- */
+.dropzone{
+  border:1px dashed var(--line); border-radius:10px; padding:24px;
+  text-align:center; color:var(--paper-faint); font-size:.85rem;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), background .3s cubic-bezier(.2,.8,.2,1);
+  cursor:pointer; margin-bottom:16px;
+}
+.dropzone:hover, .dropzone.drag{border-color:var(--gold); background:var(--field-base);}
+.dropzone strong{color:var(--paper-dim); font-weight:500;}
+.dropzone input[type="file"]{display:none;}
+.file-chip{
+  display:none; align-items:center; gap:10px; font-family:'Space Mono',monospace; font-size:.78rem;
+  color:var(--paper-dim); background:var(--ink-soft); border:1px solid var(--line);
+  border-radius:100px; padding:6px 14px; margin-bottom:16px; width:fit-content;
+}
+.file-chip.show{display:flex;}
+.file-chip button{background:none; border:none; color:var(--paper-faint); font-size:1rem; line-height:1; padding:0;}
+.file-chip button:hover{color:var(--gold);}
+
+.mode-switch{display:flex; gap:8px; margin-bottom:20px;}
+.mode-btn{
+  font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase;
+  padding:8px 16px; border-radius:100px; border:1px solid var(--line); background:transparent;
+  color:var(--paper-faint); transition:all .3s cubic-bezier(.2,.8,.2,1);
+}
+.mode-btn.active{border-color:var(--gold); color:var(--gold); background:var(--field-base);}
+
+/* ---- Alphabet variant chips ---- */
+.variant-row{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;}
+
+/* ---- Info card ---- */
+.info-card{
+  font-size:.88rem; color:var(--paper-dim); line-height:1.7;
+}
+.info-card h3{
+  font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--gold); margin:0 0 12px;
+}
+.info-card p{margin:0 0 10px;}
+.info-card p:last-child{margin-bottom:0;}
+.info-card code{font-family:'Space Mono',monospace; color:var(--paper); background:var(--field-base); padding:2px 6px; border-radius:4px; font-size:.85em;}
+
+/* ---- TOTP ---- */
+.totp-layout{display:grid; grid-template-columns:1fr; gap:24px;}
+.totp-display{
+  display:flex; flex-direction:column; align-items:center; gap:22px; padding:48px 24px;
+}
+.ring-wrap{position:relative; width:120px; height:120px;}
+.ring-wrap svg{width:120px; height:120px; transform:rotate(-90deg);}
+.ring-bg{fill:none; stroke:var(--line); stroke-width:4;}
+.ring-fg{fill:none; stroke:var(--gold); stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset .3s linear;}
+.ring-num{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:'Space Mono',monospace; font-size:1.4rem; color:var(--paper);
+}
+.totp-code{
+  font-family:'Space Mono',monospace; font-size:clamp(2.4rem,8vw,3.6rem); letter-spacing:.12em;
+  color:var(--gold-bright); font-weight:700; cursor:pointer; user-select:all;
+  transition:opacity .2s ease;
+}
+.totp-code:hover{opacity:.85;}
+.totp-meta{
+  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--paper-faint); text-align:center;
+}
+.totp-placeholder{color:var(--paper-faint); font-family:'Space Grotesk',sans-serif; font-size:.95rem; text-align:center;}
+
+.adv-toggle{
+  font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--paper-faint); background:none; border:none; cursor:pointer; padding:0;
+  display:flex; align-items:center; gap:6px; margin-top:18px;
+  transition:color .3s cubic-bezier(.2,.8,.2,1);
+}
+.adv-toggle:hover{color:var(--gold);}
+.adv-toggle svg{width:11px; height:11px; transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+.adv-toggle.open svg{transform:rotate(180deg);}
+.adv-panel{display:none; margin-top:18px; padding-top:18px; border-top:1px solid var(--line);}
+.adv-panel.show{display:block;}
+.adv-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+@media (max-width:560px){ .adv-grid{grid-template-columns:1fr;} }
+.adv-grid label{display:block;}
+select{
+  width:100%; background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
+  color:var(--paper); font-family:'Space Mono',monospace; font-size:.85rem; padding:10px 12px;
+}
+select:focus{border-color:var(--gold); outline:none;}
+
+/* ---- Toast ---- */
+.toast{
+  position:fixed; bottom:32px; left:50%; transform:translate(-50%, 20px);
+  background:var(--gold); color:var(--ink); font-family:'Space Mono',monospace; font-size:.78rem;
+  letter-spacing:.06em; padding:12px 24px; border-radius:100px; opacity:0; pointer-events:none;
+  z-index:100; transition:opacity .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
+  white-space:nowrap;
+}
+.toast.show{opacity:1; transform:translate(-50%, 0);}
+
+footer{
+  border-top:1px solid var(--line); padding:32px 0 48px; margin-top:40px;
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+}
+footer .fnote{font-family:'Space Mono',monospace; font-size:.72rem; color:var(--paper-faint); letter-spacing:.04em;}
+
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition-duration:.01ms !important; animation-duration:.01ms !important;}
+}
+</style>
+</head>
+<body>
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <div class="container">
+    <a href="/" class="brand" aria-label="Zur 31415.me Startseite">
+      <span class="pi">π</span><span class="num">31415</span><span class="dot">.me</span>
+    </a>
+    <nav>
+      <a href="/" class="back-link"><span class="arrow">←</span> Werkzeuge</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <div class="app-head reveal">
+    <div class="eyebrow">Werkzeug 09</div>
+    <h1>Base-<em>Konverter</em></h1>
+    <p class="lede">Base64, Base64URL und Base32 in beide Richtungen — plus ein TOTP-Checker, mit dem du Authenticator-Secrets direkt im Browser kontrollierst. Nichts verlässt dein Gerät.</p>
+  </div>
+
+  <div class="tabs reveal" role="tablist" aria-label="Kodierungsart wählen">
+    <button class="tab-btn active" data-tab="b64" role="tab" aria-selected="true">Base64</button>
+    <button class="tab-btn" data-tab="b32" role="tab" aria-selected="false">Base32</button>
+    <button class="tab-btn" data-tab="totp" role="tab" aria-selected="false">TOTP-Checker</button>
+  </div>
+
+  <!-- ===================== BASE64 PANEL ===================== -->
+  <section class="panel active" id="panel-b64">
+    <div class="card reveal">
+      <div class="variant-row" role="group" aria-label="Base64-Variante">
+        <button class="mode-btn active" data-b64variant="std">Standard</button>
+        <button class="mode-btn" data-b64variant="url">URL-sicher</button>
+      </div>
+      <div class="mode-switch" role="group" aria-label="Eingabeart">
+        <button class="mode-btn active" data-b64input="text">Text</button>
+        <button class="mode-btn" data-b64input="file">Datei</button>
+      </div>
+
+      <div id="b64-text-input">
+        <div class="field-label">Klartext <span class="hint">wird beim Tippen kodiert</span></div>
+        <textarea id="b64-plain" placeholder="Text hier eingeben oder Base64 oben einfügen, um zu dekodieren …" aria-label="Klartext"></textarea>
+      </div>
+
+      <div id="b64-file-input" style="display:none;">
+        <div class="dropzone" id="b64-dropzone" tabindex="0" role="button" aria-label="Datei zum Kodieren auswählen oder hineinziehen">
+          <strong>Datei hierher ziehen</strong> oder klicken zum Auswählen<br>
+          <input type="file" id="b64-file" aria-label="Datei auswählen">
+        </div>
+        <div class="file-chip" id="b64-file-chip"><span id="b64-file-name"></span><button id="b64-file-clear" aria-label="Datei entfernen" type="button">✕</button></div>
+      </div>
+
+      <div class="swap-wrap">
+        <button class="swap-btn" id="b64-swap" aria-label="Richtung tauschen" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        </button>
+      </div>
+
+      <div class="field-label">Base64 <span id="b64-label-hint" class="hint">Ergebnis</span></div>
+      <textarea id="b64-encoded" placeholder="Hier erscheint das Base64-Ergebnis. Du kannst hier auch direkt etwas einfügen, um zu dekodieren." aria-label="Base64-Wert"></textarea>
+      <div class="err-msg" id="b64-error"></div>
+
+      <div class="field-actions">
+        <button class="btn primary" id="b64-copy" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Kopieren
+        </button>
+        <button class="btn" id="b64-clear" type="button">Zurücksetzen</button>
+        <button class="btn" id="b64-download" type="button" style="display:none;">Als Datei herunterladen</button>
+      </div>
+    </div>
+
+    <div class="card info-card reveal">
+      <h3>Was ist der Unterschied?</h3>
+      <p><strong>Standard-Base64</strong> nutzt <code>+</code> und <code>/</code> sowie <code>=</code> als Padding — üblich in E-Mails, JSON, Datenbanken.</p>
+      <p><strong>Base64URL</strong> ersetzt diese durch <code>-</code> und <code>_</code> und lässt Padding meist weg, damit der String gefahrlos in URLs und Dateinamen passt (z. B. JWTs).</p>
+    </div>
+  </section>
+
+  <!-- ===================== BASE32 PANEL ===================== -->
+  <section class="panel" id="panel-b32">
+    <div class="card reveal">
+      <div class="mode-switch" role="group" aria-label="Eingabeart">
+        <button class="mode-btn active" data-b32input="text">Text</button>
+        <button class="mode-btn" data-b32input="file">Datei</button>
+      </div>
+
+      <div id="b32-text-input">
+        <div class="field-label">Klartext <span class="hint">wird beim Tippen kodiert</span></div>
+        <textarea id="b32-plain" placeholder="Text hier eingeben oder Base32 unten einfügen, um zu dekodieren …" aria-label="Klartext"></textarea>
+      </div>
+
+      <div id="b32-file-input" style="display:none;">
+        <div class="dropzone" id="b32-dropzone" tabindex="0" role="button" aria-label="Datei zum Kodieren auswählen oder hineinziehen">
+          <strong>Datei hierher ziehen</strong> oder klicken zum Auswählen<br>
+          <input type="file" id="b32-file" aria-label="Datei auswählen">
+        </div>
+        <div class="file-chip" id="b32-file-chip"><span id="b32-file-name"></span><button id="b32-file-clear" aria-label="Datei entfernen" type="button">✕</button></div>
+      </div>
+
+      <div class="swap-wrap">
+        <button class="swap-btn" id="b32-swap" aria-label="Richtung tauschen" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+        </button>
+      </div>
+
+      <div class="field-label">Base32 <span class="hint">RFC 4648, Großbuchstaben</span></div>
+      <textarea id="b32-encoded" placeholder="Hier erscheint das Base32-Ergebnis. Du kannst hier auch direkt ein Secret einfügen, um es zu dekodieren." aria-label="Base32-Wert"></textarea>
+      <div class="err-msg" id="b32-error"></div>
+
+      <div class="field-actions">
+        <button class="btn primary" id="b32-copy" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Kopieren
+        </button>
+        <button class="btn" id="b32-clear" type="button">Zurücksetzen</button>
+        <button class="btn" id="b32-totp" type="button">Als TOTP-Secret prüfen →</button>
+      </div>
+    </div>
+
+    <div class="card info-card reveal">
+      <h3>Warum Base32 für TOTP-Secrets?</h3>
+      <p>Authenticator-Apps (Google Authenticator, Authy, etc.) speichern Secrets als Base32, weil das Alphabet (<code>A–Z</code>, <code>2–7</code>) sich beim Abtippen oder Vorlesen kaum verwechseln lässt — anders als Base64 mit ähnlich aussehenden Zeichen wie <code>0</code>/<code>O</code> oder <code>1</code>/<code>l</code>.</p>
+    </div>
+  </section>
+
+  <!-- ===================== TOTP PANEL ===================== -->
+  <section class="panel" id="panel-totp">
+    <div class="card reveal">
+      <div class="field-label">Base32-Secret <span class="hint">z. B. aus dem QR-Code-Setup</span></div>
+      <input type="text" id="totp-secret" placeholder="JBSWY3DPEHPK3PXP" autocomplete="off" spellcheck="false">
+      <div class="err-msg" id="totp-error"></div>
+
+      <button class="adv-toggle" id="totp-adv-toggle" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        Erweiterte Einstellungen
+      </button>
+      <div class="adv-panel" id="totp-adv-panel">
+        <div class="adv-grid">
+          <label>
+            <div class="field-label">Algorithmus</div>
+            <select id="totp-algo">
+              <option value="SHA-1">SHA-1 (Standard)</option>
+              <option value="SHA-256">SHA-256</option>
+              <option value="SHA-512">SHA-512</option>
+            </select>
+          </label>
+          <label>
+            <div class="field-label">Ziffern</div>
+            <select id="totp-digits">
+              <option value="6">6</option>
+              <option value="8">8</option>
+            </select>
+          </label>
+          <label>
+            <div class="field-label">Intervall (Sek.)</div>
+            <select id="totp-period">
+              <option value="30">30</option>
+              <option value="60">60</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="totp-display" id="totp-display">
+        <p class="totp-placeholder">Secret eingeben, um den aktuellen Code zu sehen.</p>
+      </div>
+    </div>
+
+    <div class="card info-card reveal">
+      <h3>Wie funktioniert das?</h3>
+      <p>TOTP (Time-based One-Time Password) berechnet aus deinem geheimen Schlüssel und der aktuellen Uhrzeit einen Code, der alle 30 Sekunden wechselt — genau das, was Authenticator-Apps anzeigen.</p>
+      <p>Die Berechnung läuft komplett lokal in deinem Browser über die <code>Web Crypto API</code>. Das Secret wird nirgendwo gespeichert oder übertragen — sobald du die Seite neu lädst, ist es weg.</p>
+      <p>Nützlich, um ein neues Secret beim Einrichten zu testen, bevor du es in eine Authenticator-App überträgst, oder um zu prüfen, ob ein Secret überhaupt gültiges Base32 ist.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span class="fnote">Läuft vollständig lokal — keine Übertragung, keine Speicherung.</span>
+    <span class="fnote">31415.me</span>
+  </footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Grundlagen: Theme, reduceMotion ---------- */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+(function(){
+  const root = document.documentElement;
+  const stored = localStorage.getItem('theme');
+  if(stored){
+    root.setAttribute('data-theme', stored);
+  } else if(window.matchMedia('(prefers-color-scheme: light)').matches){
+    root.setAttribute('data-theme', 'light');
+  }
+  function syncThemeColor(){
+    const isLight = root.getAttribute('data-theme') === 'light';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
+  }
+  syncThemeColor();
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    localStorage.setItem('theme', next);
+    syncThemeColor();
+  });
+})();
+
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+function switchToTab(name){
+  document.querySelector(`.tab-btn[data-tab="${name}"]`).click();
+}
+
+/* ===================================================================
+   Base32 / Base64 — eigenständige Implementierung (RFC 4648)
+   =================================================================== */
+const B32_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+
+function bytesToBase32(bytes){
+  let bits = 0, value = 0, output = '';
+  for(let i = 0; i < bytes.length; i++){
+    value = (value << 8) | bytes[i];
+    bits += 8;
+    while(bits >= 5){
+      output += B32_ALPHABET[(value >>> (bits - 5)) & 31];
+      bits -= 5;
+    }
+  }
+  if(bits > 0){
+    output += B32_ALPHABET[(value << (5 - bits)) & 31];
+  }
+  while(output.length % 8 !== 0){ output += '='; }
+  return output;
+}
+
+function base32ToBytes(str){
+  const clean = str.toUpperCase().replace(/\s+/g,'').replace(/=+$/,'');
+  if(clean.length === 0) return new Uint8Array(0);
+  if(!/^[A-Z2-7]+$/.test(clean)){
+    throw new Error('Ungültiges Zeichen — Base32 erlaubt nur A–Z und 2–7 (kein 0, 1, 8, 9).');
+  }
+  let bits = 0, value = 0;
+  const bytes = [];
+  for(let i = 0; i < clean.length; i++){
+    const idx = B32_ALPHABET.indexOf(clean[i]);
+    value = (value << 5) | idx;
+    bits += 5;
+    if(bits >= 8){
+      bytes.push((value >>> (bits - 8)) & 255);
+      bits -= 8;
+    }
+  }
+  return new Uint8Array(bytes);
+}
+
+function bytesToBase64(bytes, urlSafe){
+  let binary = '';
+  for(let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  let b64 = btoa(binary);
+  if(urlSafe){
+    b64 = b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+  }
+  return b64;
+}
+
+function base64ToBytes(str, urlSafe){
+  let clean = str.replace(/\s+/g,'');
+  if(urlSafe || /[-_]/.test(clean)){
+    clean = clean.replace(/-/g,'+').replace(/_/g,'/');
+  }
+  while(clean.length % 4 !== 0) clean += '=';
+  if(!/^[A-Za-z0-9+/]*={0,2}$/.test(clean)){
+    throw new Error('Ungültiges Zeichen — das ist kein gültiges Base64.');
+  }
+  const binary = atob(clean);
+  const bytes = new Uint8Array(binary.length);
+  for(let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+function textToBytes(text){ return new TextEncoder().encode(text); }
+function bytesToText(bytes){
+  try{ return new TextDecoder('utf-8', {fatal:true}).decode(bytes); }
+  catch(e){ throw new Error('Ergebnis ist kein gültiger UTF-8-Text — vermutlich Binärdaten. Lade es als Datei herunter.'); }
+}
+function bytesToHexPreview(bytes, max=64){
+  const slice = bytes.slice(0, max);
+  let hex = Array.from(slice).map(b => b.toString(16).padStart(2,'0')).join(' ');
+  return hex + (bytes.length > max ? ' …' : '');
+}
+
+/* ===================================================================
+   Base64-Panel-Logik
+   =================================================================== */
+(function(){
+  const plainEl = document.getElementById('b64-plain');
+  const encEl = document.getElementById('b64-encoded');
+  const errEl = document.getElementById('b64-error');
+  const labelHint = document.getElementById('b64-label-hint');
+  const downloadBtn = document.getElementById('b64-download');
+  let variant = 'std'; // 'std' | 'url'
+  let inputMode = 'text'; // 'text' | 'file'
+  let fileBytes = null;
+  let lastDecodedBytes = null; // für Datei-Download bei Decode
+  let lockField = null; // welches Feld zuletzt vom Nutzer editiert wurde
+  let syncing = false;
+
+  document.querySelectorAll('[data-b64variant]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-b64variant]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      variant = btn.dataset.b64variant;
+      reEncodeFromSource();
+    });
+  });
+
+  document.querySelectorAll('[data-b64input]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-b64input]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      inputMode = btn.dataset.b64input;
+      document.getElementById('b64-text-input').style.display = inputMode === 'text' ? '' : 'none';
+      document.getElementById('b64-file-input').style.display = inputMode === 'file' ? '' : 'none';
+      clearError();
+      if(inputMode === 'text'){
+        downloadBtn.style.display = 'none';
+        lockField = 'plain';
+        reEncodeFromSource();
+      }
+    });
+  });
+
+  function clearError(){ errEl.classList.remove('show'); errEl.textContent = ''; }
+  function setError(msg){ errEl.textContent = msg; errEl.classList.add('show'); }
+
+  function reEncodeFromSource(){
+    clearError();
+    if(inputMode === 'file'){
+      if(!fileBytes) return;
+      encEl.value = bytesToBase64(fileBytes, variant === 'url');
+      labelHint.textContent = 'Ergebnis';
+      return;
+    }
+    if(lockField === 'enc') { decodeFromEnc(); return; }
+    const text = plainEl.value;
+    if(text === ''){ encEl.value=''; return; }
+    try{
+      encEl.value = bytesToBase64(textToBytes(text), variant === 'url');
+      labelHint.textContent = 'Ergebnis';
+    }catch(e){ setError(e.message); }
+  }
+
+  function decodeFromEnc(){
+    clearError();
+    downloadBtn.style.display = 'none';
+    const val = encEl.value;
+    if(val.trim() === ''){ if(inputMode==='text') plainEl.value=''; return; }
+    try{
+      const bytes = base64ToBytes(val, variant === 'url');
+      lastDecodedBytes = bytes;
+      if(inputMode === 'text'){
+        try{
+          plainEl.value = bytesToText(bytes);
+        }catch(decodeErr){
+          plainEl.value = '';
+          setError(decodeErr.message + ' Hex-Vorschau: ' + bytesToHexPreview(bytes));
+          downloadBtn.style.display = '';
+        }
+      }
+    }catch(e){ setError(e.message); }
+  }
+
+  plainEl.addEventListener('input', () => { lockField = 'plain'; reEncodeFromSource(); });
+  encEl.addEventListener('input', () => {
+    lockField = 'enc';
+    if(inputMode === 'text'){ decodeFromEnc(); }
+  });
+
+  document.getElementById('b64-swap').addEventListener('click', () => {
+    if(inputMode === 'file') return;
+    const tmp = plainEl.value;
+    plainEl.value = encEl.value;
+    encEl.value = tmp;
+    // nach dem Tausch: versuchen, das neue "Klartext"-Feld als kodierten Wert zu interpretieren falls nötig
+    lockField = 'plain';
+    reEncodeFromSource();
+  });
+
+  document.getElementById('b64-copy').addEventListener('click', () => {
+    const val = encEl.value || plainEl.value;
+    if(!val) return;
+    navigator.clipboard.writeText(encEl.value).then(() => showToast('Kopiert')).catch(()=>showToast('Kopieren fehlgeschlagen'));
+  });
+
+  document.getElementById('b64-clear').addEventListener('click', () => {
+    plainEl.value=''; encEl.value=''; clearError(); fileBytes=null; lastDecodedBytes=null;
+    document.getElementById('b64-file-chip').classList.remove('show');
+    downloadBtn.style.display='none';
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    if(!lastDecodedBytes) return;
+    const blob = new Blob([lastDecodedBytes]);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'dekodiert.bin';
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  /* Datei-Drop */
+  const dz = document.getElementById('b64-dropzone');
+  const fileInput = document.getElementById('b64-file');
+  const chip = document.getElementById('b64-file-chip');
+  const chipName = document.getElementById('b64-file-name');
+
+  function handleFile(file){
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      fileBytes = new Uint8Array(reader.result);
+      chipName.textContent = file.name + ' · ' + formatBytes(file.size);
+      chip.classList.add('show');
+      reEncodeFromSource();
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  function formatBytes(n){
+    if(n < 1024) return n + ' B';
+    if(n < 1024*1024) return (n/1024).toFixed(1) + ' KB';
+    return (n/1024/1024).toFixed(1) + ' MB';
+  }
+
+  dz.addEventListener('click', () => fileInput.click());
+  dz.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); fileInput.click(); } });
+  fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+  ['dragover','dragenter'].forEach(evt => dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(evt => dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+  dz.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+
+  document.getElementById('b64-file-clear').addEventListener('click', () => {
+    fileBytes = null; fileInput.value=''; chip.classList.remove('show'); encEl.value='';
+  });
+})();
+
+/* ===================================================================
+   Base32-Panel-Logik
+   =================================================================== */
+(function(){
+  const plainEl = document.getElementById('b32-plain');
+  const encEl = document.getElementById('b32-encoded');
+  const errEl = document.getElementById('b32-error');
+  let inputMode = 'text';
+  let fileBytes = null;
+  let lockField = 'plain';
+
+  document.querySelectorAll('[data-b32input]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-b32input]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      inputMode = btn.dataset.b32input;
+      document.getElementById('b32-text-input').style.display = inputMode === 'text' ? '' : 'none';
+      document.getElementById('b32-file-input').style.display = inputMode === 'file' ? '' : 'none';
+      clearError();
+      if(inputMode === 'text'){ lockField='plain'; reEncode(); }
+    });
+  });
+
+  function clearError(){ errEl.classList.remove('show'); errEl.textContent=''; }
+  function setError(msg){ errEl.textContent = msg; errEl.classList.add('show'); }
+
+  function reEncode(){
+    clearError();
+    if(inputMode === 'file'){
+      if(!fileBytes) return;
+      encEl.value = bytesToBase32(fileBytes);
+      return;
+    }
+    if(lockField === 'enc'){ decode(); return; }
+    const text = plainEl.value;
+    if(text === ''){ encEl.value=''; return; }
+    encEl.value = bytesToBase32(textToBytes(text));
+  }
+
+  function decode(){
+    clearError();
+    const val = encEl.value;
+    if(val.trim() === ''){ if(inputMode==='text') plainEl.value=''; return; }
+    try{
+      const bytes = base32ToBytes(val);
+      if(inputMode === 'text'){
+        try{ plainEl.value = bytesToText(bytes); }
+        catch(decodeErr){ plainEl.value=''; setError(decodeErr.message + ' Hex-Vorschau: ' + bytesToHexPreview(bytes)); }
+      }
+    }catch(e){ setError(e.message); }
+  }
+
+  plainEl.addEventListener('input', () => { lockField='plain'; reEncode(); });
+  encEl.addEventListener('input', () => { lockField='enc'; if(inputMode==='text') decode(); });
+
+  document.getElementById('b32-swap').addEventListener('click', () => {
+    if(inputMode === 'file') return;
+    const tmp = plainEl.value; plainEl.value = encEl.value; encEl.value = tmp;
+    lockField='plain'; reEncode();
+  });
+
+  document.getElementById('b32-copy').addEventListener('click', () => {
+    if(!encEl.value) return;
+    navigator.clipboard.writeText(encEl.value).then(()=>showToast('Kopiert')).catch(()=>showToast('Kopieren fehlgeschlagen'));
+  });
+
+  document.getElementById('b32-clear').addEventListener('click', () => {
+    plainEl.value=''; encEl.value=''; clearError(); fileBytes=null;
+    document.getElementById('b32-file-chip').classList.remove('show');
+  });
+
+  document.getElementById('b32-totp').addEventListener('click', () => {
+    const secret = encEl.value.trim() || plainEl.value.trim();
+    if(!secret) return;
+    switchToTab('totp');
+    const secretInput = document.getElementById('totp-secret');
+    secretInput.value = secret;
+    secretInput.dispatchEvent(new Event('input'));
+    secretInput.focus();
+  });
+
+  /* Datei-Drop */
+  const dz = document.getElementById('b32-dropzone');
+  const fileInput = document.getElementById('b32-file');
+  const chip = document.getElementById('b32-file-chip');
+  const chipName = document.getElementById('b32-file-name');
+
+  function handleFile(file){
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      fileBytes = new Uint8Array(reader.result);
+      chipName.textContent = file.name + ' · ' + formatBytes(file.size);
+      chip.classList.add('show');
+      reEncode();
+    };
+    reader.readAsArrayBuffer(file);
+  }
+  function formatBytes(n){
+    if(n < 1024) return n + ' B';
+    if(n < 1024*1024) return (n/1024).toFixed(1) + ' KB';
+    return (n/1024/1024).toFixed(1) + ' MB';
+  }
+
+  dz.addEventListener('click', () => fileInput.click());
+  dz.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); fileInput.click(); } });
+  fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+  ['dragover','dragenter'].forEach(evt => dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(evt => dz.addEventListener(evt, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+  dz.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
+
+  document.getElementById('b32-file-clear').addEventListener('click', () => {
+    fileBytes=null; fileInput.value=''; chip.classList.remove('show'); encEl.value='';
+  });
+})();
+
+/* ===================================================================
+   TOTP-Checker — RFC 6238 / HMAC via Web Crypto API
+   =================================================================== */
+(function(){
+  const secretInput = document.getElementById('totp-secret');
+  const errEl = document.getElementById('totp-error');
+  const displayEl = document.getElementById('totp-display');
+  const algoSel = document.getElementById('totp-algo');
+  const digitsSel = document.getElementById('totp-digits');
+  const periodSel = document.getElementById('totp-period');
+  const advToggle = document.getElementById('totp-adv-toggle');
+  const advPanel = document.getElementById('totp-adv-panel');
+
+  advToggle.addEventListener('click', () => {
+    advToggle.classList.toggle('open');
+    advPanel.classList.toggle('show');
+  });
+
+  let timerHandle = null;
+  let currentKeyBytes = null;
+
+  function clearError(){ errEl.classList.remove('show'); errEl.textContent=''; }
+  function setError(msg){ errEl.textContent = msg; errEl.classList.add('show'); stopTimer(); renderPlaceholder(); }
+
+  function renderPlaceholder(){
+    displayEl.innerHTML = '<p class="totp-placeholder">Secret eingeben, um den aktuellen Code zu sehen.</p>';
+  }
+
+  function renderDisplay(){
+    displayEl.innerHTML = `
+      <div class="ring-wrap">
+        <svg viewBox="0 0 120 120">
+          <circle class="ring-bg" cx="60" cy="60" r="54"></circle>
+          <circle class="ring-fg" id="totp-ring" cx="60" cy="60" r="54" stroke-dasharray="339.3"></circle>
+        </svg>
+        <div class="ring-num" id="totp-seconds">30</div>
+      </div>
+      <div class="totp-code" id="totp-code-val" title="Klicken zum Kopieren">000000</div>
+      <div class="totp-meta">Tippe auf den Code, um ihn zu kopieren</div>
+    `;
+    document.getElementById('totp-code-val').addEventListener('click', () => {
+      navigator.clipboard.writeText(document.getElementById('totp-code-val').textContent.replace(/\s/g,''))
+        .then(()=>showToast('Code kopiert')).catch(()=>showToast('Kopieren fehlgeschlagen'));
+    });
+  }
+
+  function hotpFormat(num, digits){
+    return String(num).padStart(digits, '0');
+  }
+
+  async function computeTotp(keyBytes, algo, digits, period){
+    const counter = Math.floor(Date.now() / 1000 / period);
+    const counterBytes = new ArrayBuffer(8);
+    const view = new DataView(counterBytes);
+    // 64-bit big-endian counter (high 32 bits always 0 for realistic timestamps)
+    view.setUint32(0, 0);
+    view.setUint32(4, counter);
+
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw', keyBytes, {name:'HMAC', hash:algo}, false, ['sign']
+    );
+    const sigBuf = await crypto.subtle.sign('HMAC', cryptoKey, counterBytes);
+    const sig = new Uint8Array(sigBuf);
+    const offset = sig[sig.length - 1] & 0x0f;
+    const binCode = ((sig[offset] & 0x7f) << 24) |
+                     ((sig[offset+1] & 0xff) << 16) |
+                     ((sig[offset+2] & 0xff) << 8) |
+                     (sig[offset+3] & 0xff);
+    const mod = Math.pow(10, digits);
+    return hotpFormat(binCode % mod, digits);
+  }
+
+  async function tick(){
+    if(!currentKeyBytes) return;
+    const algo = algoSel.value;
+    const digits = parseInt(digitsSel.value, 10);
+    const period = parseInt(periodSel.value, 10);
+
+    try{
+      const code = await computeTotp(currentKeyBytes, algo, digits, period);
+      const codeEl = document.getElementById('totp-code-val');
+      if(codeEl){
+        const spaced = digits === 6 ? code.slice(0,3) + ' ' + code.slice(3) : code.slice(0,4) + ' ' + code.slice(4);
+        codeEl.textContent = spaced;
+      }
+      const secondsLeft = period - (Math.floor(Date.now()/1000) % period);
+      const secEl = document.getElementById('totp-seconds');
+      const ringEl = document.getElementById('totp-ring');
+      if(secEl) secEl.textContent = secondsLeft;
+      if(ringEl){
+        const circumference = 339.3;
+        const fraction = secondsLeft / period;
+        ringEl.style.strokeDashoffset = (circumference * (1 - fraction));
+      }
+    }catch(e){
+      setError('Berechnung fehlgeschlagen: ' + e.message);
+    }
+  }
+
+  function startTimer(){
+    stopTimer();
+    renderDisplay();
+    tick();
+    timerHandle = setInterval(tick, 1000);
+  }
+  function stopTimer(){
+    if(timerHandle){ clearInterval(timerHandle); timerHandle = null; }
+  }
+
+  function handleSecretChange(){
+    clearError();
+    const raw = secretInput.value.trim();
+    if(raw === ''){ stopTimer(); currentKeyBytes = null; renderPlaceholder(); return; }
+    try{
+      const bytes = base32ToBytes(raw);
+      if(bytes.length === 0){ throw new Error('Secret ist leer oder enthält nur Padding.'); }
+      currentKeyBytes = bytes;
+      startTimer();
+    }catch(e){
+      currentKeyBytes = null;
+      setError(e.message);
+    }
+  }
+
+  secretInput.addEventListener('input', handleSecretChange);
+  algoSel.addEventListener('change', () => { if(currentKeyBytes) startTimer(); });
+  digitsSel.addEventListener('change', () => { if(currentKeyBytes) startTimer(); });
+  periodSel.addEventListener('change', () => { if(currentKeyBytes) startTimer(); });
+
+  renderPlaceholder();
+})();
+
+/* ---------- Gold-Spotlight auf Karten ---------- */
+document.querySelectorAll('.card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  });
+});
+
+/* ---------- Scroll-Reveal ---------- */
+(function(){
+  const els = document.querySelectorAll('.reveal');
+  if(reduceMotion){ els.forEach(el => el.classList.add('in')); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
+    });
+  }, {threshold:.15});
+  els.forEach(el => obs.observe(el));
+})();
+
+/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
+  const cv = document.getElementById('digit-field');
+  const ctx = cv.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    const cols = Math.floor(cv.width / 28);
+    drops = [];
+    for(let i=0;i<cols;i++){
+      drops.push({
+        x: i*28 + 14,
+        y: Math.random() * cv.height,
+        speed: 0.4 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
+      });
+    }
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d => {
+      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
+      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > cv.height){
+        d.y = -20;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
