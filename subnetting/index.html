@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0e14">
+<title>Subnetting-Rechner — 31415.me</title>
+<meta name="description" content="IP-Netze analysieren, Masken aus Host-/Subnetzbedarf berechnen und Netze per VLSM aufteilen. Rein clientseitig, ohne Tracking.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:400;
+  line-height:1.6;
+  min-height:100vh;
+  position:relative;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--gold);color:var(--ink);}
+
+#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+a{color:inherit;text-decoration:none;}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px;position:relative;z-index:2;}
+@media(max-width:640px){.wrap{padding:0 20px;}}
+
+/* ---------- Header ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  height:72px;display:flex;align-items:center;
+  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+}
+.header-inner{
+  max-width:1180px;margin:0 auto;width:100%;
+  padding:0 28px;display:flex;align-items:center;justify-content:space-between;
+}
+@media(max-width:640px){.header-inner{padding:0 20px;}}
+
+.brand{display:flex;align-items:baseline;gap:.32em;font-size:1rem;}
+.brand .pi{font-family:'Fraunces',serif;font-size:1.5rem;color:var(--gold);line-height:1;}
+.brand .num{font-family:'Space Mono',monospace;font-weight:700;color:var(--paper);letter-spacing:.02em;}
+.brand .me{font-family:'Space Mono',monospace;color:var(--paper-faint);}
+
+.header-right{display:flex;align-items:center;gap:18px;}
+.back-link{
+  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--paper-dim);display:flex;align-items:center;gap:6px;
+  transition:color .3s cubic-bezier(.2,.8,.2,1);
+}
+.back-link:hover{color:var(--gold);}
+.back-link svg{width:13px;height:13px;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+.back-link:hover svg{transform:translateX(-3px);}
+
+.theme-toggle{
+  width:40px;height:40px;border-radius:100px;border:1px solid var(--line);
+  background:transparent;color:var(--paper-dim);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
+.theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.theme-toggle svg{width:17px;height:17px;}
+.theme-toggle .sun{display:none;}
+html[data-theme="light"] .theme-toggle .moon{display:none;}
+html[data-theme="light"] .theme-toggle .sun{display:block;}
+
+/* ---------- App head ---------- */
+.app-head{padding:150px 0 56px;}
+@media(max-width:640px){.app-head{padding:120px 0 40px;}}
+.eyebrow{
+  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--gold);display:block;margin-bottom:18px;
+}
+h1{
+  font-family:'Fraunces',serif;font-weight:300;font-size:clamp(2.2rem,6vw,3.6rem);
+  letter-spacing:-.02em;line-height:.98;margin:0 0 16px;color:var(--paper);
+}
+h1 em{font-style:italic;color:var(--gold-bright);font-weight:400;}
+.lede{font-size:1.05rem;color:var(--paper-dim);max-width:580px;margin:0;}
+
+/* ---------- Mode switch ---------- */
+.mode-switch{
+  display:inline-flex;gap:4px;padding:5px;border-radius:100px;
+  background:var(--ink-soft);border:1px solid var(--line);margin-bottom:48px;
+  flex-wrap:wrap;
+}
+.mode-btn{
+  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+  padding:11px 20px;border-radius:100px;border:none;background:transparent;color:var(--paper-dim);
+  cursor:pointer;transition:background .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+  white-space:nowrap;
+}
+.mode-btn:hover{color:var(--paper);}
+.mode-btn.active{background:var(--gold);color:var(--ink);font-weight:700;}
+.mode-btn:focus-visible{outline:2px solid var(--gold-bright);outline-offset:2px;}
+
+/* ---------- Work area ---------- */
+.workspace{padding-bottom:130px;}
+@media(max-width:640px){.workspace{padding-bottom:90px;}}
+
+.panel{display:none;}
+.panel.active{display:block;}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+@media(max-width:880px){.grid{grid-template-columns:1fr;}}
+
+.card{
+  position:relative;background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line);border-radius:var(--r);padding:32px;
+  --mx:50%; --my:50%;
+  overflow:hidden;
+}
+.card::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  opacity:0;transition:opacity .4s cubic-bezier(.2,.8,.2,1);
+}
+.card:hover::before{opacity:.14;}
+.card > *{position:relative;z-index:1;}
+
+.card h2{
+  font-family:'Fraunces',serif;font-weight:400;font-size:1.3rem;margin:0 0 22px;color:var(--paper);
+  letter-spacing:-.01em;
+}
+
+.field{margin-bottom:20px;}
+.field:last-child{margin-bottom:0;}
+.field label{
+  display:block;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--paper-faint);margin-bottom:8px;
+}
+.field input, .field select{
+  width:100%;background:var(--ink-soft);border:1px solid var(--line);border-radius:8px;
+  padding:13px 14px;color:var(--paper);font-family:'Space Mono',monospace;font-size:.92rem;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+html[data-theme="light"] .field input, html[data-theme="light"] .field select{background:var(--panel);}
+.field input::placeholder{color:var(--paper-faint);}
+.field input:focus, .field select:focus{outline:none;border-color:var(--gold);}
+.field input:focus-visible, .field select:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.field select{cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:.92rem;}
+.field .hint{font-size:.78rem;color:var(--paper-faint);margin-top:6px;font-family:'Space Grotesk',sans-serif;}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:480px){.row2{grid-template-columns:1fr;}}
+
+.btn{
+  font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:.92rem;
+  padding:14px 26px;border-radius:100px;border:none;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s cubic-bezier(.2,.8,.2,1), border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-primary{background:var(--gold);color:var(--ink);width:100%;margin-top:8px;}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 14px 28px -10px var(--shadow);}
+.btn-primary:focus-visible{outline:2px solid var(--gold-bright);outline-offset:3px;}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--paper);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-ghost:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+.btn-sm{padding:9px 18px;font-size:.82rem;}
+
+.error-box{
+  display:none;margin-top:18px;padding:14px 16px;border-radius:8px;
+  border:1px solid var(--line);background:var(--ink-soft);color:var(--gold-bright);
+  font-family:'Space Mono',monospace;font-size:.82rem;line-height:1.5;
+}
+.error-box.show{display:block;}
+
+/* ---------- Output ---------- */
+.output-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  min-height:280px;color:var(--paper-faint);gap:10px;
+}
+.output-empty .pi-mark{font-family:'Fraunces',serif;font-size:2.4rem;color:var(--gold);opacity:.4;font-style:italic;}
+.output-empty p{margin:0;font-size:.92rem;max-width:280px;}
+
+.result-table{width:100%;border-collapse:collapse;}
+.result-table tr{border-bottom:1px solid var(--line);}
+.result-table tr:last-child{border-bottom:none;}
+.result-table td{padding:11px 0;font-size:.88rem;}
+.result-table td:first-child{
+  font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--paper-faint);width:42%;vertical-align:top;padding-top:13px;
+}
+.result-table td:last-child{
+  font-family:'Space Mono',monospace;color:var(--paper);font-size:.95rem;text-align:right;
+  word-break:break-all;
+}
+.result-table td:last-child .copy-inline{
+  background:none;border:none;color:var(--paper-faint);cursor:pointer;padding:0 0 0 8px;
+  vertical-align:middle;transition:color .3s cubic-bezier(.2,.8,.2,1);
+}
+.result-table td:last-child .copy-inline:hover{color:var(--gold);}
+.result-table td:last-child .copy-inline svg{width:13px;height:13px;display:block;}
+
+.binary-block{
+  margin-top:20px;padding-top:20px;border-top:1px solid var(--line);
+  font-family:'Space Mono',monospace;font-size:.78rem;color:var(--paper-dim);
+  line-height:2;word-break:break-all;
+}
+.binary-block .b-label{display:block;color:var(--paper-faint);letter-spacing:.1em;text-transform:uppercase;font-size:.64rem;margin-bottom:6px;}
+.binary-block .net-bits{color:var(--gold-bright);}
+.binary-block .host-bits{color:var(--paper-dim);}
+
+/* ---------- VLSM ---------- */
+.vlsm-list{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.vlsm-item{
+  display:grid;grid-template-columns:1fr 110px 36px;gap:10px;align-items:center;
+}
+@media(max-width:480px){.vlsm-item{grid-template-columns:1fr 90px 32px;}}
+.vlsm-item input{
+  background:var(--ink-soft);border:1px solid var(--line);border-radius:8px;
+  padding:11px 13px;color:var(--paper);font-family:'Space Grotesk',sans-serif;font-size:.88rem;
+}
+html[data-theme="light"] .vlsm-item input{background:var(--panel);}
+.vlsm-item input:focus{outline:none;border-color:var(--gold);}
+.vlsm-item input:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.vlsm-item input[type="number"]{font-family:'Space Mono',monospace;}
+.vlsm-remove{
+  width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:transparent;
+  color:var(--paper-faint);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.vlsm-remove:hover{border-color:var(--gold);color:var(--gold);}
+.vlsm-remove:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.vlsm-remove svg{width:14px;height:14px;}
+
+.vlsm-table-wrap{overflow-x:auto;}
+.vlsm-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:600px;}
+.vlsm-table th{
+  font-family:'Space Mono',monospace;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--paper-faint);text-align:left;padding:0 10px 12px;border-bottom:1px solid var(--line);
+}
+.vlsm-table td{
+  font-family:'Space Mono',monospace;padding:11px 10px;color:var(--paper);
+  border-bottom:1px solid var(--line);white-space:nowrap;
+}
+.vlsm-table tr:last-child td{border-bottom:none;}
+.vlsm-table td:first-child{font-family:'Space Grotesk',sans-serif;color:var(--paper-dim);}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed;bottom:32px;left:50%;z-index:100;
+  background:var(--gold);color:var(--ink);font-family:'Space Grotesk',sans-serif;font-weight:500;
+  font-size:.85rem;padding:12px 24px;border-radius:100px;
+  transform:translate(-50%, 20px);opacity:0;pointer-events:none;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s cubic-bezier(.2,.8,.2,1);
+}
+.toast.show{transform:translate(-50%, 0);opacity:1;}
+
+/* ---------- Footer ---------- */
+footer{
+  border-top:1px solid var(--line);padding:32px 0;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+}
+footer p{margin:0;font-size:.8rem;color:var(--paper-faint);}
+footer a{color:var(--paper-faint);transition:color .3s cubic-bezier(.2,.8,.2,1);}
+footer a:hover{color:var(--gold);}
+
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+@media(prefers-reduced-motion:reduce){
+  *{transition-duration:.001ms !important; animation-duration:.001ms !important;}
+}
+</style>
+</head>
+<body>
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <div class="header-inner">
+    <a href="/" class="brand" aria-label="31415.me Startseite">
+      <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
+    </a>
+    <div class="header-right">
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Alle Werkzeuge
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten" type="button">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="app-head reveal">
+    <span class="eyebrow">Netzwerk · Werkzeug 04</span>
+    <h1>Subnetting-<em>Rechner</em></h1>
+    <p class="lede">IP-Netze analysieren, die passende Maske aus deinem Bedarf ableiten oder ein Netz per VLSM in mehrere Subnetze schneiden.</p>
+  </div>
+
+  <div class="mode-switch reveal" role="group" aria-label="Modus wählen">
+    <button class="mode-btn active" data-mode="cidr" type="button">CIDR-Analyse</button>
+    <button class="mode-btn" data-mode="need" type="button">Hosts → Maske</button>
+    <button class="mode-btn" data-mode="vlsm" type="button">VLSM-Splitter</button>
+  </div>
+
+  <div class="workspace">
+
+    <!-- MODUS 1: CIDR-Analyse -->
+    <section class="panel active" id="panel-cidr">
+      <div class="grid">
+        <div class="card controls-card reveal">
+          <h2>Netz eingeben</h2>
+          <div class="field">
+            <label for="cidrInput">IP-Adresse mit Präfix</label>
+            <input type="text" id="cidrInput" placeholder="192.168.1.0/24 oder 2001:db8::/64" autocomplete="off" spellcheck="false">
+            <div class="hint">IPv4 oder IPv6 — Präfix nach dem Schrägstrich angeben.</div>
+          </div>
+          <button class="btn btn-primary" id="cidrCalc" type="button">Berechnen</button>
+          <div class="error-box" id="cidrError"></div>
+        </div>
+
+        <div class="card output-card reveal" id="cidrOutputCard">
+          <h2>Ergebnis</h2>
+          <div class="output-empty" id="cidrEmpty">
+            <span class="pi-mark">π</span>
+            <p>Trag links ein Netz ein — Netzadresse, Broadcast, Hostbereich und Maske erscheinen hier.</p>
+          </div>
+          <div id="cidrResult" style="display:none;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODUS 2: Hosts/Subnetze -> Maske -->
+    <section class="panel" id="panel-need">
+      <div class="grid">
+        <div class="card controls-card reveal">
+          <h2>Bedarf angeben</h2>
+          <div class="field">
+            <label for="needBase">Basis-Netzadresse (IPv4)</label>
+            <input type="text" id="needBase" placeholder="192.168.1.0" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label>Wonach soll gerechnet werden?</label>
+            <select id="needMode">
+              <option value="hosts">Benötigte Hosts pro Netz</option>
+              <option value="subnets">Benötigte Anzahl Subnetze</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="needValue" id="needValueLabel">Anzahl Hosts</label>
+            <input type="number" id="needValue" min="1" placeholder="z. B. 30" inputmode="numeric">
+            <div class="hint" id="needHint">Inklusive Netz- und Broadcast-Reserve wird automatisch aufgerundet.</div>
+          </div>
+          <button class="btn btn-primary" id="needCalc" type="button">Maske berechnen</button>
+          <div class="error-box" id="needError"></div>
+        </div>
+
+        <div class="card output-card reveal" id="needOutputCard">
+          <h2>Ergebnis</h2>
+          <div class="output-empty" id="needEmpty">
+            <span class="pi-mark">π</span>
+            <p>Gib an, wie viele Hosts oder Subnetze du brauchst — die passende Maske erscheint hier.</p>
+          </div>
+          <div id="needResult" style="display:none;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODUS 3: VLSM -->
+    <section class="panel" id="panel-vlsm">
+      <div class="grid">
+        <div class="card controls-card reveal">
+          <h2>Netz aufteilen</h2>
+          <div class="field">
+            <label for="vlsmBase">Basis-Netz (CIDR, IPv4)</label>
+            <input type="text" id="vlsmBase" placeholder="192.168.0.0/24" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label>Teilnetze (Name + benötigte Hosts)</label>
+            <div class="vlsm-list" id="vlsmList"></div>
+            <button class="btn btn-ghost btn-sm" id="vlsmAdd" type="button">+ Teilnetz hinzufügen</button>
+          </div>
+          <button class="btn btn-primary" id="vlsmCalc" type="button">Aufteilen</button>
+          <div class="error-box" id="vlsmError"></div>
+        </div>
+
+        <div class="card output-card reveal" id="vlsmOutputCard">
+          <h2>Ergebnis</h2>
+          <div class="output-empty" id="vlsmEmpty">
+            <span class="pi-mark">π</span>
+            <p>Trag dein Basisnetz und die Teilnetze mit ihrem Hostbedarf ein — die VLSM-Aufteilung erscheint hier, größte Bedarfe zuerst zugeschnitten.</p>
+          </div>
+          <div id="vlsmResult" style="display:none;"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;width:100%;">
+    <p>Läuft vollständig in deinem Browser. Keine Daten verlassen dein Gerät.</p>
+    <p><a href="/">31415.me</a></p>
+  </div>
+</footer>
+
+<script>
+/* ---------- Setup ---------- */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Theme ---------- */
+(function(){
+  const root = document.documentElement;
+  const saved = localStorage.getItem('theme');
+  if(saved){
+    root.setAttribute('data-theme', saved);
+  } else {
+    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+    if(prefersLight) root.setAttribute('data-theme', 'light');
+  }
+  function syncThemeColor(){
+    const isLight = root.getAttribute('data-theme') === 'light';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
+  }
+  syncThemeColor();
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme', 'light'); }
+    localStorage.setItem('theme', next);
+    syncThemeColor();
+  });
+})();
+
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+function copyToClipboard(text){
+  navigator.clipboard.writeText(text).then(() => showToast('Kopiert')).catch(() => showToast('Kopieren fehlgeschlagen'));
+}
+
+/* ---------- Mode switching ---------- */
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + btn.dataset.mode).classList.add('active');
+  });
+});
+
+/* ================== IPv4 Hilfsfunktionen ================== */
+function parseIPv4(str){
+  const parts = str.trim().split('.');
+  if(parts.length !== 4) return null;
+  const octets = [];
+  for(const p of parts){
+    if(!/^\d{1,3}$/.test(p)) return null;
+    const n = parseInt(p, 10);
+    if(n < 0 || n > 255) return null;
+    octets.push(n);
+  }
+  return octets;
+}
+function octetsToInt(o){ return ((o[0]<<24) | (o[1]<<16) | (o[2]<<8) | o[3]) >>> 0; }
+function intToOctets(n){ return [(n>>>24)&255, (n>>>16)&255, (n>>>8)&255, n&255]; }
+function intToStr(n){ return intToOctets(n).join('.'); }
+function maskFromPrefix(p){ return p === 0 ? 0 : (0xFFFFFFFF << (32 - p)) >>> 0; }
+function octetsToBinStr(o){ return o.map(x => x.toString(2).padStart(8,'0')).join('.'); }
+
+/* ================== Modus 1: CIDR-Analyse ================== */
+function isIPv6(str){ return str.includes(':'); }
+
+function parseIPv6(str){
+  // Vereinfachte, robuste IPv6-Verarbeitung über BigInt
+  let s = str.trim();
+  if(s.includes('%')) s = s.split('%')[0];
+  let head = s, tail = '';
+  if(s.includes('::')){
+    const idx = s.indexOf('::');
+    head = s.slice(0, idx);
+    tail = s.slice(idx + 2);
+  }
+  const headParts = head === '' ? [] : head.split(':');
+  const tailParts = tail === '' ? [] : tail.split(':');
+  if(headParts.length + tailParts.length > 8) return null;
+  const missing = 8 - (headParts.length + tailParts.length);
+  if(!s.includes('::') && missing !== 0) return null;
+  const fullParts = [...headParts, ...Array(s.includes('::') ? missing : 0).fill('0'), ...tailParts];
+  if(fullParts.length !== 8) return null;
+  let value = 0n;
+  for(const part of fullParts){
+    if(!/^[0-9a-fA-F]{1,4}$/.test(part)) return null;
+    value = (value << 16n) | BigInt(parseInt(part, 16));
+  }
+  return value;
+}
+function bigIntToIPv6Str(v){
+  const groups = [];
+  for(let i = 0; i < 8; i++){
+    groups.unshift((v & 0xFFFFn).toString(16));
+    v = v >> 16n;
+  }
+  // :: Kompression für längste Nullsequenz
+  let bestStart = -1, bestLen = 0, curStart = -1, curLen = 0;
+  for(let i = 0; i < 8; i++){
+    if(groups[i] === '0'){
+      if(curStart === -1) curStart = i;
+      curLen++;
+      if(curLen > bestLen){ bestLen = curLen; bestStart = curStart; }
+    } else { curStart = -1; curLen = 0; }
+  }
+  if(bestLen > 1){
+    const before = groups.slice(0, bestStart);
+    const after = groups.slice(bestStart + bestLen);
+    return before.join(':') + '::' + after.join(':');
+  }
+  return groups.join(':');
+}
+
+function renderRow(label, value, copyable){
+  const copyBtn = copyable ? `<button class="copy-inline" type="button" aria-label="${label} kopieren" data-copy="${value}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button>` : '';
+  return `<tr><td>${label}</td><td>${value}${copyBtn}</td></tr>`;
+}
+function bindCopyButtons(container){
+  container.querySelectorAll('.copy-inline').forEach(btn => {
+    btn.addEventListener('click', () => copyToClipboard(btn.dataset.copy));
+  });
+}
+
+function calcCidrV4(ipStr, prefix){
+  const octets = parseIPv4(ipStr);
+  if(!octets) return { error: 'Diese IPv4-Adresse ist ungültig. Nutze das Format 192.168.1.0 — vier Zahlen von 0 bis 255, durch Punkte getrennt.' };
+  if(prefix < 0 || prefix > 32) return { error: 'Das Präfix muss für IPv4 zwischen /0 und /32 liegen.' };
+
+  const ipInt = octetsToInt(octets);
+  const maskInt = maskFromPrefix(prefix);
+  const netInt = (ipInt & maskInt) >>> 0;
+  const wildcardInt = (~maskInt) >>> 0;
+  const bcastInt = (netInt | wildcardInt) >>> 0;
+  const totalHosts = Math.pow(2, 32 - prefix);
+  let usableHosts, firstHost, lastHost;
+
+  if(prefix === 32){ usableHosts = 1; firstHost = netInt; lastHost = netInt; }
+  else if(prefix === 31){ usableHosts = 2; firstHost = netInt; lastHost = bcastInt; }
+  else { usableHosts = totalHosts - 2; firstHost = (netInt + 1) >>> 0; lastHost = (bcastInt - 1) >>> 0; }
+
+  const maskOctets = intToOctets(maskInt);
+  const netOctets = intToOctets(netInt);
+
+  let html = '<table class="result-table">';
+  html += renderRow('Netzadresse', intToStr(netInt), true);
+  html += renderRow('Broadcast', intToStr(bcastInt), true);
+  html += renderRow('Subnetzmaske', maskOctets.join('.'), true);
+  html += renderRow('Präfix', '/' + prefix, false);
+  html += renderRow('Hostbereich', usableHosts > 0 ? `${intToStr(firstHost)} – ${intToStr(lastHost)}` : '—', true);
+  html += renderRow('Nutzbare Hosts', usableHosts.toLocaleString('de-DE'), false);
+  html += renderRow('Gesamtadressen', totalHosts.toLocaleString('de-DE'), false);
+  html += '</table>';
+
+  const netBitsCount = prefix;
+  let binDisplay = '';
+  const binFull = netOctets.map(x => x.toString(2).padStart(8,'0')).join('');
+  for(let i = 0; i < 32; i++){
+    if(i > 0 && i % 8 === 0) binDisplay += '.';
+    binDisplay += `<span class="${i < netBitsCount ? 'net-bits' : 'host-bits'}">${binFull[i]}</span>`;
+  }
+  html += `<div class="binary-block"><span class="b-label">Netzadresse binär (Netzanteil hervorgehoben)</span>${binDisplay}</div>`;
+
+  return { html };
+}
+
+function calcCidrV6(ipStr, prefix){
+  const ipVal = parseIPv6(ipStr);
+  if(ipVal === null) return { error: 'Diese IPv6-Adresse ist ungültig. Beispiel: 2001:db8::1 oder 2001:db8:0:0:0:0:0:1.' };
+  if(prefix < 0 || prefix > 128) return { error: 'Das Präfix muss für IPv6 zwischen /0 und /128 liegen.' };
+
+  const full = (1n << 128n) - 1n;
+  const maskVal = prefix === 0 ? 0n : (full << BigInt(128 - prefix)) & full;
+  const netVal = ipVal & maskVal;
+  const wildcard = full ^ maskVal;
+  const lastVal = netVal | wildcard;
+  const totalAddrBits = 128 - prefix;
+  const totalAddrs = totalAddrBits > 53 ? null : Math.pow(2, totalAddrBits);
+
+  let html = '<table class="result-table">';
+  html += renderRow('Netzadresse', bigIntToIPv6Str(netVal) + '/' + prefix, true);
+  html += renderRow('Letzte Adresse im Netz', bigIntToIPv6Str(lastVal), true);
+  html += renderRow('Präfixlänge', '/' + prefix, false);
+  html += renderRow('Interface-ID-Bits', (128 - prefix) + ' Bit', false);
+  html += renderRow('Adressen gesamt', totalAddrs ? totalAddrs.toLocaleString('de-DE') : '2^' + totalAddrBits, false);
+  html += '</table>';
+  html += '<div class="binary-block"><span class="b-label">Hinweis</span>IPv6 kennt keinen Broadcast — das letzte Wert im Bereich ist eine reguläre Host-Adresse.</div>';
+
+  return { html };
+}
+
+function runCidrCalc(){
+  const input = document.getElementById('cidrInput').value.trim();
+  const errorBox = document.getElementById('cidrError');
+  const empty = document.getElementById('cidrEmpty');
+  const resultDiv = document.getElementById('cidrResult');
+  errorBox.classList.remove('show');
+
+  if(!input){
+    errorBox.textContent = 'Trag zuerst eine IP-Adresse mit Präfix ein, z. B. 192.168.1.0/24.';
+    errorBox.classList.add('show');
+    return;
+  }
+  if(!input.includes('/')){
+    errorBox.textContent = 'Das Präfix fehlt. Ergänze es mit einem Schrägstrich, z. B. 192.168.1.0/24.';
+    errorBox.classList.add('show');
+    return;
+  }
+  const [addrPart, prefixPart] = input.split('/');
+  if(!/^\d{1,3}$/.test(prefixPart.trim())){
+    errorBox.textContent = 'Das Präfix muss eine Zahl sein, z. B. /24.';
+    errorBox.classList.add('show');
+    return;
+  }
+  const prefix = parseInt(prefixPart.trim(), 10);
+
+  const result = isIPv6(addrPart) ? calcCidrV6(addrPart, prefix) : calcCidrV4(addrPart, prefix);
+  if(result.error){
+    errorBox.textContent = result.error;
+    errorBox.classList.add('show');
+    return;
+  }
+  empty.style.display = 'none';
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = result.html;
+  bindCopyButtons(resultDiv);
+}
+document.getElementById('cidrCalc').addEventListener('click', runCidrCalc);
+document.getElementById('cidrInput').addEventListener('keydown', e => { if(e.key === 'Enter') runCidrCalc(); });
+
+/* ================== Modus 2: Hosts/Subnetze -> Maske ================== */
+const needModeSelect = document.getElementById('needMode');
+const needValueLabel = document.getElementById('needValueLabel');
+const needHint = document.getElementById('needHint');
+needModeSelect.addEventListener('change', () => {
+  if(needModeSelect.value === 'hosts'){
+    needValueLabel.textContent = 'Anzahl Hosts';
+    document.getElementById('needValue').placeholder = 'z. B. 30';
+    needHint.textContent = 'Inklusive Netz- und Broadcast-Reserve wird automatisch aufgerundet.';
+  } else {
+    needValueLabel.textContent = 'Anzahl Subnetze';
+    document.getElementById('needValue').placeholder = 'z. B. 6';
+    needHint.textContent = 'Die Basisadresse wird dabei als ein einzelnes /32-Host-Netz behandelt — als Ausgangspunkt für die Aufteilung.';
+  }
+});
+
+function runNeedCalc(){
+  const baseStr = document.getElementById('needBase').value.trim();
+  const mode = needModeSelect.value;
+  const valueStr = document.getElementById('needValue').value.trim();
+  const errorBox = document.getElementById('needError');
+  const empty = document.getElementById('needEmpty');
+  const resultDiv = document.getElementById('needResult');
+  errorBox.classList.remove('show');
+
+  const octets = parseIPv4(baseStr);
+  if(!octets){
+    errorBox.textContent = 'Diese Basis-Netzadresse ist ungültig. Nutze das Format 192.168.1.0.';
+    errorBox.classList.add('show');
+    return;
+  }
+  const value = parseInt(valueStr, 10);
+  if(!valueStr || isNaN(value) || value < 1){
+    errorBox.textContent = mode === 'hosts' ? 'Gib an, wie viele Hosts mindestens nutzbar sein sollen — eine Zahl größer als 0.' : 'Gib an, wie viele Subnetze mindestens entstehen sollen — eine Zahl größer als 0.';
+    errorBox.classList.add('show');
+    return;
+  }
+
+  let prefix, totalSlots, usableHosts;
+  if(mode === 'hosts'){
+    // benötigte Hostbits: 2^h - 2 >= value  (Ausnahme h=0,1 für Punkt-zu-Punkt-Fälle)
+    let h = 0;
+    while(true){
+      const cap = h === 0 ? 1 : (h === 1 ? 2 : Math.pow(2, h) - 2);
+      if(cap >= value) break;
+      h++;
+      if(h > 32){ errorBox.textContent = 'Diese Hostzahl ist zu groß für ein IPv4-Netz.'; errorBox.classList.add('show'); return; }
+    }
+    prefix = 32 - h;
+    usableHosts = h === 0 ? 1 : (h === 1 ? 2 : Math.pow(2, h) - 2);
+    totalSlots = Math.pow(2, h);
+  } else {
+    // benötigte Netzbits: 2^s >= value
+    let s = 0;
+    while(Math.pow(2, s) < value){
+      s++;
+      if(s > 32){ errorBox.textContent = 'Diese Subnetzzahl ist zu groß für ein IPv4-Netz.'; errorBox.classList.add('show'); return; }
+    }
+    // Annahme: Basisnetz ist /24, wir berechnen wie viele Bits zusätzlich geborgt werden müssten — zeige Ergebnis relativ zu /24 und absolut
+    prefix = Math.max(0, 24 + s); // Vorschlag bei klassischem /24-Ausgangsnetz
+    if(prefix > 30) prefix = Math.min(30, prefix);
+    const h2 = 32 - prefix;
+    usableHosts = h2 <= 1 ? totalSlots : Math.pow(2, h2) - 2;
+    totalSlots = Math.pow(2, h2);
+  }
+
+  const maskInt = maskFromPrefix(prefix);
+  const ipInt = octetsToInt(octets);
+  const netInt = (ipInt & maskInt) >>> 0;
+
+  let html = '<table class="result-table">';
+  html += renderRow('Empfohlene Maske', intToOctets(maskInt).join('.'), true);
+  html += renderRow('Präfix', '/' + prefix, false);
+  html += renderRow('Netzadresse', intToStr(netInt), true);
+  html += renderRow('Nutzbare Hosts pro Netz', usableHosts.toLocaleString('de-DE'), false);
+  html += renderRow('Adressblock-Größe', totalSlots.toLocaleString('de-DE'), false);
+  if(mode === 'subnets'){
+    html += renderRow('Anzahl möglicher Subnetze', Math.pow(2, prefix - 24 >= 0 ? prefix - 24 : 0).toLocaleString('de-DE'), false);
+  }
+  html += '</table>';
+
+  if(mode === 'subnets'){
+    html += `<div class="binary-block"><span class="b-label">Hinweis</span>Berechnet auf Basis eines /24-Ausgangsnetzes. Hast du ein anderes Ausgangspräfix, nutze stattdessen den VLSM-Splitter für exakte Zuschnitte.</div>`;
+  }
+
+  empty.style.display = 'none';
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = html;
+  bindCopyButtons(resultDiv);
+}
+document.getElementById('needCalc').addEventListener('click', runNeedCalc);
+
+/* ================== Modus 3: VLSM-Splitter ================== */
+let vlsmCounter = 0;
+function addVlsmRow(name, hosts){
+  vlsmCounter++;
+  const id = 'vlsm-row-' + vlsmCounter;
+  const row = document.createElement('div');
+  row.className = 'vlsm-item';
+  row.id = id;
+  row.innerHTML = `
+    <input type="text" placeholder="z. B. Vertrieb" value="${name || ''}" aria-label="Name des Teilnetzes" class="vlsm-name">
+    <input type="number" min="1" placeholder="Hosts" value="${hosts || ''}" aria-label="Benötigte Hosts" class="vlsm-hosts" inputmode="numeric">
+    <button class="vlsm-remove" type="button" aria-label="Teilnetz entfernen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  `;
+  row.querySelector('.vlsm-remove').addEventListener('click', () => row.remove());
+  document.getElementById('vlsmList').appendChild(row);
+}
+addVlsmRow('Vertrieb', 50);
+addVlsmRow('Entwicklung', 20);
+addVlsmRow('Gäste-WLAN', 10);
+document.getElementById('vlsmAdd').addEventListener('click', () => addVlsmRow('', ''));
+
+function runVlsmCalc(){
+  const baseInput = document.getElementById('vlsmBase').value.trim();
+  const errorBox = document.getElementById('vlsmError');
+  const empty = document.getElementById('vlsmEmpty');
+  const resultDiv = document.getElementById('vlsmResult');
+  errorBox.classList.remove('show');
+
+  if(!baseInput.includes('/')){
+    errorBox.textContent = 'Gib das Basisnetz mit Präfix an, z. B. 192.168.0.0/24.';
+    errorBox.classList.add('show');
+    return;
+  }
+  const [baseAddr, basePrefixStr] = baseInput.split('/');
+  const octets = parseIPv4(baseAddr);
+  const basePrefix = parseInt(basePrefixStr.trim(), 10);
+  if(!octets){
+    errorBox.textContent = 'Diese Basis-IPv4-Adresse ist ungültig. Nutze das Format 192.168.0.0.';
+    errorBox.classList.add('show');
+    return;
+  }
+  if(isNaN(basePrefix) || basePrefix < 0 || basePrefix > 30){
+    errorBox.textContent = 'Das Präfix des Basisnetzes muss zwischen /0 und /30 liegen, damit Platz für Teilnetze bleibt.';
+    errorBox.classList.add('show');
+    return;
+  }
+
+  const rows = Array.from(document.querySelectorAll('.vlsm-item'));
+  if(rows.length === 0){
+    errorBox.textContent = 'Füge mindestens ein Teilnetz mit Namen und Hostbedarf hinzu.';
+    errorBox.classList.add('show');
+    return;
+  }
+
+  const subnets = [];
+  for(const row of rows){
+    const name = row.querySelector('.vlsm-name').value.trim() || 'Unbenannt';
+    const hostsStr = row.querySelector('.vlsm-hosts').value.trim();
+    const hosts = parseInt(hostsStr, 10);
+    if(!hostsStr || isNaN(hosts) || hosts < 1){
+      errorBox.textContent = `Trag bei „${name}" eine gültige Anzahl Hosts ein (mindestens 1).`;
+      errorBox.classList.add('show');
+      return;
+    }
+    subnets.push({ name, hosts });
+  }
+
+  // Größte Bedarfe zuerst zuschneiden (klassisches VLSM-Vorgehen)
+  const sorted = subnets.map((s, i) => ({...s, origIndex: i})).sort((a, b) => b.hosts - a.hosts);
+
+  const baseMaskInt = maskFromPrefix(basePrefix);
+  const baseIpInt = octetsToInt(octets);
+  const baseNetInt = (baseIpInt & baseMaskInt) >>> 0;
+  const baseTotalSlots = Math.pow(2, 32 - basePrefix);
+  const baseBcast = (baseNetInt + baseTotalSlots - 1) >>> 0;
+
+  let cursor = baseNetInt;
+  const results = [];
+  let failed = null;
+
+  for(const sub of sorted){
+    let h = 0;
+    while(true){
+      const cap = h === 0 ? 1 : (h === 1 ? 2 : Math.pow(2, h) - 2);
+      if(cap >= sub.hosts) break;
+      h++;
+      if(h > 32) break;
+    }
+    const slots = Math.pow(2, h);
+    const subPrefix = 32 - h;
+
+    // auf Blockgrenze ausrichten
+    const remainder = cursor % slots;
+    if(remainder !== 0) cursor = cursor + (slots - remainder);
+
+    const netStart = cursor;
+    const netEnd = (netStart + slots - 1) >>> 0;
+
+    if(netEnd > baseBcast || subPrefix < basePrefix){
+      failed = sub.name;
+      break;
+    }
+
+    const usable = h === 0 ? 1 : (h === 1 ? 2 : slots - 2);
+    const firstHost = h <= 1 ? netStart : (netStart + 1) >>> 0;
+    const lastHost = h <= 1 ? netEnd : (netEnd - 1) >>> 0;
+
+    results.push({
+      name: sub.name, requested: sub.hosts, prefix: subPrefix,
+      network: intToStr(netStart), broadcast: intToStr(netEnd),
+      range: usable > 0 ? `${intToStr(firstHost)} – ${intToStr(lastHost)}` : '—',
+      mask: intToOctets(maskFromPrefix(subPrefix)).join('.'),
+      usable, origIndex: sub.origIndex
+    });
+
+    cursor = (netEnd + 1) >>> 0;
+  }
+
+  if(failed){
+    errorBox.textContent = `Das Basisnetz ist zu klein. Ab Teilnetz „${failed}" reicht der verfügbare Adressraum nicht mehr — wähle ein größeres Basisnetz (kleineres Präfix) oder reduziere den Hostbedarf.`;
+    errorBox.classList.add('show');
+    return;
+  }
+
+  results.sort((a, b) => a.origIndex - b.origIndex);
+
+  let html = '<div class="vlsm-table-wrap"><table class="vlsm-table"><thead><tr>';
+  html += '<th>Name</th><th>Netz</th><th>Maske</th><th>Hostbereich</th><th>Nutzbar</th>';
+  html += '</tr></thead><tbody>';
+  for(const r of results){
+    html += `<tr><td>${r.name}</td><td>${r.network}/${r.prefix}</td><td>${r.mask}</td><td>${r.range}</td><td>${r.usable} / ${r.requested} benötigt</td></tr>`;
+  }
+  html += '</tbody></table></div>';
+
+  const usedSlots = (cursor - baseNetInt) >>> 0;
+  const freeSlots = baseTotalSlots - usedSlots;
+  html += `<div class="binary-block"><span class="b-label">Restkapazität im Basisnetz</span>${freeSlots.toLocaleString('de-DE')} von ${baseTotalSlots.toLocaleString('de-DE')} Adressen noch frei, ab ${intToStr((cursor) >>> 0)}.</div>`;
+
+  empty.style.display = 'none';
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = html;
+}
+document.getElementById('vlsmCalc').addEventListener('click', runVlsmCalc);
+
+/* ---------- Spotlight on cards ---------- */
+document.querySelectorAll('.controls-card, .output-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  });
+});
+
+/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
+  const cv = document.getElementById('digit-field');
+  const ctx = cv.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    const cols = Math.floor(cv.width / 28);
+    drops = [];
+    for(let i=0;i<cols;i++){
+      drops.push({
+        x: i*28 + 14,
+        y: Math.random() * cv.height,
+        speed: 0.4 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
+      });
+    }
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d => {
+      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
+      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > cv.height){
+        d.y = -20;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ---------- Scroll reveal ---------- */
+(function(){
+  const els = document.querySelectorAll('.reveal');
+  if(reduceMotion){ els.forEach(el => el.classList.add('in')); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
+    });
+  }, {threshold:.15});
+  els.forEach(el => obs.observe(el));
+})();
+</script>
+</body>
+</html>
