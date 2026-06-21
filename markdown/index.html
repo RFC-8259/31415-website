@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown-Formatter — 31415.me</title>
+<meta name="description" content="Markdown schreiben, formatieren und als PDF exportieren — direkt im Browser, ohne Server.">
+<meta name="theme-color" content="#0a0e14">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--ink);
+  color:var(--paper);
+  font-family:'Space Grotesk',sans-serif;
+  font-weight:400;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  transition:background .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+
+#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+a{color:inherit;text-decoration:none;}
+
+.container{max-width:1180px;margin:0 auto;padding:0 28px;position:relative;z-index:2;}
+@media (max-width:640px){ .container{padding:0 20px;} }
+
+/* ---------- Header ---------- */
+header{
+  position:fixed; top:0; left:0; right:0; height:72px; z-index:50;
+  display:flex; align-items:center;
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+}
+header .container{
+  display:flex; align-items:center; justify-content:space-between; width:100%;
+}
+.brand{display:flex; align-items:baseline; gap:2px; font-size:1rem; cursor:pointer;}
+.brand .pi{font-family:'Fraunces',serif; font-size:26px; color:var(--gold); line-height:1;}
+.brand .num{font-family:'Space Mono',monospace; font-weight:700; color:var(--paper); letter-spacing:.02em;}
+.brand .dot-me{font-family:'Space Mono',monospace; color:var(--paper-faint);}
+
+.nav-right{display:flex; align-items:center; gap:18px;}
+
+.theme-toggle{
+  width:40px; height:40px; border-radius:100px; border:1px solid var(--line);
+  background:transparent; color:var(--paper); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover{border-color:var(--gold); color:var(--gold); transform:translateY(-2px);}
+.theme-toggle:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.theme-toggle svg{width:18px; height:18px;}
+
+/* ---------- App head ---------- */
+.app-head{
+  padding:150px 0 40px;
+  position:relative; z-index:2;
+}
+@media (max-width:640px){ .app-head{padding:120px 0 32px;} }
+.eyebrow{
+  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--gold); display:flex; align-items:center; gap:10px; margin-bottom:16px;
+}
+.eyebrow::before{content:""; width:24px; height:1px; background:var(--gold); display:inline-block;}
+h1.app-title{
+  font-family:'Fraunces',serif; font-weight:300; letter-spacing:-.02em; line-height:.96;
+  font-size:clamp(2.2rem,6vw,3.6rem); margin:0 0 14px;
+  color:var(--paper);
+}
+h1.app-title em{font-style:italic; color:var(--gold);}
+.app-desc{
+  color:var(--paper-dim); font-size:1.02rem; max-width:640px; margin:0;
+}
+
+footer{
+  position:relative; z-index:2; padding:48px 0 60px;
+  border-top:1px solid var(--line); margin-top:60px;
+}
+footer .container{
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+}
+footer .foot-text{
+  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.08em; color:var(--paper-faint);
+}
+footer a.back-link{
+  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.08em; color:var(--paper-dim);
+  display:inline-flex; align-items:center; gap:6px; transition:color .3s cubic-bezier(.2,.8,.2,1);
+}
+footer a.back-link:hover{color:var(--gold);}
+footer a.back-link .arrow{transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+footer a.back-link:hover .arrow{transform:translateX(6px);}
+
+/* ---------- Meta panel (Titel/Autor/Version/Datum) ---------- */
+.meta-panel{
+  position:relative; z-index:2; margin-bottom:32px;
+  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line); border-radius:var(--r);
+  overflow:hidden;
+}
+.meta-toggle-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:16px 22px; cursor:pointer; user-select:none;
+}
+.meta-toggle-row .label{
+  font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--paper-dim); display:flex; align-items:center; gap:10px;
+}
+.meta-toggle-row .label .dot{width:6px; height:6px; border-radius:50%; background:var(--gold);}
+.meta-toggle-row .chev{
+  color:var(--paper-faint); transition:transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.meta-panel.open .chev{transform:rotate(180deg);}
+.meta-body{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:16px;
+  padding:0 22px; max-height:0; overflow:hidden;
+  transition:max-height .35s cubic-bezier(.2,.8,.2,1), padding .35s cubic-bezier(.2,.8,.2,1);
+}
+.meta-panel.open .meta-body{ max-height:160px; padding:0 22px 22px; }
+@media (max-width:760px){ .meta-body{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:480px){ .meta-body{grid-template-columns:1fr;} }
+.field{display:flex; flex-direction:column; gap:6px;}
+.field label{
+  font-family:'Space Mono',monospace; font-size:.66rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--paper-faint);
+}
+.field input{
+  background:var(--ink-soft); border:1px solid var(--line); border-radius:8px;
+  color:var(--paper); padding:9px 12px; font-family:'Space Grotesk',sans-serif; font-size:.92rem;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.field input::placeholder{color:var(--paper-faint);}
+.field input:focus{ outline:2px solid var(--gold); outline-offset:2px; border-color:var(--gold); }
+
+/* ---------- Toolbar ---------- */
+.toolbar{
+  position:relative; z-index:2;
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line); border-radius:var(--r);
+  padding:10px; margin-bottom:18px;
+}
+.tb-group{display:flex; align-items:center; gap:4px; padding:0 8px; border-right:1px solid var(--line);}
+.tb-group:last-child{border-right:none;}
+@media (max-width:760px){ .tb-group{border-right:none; padding:0 4px;} }
+.tb-btn{
+  width:36px; height:36px; border-radius:8px; border:1px solid transparent;
+  background:transparent; color:var(--paper-dim); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Space Grotesk',sans-serif; font-size:.85rem; font-weight:600;
+  transition:background .25s cubic-bezier(.2,.8,.2,1), color .25s cubic-bezier(.2,.8,.2,1), border-color .25s cubic-bezier(.2,.8,.2,1);
+}
+.tb-btn.wide{width:auto; padding:0 12px; gap:6px; font-size:.78rem; font-weight:500;}
+.tb-btn svg{width:16px; height:16px;}
+.tb-btn:hover{background:var(--field-base); color:var(--gold); border-color:var(--line);}
+.tb-btn.active{background:var(--field-base); color:var(--gold); border-color:var(--gold);}
+.tb-btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.tb-spacer{flex:1;}
+.tb-btn.primary{
+  background:var(--gold); color:var(--ink); border-radius:100px; padding:0 18px; font-weight:600;
+}
+.tb-btn.primary:hover{ background:var(--gold-bright); color:var(--ink); transform:translateY(-2px); box-shadow:0 14px 28px -10px var(--shadow); }
+
+/* ---------- Editor split ---------- */
+.editor-wrap{
+  position:relative; z-index:2;
+  display:grid; grid-template-columns:1fr 1fr; gap:18px;
+  margin-bottom:24px;
+}
+@media (max-width:880px){ .editor-wrap{grid-template-columns:1fr;} }
+
+.pane{
+  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line); border-radius:var(--r);
+  display:flex; flex-direction:column; min-height:560px; overflow:hidden;
+}
+.pane-head{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 18px; border-bottom:1px solid var(--line);
+}
+.pane-head .ph-label{
+  font-family:'Space Mono',monospace; font-size:.66rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--paper-faint);
+}
+.pane-head .ph-count{
+  font-family:'Space Mono',monospace; font-size:.68rem; color:var(--paper-faint);
+}
+
+#md-input{
+  flex:1; resize:none; border:none; outline:none; background:transparent;
+  color:var(--paper); font-family:'Space Mono',monospace; font-size:.92rem; line-height:1.7;
+  padding:20px 22px; tab-size:2;
+}
+#md-input::placeholder{color:var(--paper-faint);}
+
+.preview-scroll{
+  flex:1; overflow-y:auto; padding:28px 30px;
+}
+#preview-doc{
+  font-family:'Space Grotesk',sans-serif; color:var(--paper); line-height:1.7;
+}
+
+/* ---------- Rendered markdown / preview & print look ---------- */
+.doc-meta{ margin-bottom:30px; padding-bottom:22px; border-bottom:1px solid var(--line); }
+.doc-title{
+  font-family:'Fraunces',serif; font-weight:400; letter-spacing:-.02em; line-height:1.05;
+  font-size:clamp(1.8rem,4vw,2.6rem); text-align:center; margin:0 0 14px; color:var(--paper);
+}
+.doc-subline{
+  display:flex; justify-content:center; gap:18px; flex-wrap:wrap;
+  font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--paper-faint);
+}
+.doc-subline span.hl{color:var(--gold);}
+
+#preview-doc h1,#preview-doc h2,#preview-doc h3,#preview-doc h4{
+  font-family:'Fraunces',serif; font-weight:500; letter-spacing:-.01em; color:var(--paper);
+  line-height:1.15; margin:1.4em 0 .5em;
+}
+#preview-doc h1{font-size:1.9rem;}
+#preview-doc h2{font-size:1.5rem;}
+#preview-doc h3{font-size:1.2rem;}
+#preview-doc h4{font-size:1.02rem;}
+#preview-doc p{margin:.7em 0;}
+#preview-doc a{color:var(--gold); text-decoration:underline; text-decoration-color:var(--line);}
+#preview-doc strong{color:var(--paper); font-weight:600;}
+#preview-doc em{font-style:italic;}
+#preview-doc code{
+  font-family:'Space Mono',monospace; font-size:.85em; background:var(--field-base);
+  padding:.15em .4em; border-radius:5px;
+}
+#preview-doc pre{
+  background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
+  padding:16px 18px; overflow-x:auto; margin:1em 0;
+}
+#preview-doc pre code{background:none; padding:0;}
+#preview-doc blockquote{
+  margin:1em 0; padding:.4em 0 .4em 18px; border-left:2px solid var(--gold);
+  color:var(--paper-dim); font-style:italic;
+}
+#preview-doc ul,#preview-doc ol{ padding-left:1.4em; margin:.7em 0; }
+#preview-doc li{ margin:.3em 0; }
+#preview-doc li::marker{ color:var(--gold); }
+#preview-doc hr{ border:none; border-top:1px solid var(--line); margin:1.8em 0; }
+#preview-doc img{ max-width:100%; border-radius:8px; }
+#preview-doc table{
+  width:100%; border-collapse:collapse; margin:1em 0; font-size:.92rem;
+}
+#preview-doc th,#preview-doc td{
+  border:1px solid var(--line); padding:8px 12px; text-align:left;
+}
+#preview-doc th{
+  background:var(--field-base); font-family:'Space Mono',monospace; font-size:.74rem;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--paper-dim);
+}
+#preview-doc .toc-block{
+  background:var(--field-base); border:1px solid var(--line); border-radius:10px;
+  padding:16px 20px; margin:1em 0;
+}
+#preview-doc .toc-block .toc-title{
+  font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--gold); margin-bottom:10px;
+}
+#preview-doc .toc-block ol{ margin:0; padding-left:1.2em; }
+#preview-doc .toc-block a{ text-decoration:none; }
+#preview-doc .toc-block a:hover{ text-decoration:underline; }
+
+.page-num-display{
+  text-align:center; font-family:'Space Mono',monospace; font-size:.68rem;
+  color:var(--paper-faint); letter-spacing:.1em; padding-top:18px; margin-top:18px;
+  border-top:1px dashed var(--line);
+}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed; bottom:32px; left:50%; z-index:100;
+  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:600;
+  font-size:.85rem; padding:11px 22px; border-radius:100px;
+  box-shadow:0 14px 28px -10px var(--shadow);
+  transform:translate(-50%, 20px); opacity:0; pointer-events:none;
+  transition:transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s cubic-bezier(.2,.8,.2,1);
+}
+.toast.show{ transform:translate(-50%, 0); opacity:1; }
+
+/* ---------- Help row under toolbar ---------- */
+.shortcut-hint{
+  font-family:'Space Mono',monospace; font-size:.68rem; color:var(--paper-faint);
+  letter-spacing:.04em; margin:-6px 0 18px; display:flex; flex-wrap:wrap; gap:14px;
+}
+.shortcut-hint kbd{
+  background:var(--field-base); border:1px solid var(--line); border-radius:5px;
+  padding:1px 6px; font-family:'Space Mono',monospace; color:var(--paper-dim);
+}
+
+/* ---------- Print ---------- */
+@media print{
+  #digit-field, .grain, header, footer, .toolbar, .meta-toggle-row, .shortcut-hint,
+  .app-head, #md-input, .pane-head, .editor-wrap .pane:first-child, .toast{
+    display:none !important;
+  }
+  body{ background:#fff; color:#1d2329; }
+  .container{ max-width:100%; padding:0; }
+  .editor-wrap{ display:block; margin:0; }
+  .pane{ border:none; background:none; min-height:0; }
+  .preview-scroll{ overflow:visible; padding:0; }
+  #preview-doc{ color:#1d2329; }
+  #preview-doc h1,#preview-doc h2,#preview-doc h3,#preview-doc h4,.doc-title{ color:#1d2329; }
+  #preview-doc code, #preview-doc pre, .toc-block{ background:#f1efe7; }
+  .doc-subline span.hl{ color:#8c6618; }
+  #preview-doc a{ color:#8c6618; }
+  #preview-doc li::marker{ color:#8c6618; }
+  .meta-body{ display:none; }
+  .meta-panel{ border:none; background:none; }
+}
+</style>
+</head>
+<body>
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <div class="container">
+    <a href="/" class="brand" aria-label="Zur 31415.me Startseite">
+      <span class="pi">π</span><span class="num">31415</span><span class="dot-me">.me</span>
+    </a>
+    <div class="nav-right">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Theme umschalten" type="button">
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+          <circle cx="12" cy="12" r="4.2"/>
+          <path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="app-head">
+    <div class="eyebrow">Werkzeug 06</div>
+    <h1 class="app-title">Markdown-<em>Formatter</em></h1>
+    <p class="app-desc">Schreib in Markdown, sieh sofort das Ergebnis — und exportiere als PDF. Mit Tastaturkürzeln, Inhaltsverzeichnis und Dokument-Metadaten.</p>
+  </div>
+
+  <div class="meta-panel" id="meta-panel">
+    <div class="meta-toggle-row" id="meta-toggle-row" role="button" tabindex="0" aria-expanded="false" aria-controls="meta-body">
+      <span class="label"><span class="dot"></span>Dokument-Angaben — Titel, Autor, Version, Datum</span>
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="meta-body" id="meta-body">
+      <div class="field">
+        <label for="meta-title">Titel</label>
+        <input type="text" id="meta-title" placeholder="z. B. Projektplan 2026">
+      </div>
+      <div class="field">
+        <label for="meta-author">Autor</label>
+        <input type="text" id="meta-author" placeholder="Dein Name">
+      </div>
+      <div class="field">
+        <label for="meta-version">Version</label>
+        <input type="text" id="meta-version" placeholder="z. B. v1.2">
+      </div>
+      <div class="field">
+        <label for="meta-date">Datum</label>
+        <input type="text" id="meta-date" placeholder="z. B. 21.06.2026">
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar" role="toolbar" aria-label="Formatierungswerkzeuge">
+    <div class="tb-group">
+      <button class="tb-btn" data-action="bold" title="Fett (Strg+B)" aria-label="Fett"><strong>B</strong></button>
+      <button class="tb-btn" data-action="italic" title="Kursiv (Strg+I)" aria-label="Kursiv"><em>I</em></button>
+      <button class="tb-btn" data-action="link" title="Link einfügen (Strg+K)" aria-label="Link einfügen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9.5 14.5l5-5M8 16.5l-1.5 1.5a3 3 0 01-4.2-4.2L4 12M16 7.5L17.5 6a3 3 0 014.2 4.2L20 11.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="tb-btn" data-action="code" title="Inline-Code" aria-label="Inline-Code">&lt;/&gt;</button>
+    </div>
+    <div class="tb-group">
+      <button class="tb-btn" data-action="h1" title="Überschrift 1" aria-label="Überschrift 1">H1</button>
+      <button class="tb-btn" data-action="h2" title="Überschrift 2" aria-label="Überschrift 2">H2</button>
+      <button class="tb-btn" data-action="h3" title="Überschrift 3" aria-label="Überschrift 3">H3</button>
+    </div>
+    <div class="tb-group">
+      <button class="tb-btn" data-action="ul" title="Aufzählungsliste" aria-label="Aufzählungsliste">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="4" cy="6" r="1.3" fill="currentColor"/><circle cx="4" cy="12" r="1.3" fill="currentColor"/><circle cx="4" cy="18" r="1.3" fill="currentColor"/><path d="M9 6h11M9 12h11M9 18h11" stroke-linecap="round"/></svg>
+      </button>
+      <button class="tb-btn" data-action="ol" title="Nummerierte Liste" aria-label="Nummerierte Liste">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6h11M9 12h11M9 18h11" stroke-linecap="round"/><text x="1" y="8.5" font-size="6.5" fill="currentColor" stroke="none" font-family="monospace">1</text><text x="1" y="14.5" font-size="6.5" fill="currentColor" stroke="none" font-family="monospace">2</text><text x="1" y="20.5" font-size="6.5" fill="currentColor" stroke="none" font-family="monospace">3</text></svg>
+      </button>
+      <button class="tb-btn" data-action="quote" title="Zitat" aria-label="Zitat">&rdquo;</button>
+      <button class="tb-btn" data-action="table" title="Tabelle einfügen/umschalten (Strg+Alt+T)" aria-label="Tabelle umschalten">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M9.5 4.5v15M15 4.5v15"/></svg>
+      </button>
+    </div>
+    <div class="tb-group">
+      <button class="tb-btn wide" data-action="toc" title="Inhaltsverzeichnis einfügen (Strg+Alt+I)" aria-label="Inhaltsverzeichnis einfügen">TOC</button>
+      <button class="tb-btn wide" data-action="date" title="Datum einfügen (Strg+Alt+D)" aria-label="Datum einfügen">Datum</button>
+      <button class="tb-btn wide" data-action="timestamp" title="Zeitstempel einfügen (Strg+Alt+Z)" aria-label="Zeitstempel einfügen">Zeitstempel</button>
+    </div>
+    <div class="tb-group">
+      <button class="tb-btn" id="page-toggle" data-action="pagenum" title="Seitenzahlen in Ansicht anzeigen" aria-label="Seitenzahlen umschalten">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M9 17h6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="tb-spacer"></div>
+    <button class="tb-btn wide" id="clear-btn" title="Editor leeren" aria-label="Editor leeren">Zurücksetzen</button>
+    <button class="tb-btn primary wide" id="export-pdf" title="Als PDF exportieren (Druckdialog)" aria-label="Als PDF exportieren">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V3h12v6M6 18h12v-7H6v7z" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="14" width="6" height="4"/><circle cx="17" cy="11.5" r=".6" fill="currentColor" stroke="none"/></svg>
+      <span>PDF</span>
+    </button>
+  </div>
+
+  <div class="shortcut-hint">
+    <span><kbd>Strg</kbd>+<kbd>B</kbd> Fett</span>
+    <span><kbd>Strg</kbd>+<kbd>I</kbd> Kursiv</span>
+    <span><kbd>Strg</kbd>+<kbd>K</kbd> Link</span>
+    <span><kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>T</kbd> Tabelle</span>
+    <span><kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>I</kbd> Inhaltsverzeichnis</span>
+    <span><kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>D</kbd> Datum</span>
+    <span><kbd>Strg</kbd>+<kbd>Alt</kbd>+<kbd>Z</kbd> Zeitstempel</span>
+    <span><kbd>Enter</kbd> in Liste führt sie fort</span>
+  </div>
+
+  <div class="editor-wrap">
+    <div class="pane">
+      <div class="pane-head">
+        <span class="ph-label">Markdown</span>
+        <span class="ph-count" id="char-count">0 Zeichen</span>
+      </div>
+      <textarea id="md-input" spellcheck="false" placeholder="# Mein Dokument
+
+Schreib hier dein Markdown. Die Vorschau rechts aktualisiert sich live.
+
+## Beispiele
+
+- **Strg+B** für fett
+- *Strg+I* für kursiv
+- Listen führen sich beim Drücken von Enter automatisch fort
+- Strg+Alt+T fügt eine Tabelle ein oder wandelt eine | Pipe-Zeile | um |
+
+> Tipp: Trag oben Titel, Autor, Version und Datum ein — sie erscheinen zentriert unter der Hauptüberschrift."></textarea>
+    </div>
+    <div class="pane">
+      <div class="pane-head">
+        <span class="ph-label">Vorschau</span>
+        <span class="ph-count" id="word-count">0 Wörter</span>
+      </div>
+      <div class="preview-scroll">
+        <div id="preview-doc"></div>
+        <div class="page-num-display" id="page-num-display" style="display:none;">Seite 1 von 1</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="container">
+    <span class="foot-text">31415.me — digitales Taschenmesser</span>
+    <a href="/" class="back-link"><span>Alle Werkzeuge</span><span class="arrow">→</span></a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- reduceMotion (muss vor Pi-Rain & Reveal stehen) ---------- */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Theme ---------- */
+(function(){
+  const root = document.documentElement;
+  const stored = localStorage.getItem('theme');
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  let theme = stored || (prefersLight ? 'light' : 'dark');
+  applyTheme(theme);
+
+  document.getElementById('theme-toggle').addEventListener('click', () => {
+    theme = (root.getAttribute('data-theme') === 'light') ? 'dark' : 'light';
+    localStorage.setItem('theme', theme);
+    applyTheme(theme);
+  });
+
+  function applyTheme(t){
+    if(t === 'light'){ root.setAttribute('data-theme','light'); }
+    else{ root.removeAttribute('data-theme'); }
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if(meta) meta.setAttribute('content', t === 'light' ? '#f6f3ea' : '#0a0e14');
+  }
+})();
+
+/* ---------- Helpers ---------- */
+const $ = (sel) => document.querySelector(sel);
+const input = $('#md-input');
+const charCount = $('#char-count');
+const wordCount = $('#word-count');
+const toastEl = $('#toast');
+let showPageNum = false;
+
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastEl._t);
+  toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 1800);
+}
+
+function pad(n){ return n.toString().padStart(2,'0'); }
+
+function germanDate(d){
+  return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`;
+}
+function germanTimestamp(d){
+  return `${germanDate(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/* ---------- Textarea selection helpers ---------- */
+function getSelection(){
+  return {
+    start: input.selectionStart,
+    end: input.selectionEnd,
+    value: input.value
+  };
+}
+function setSelection(start, end){
+  input.focus();
+  input.setSelectionRange(start, end);
+}
+function replaceRange(start, end, text){
+  const val = input.value;
+  input.value = val.slice(0, start) + text + val.slice(end);
+}
+
+/* Wraps selection with prefix/suffix; if already wrapped, unwraps (toggle) */
+function wrapSelection(prefix, suffix){
+  suffix = suffix === undefined ? prefix : suffix;
+  const {start, end, value} = getSelection();
+  const selected = value.slice(start, end);
+  const before = value.slice(Math.max(0, start - prefix.length), start);
+  const after = value.slice(end, end + suffix.length);
+
+  if(before === prefix && after === suffix){
+    // unwrap
+    replaceRange(start - prefix.length, end + suffix.length, selected);
+    setSelection(start - prefix.length, end - prefix.length);
+  } else {
+    const text = selected || 'Text';
+    replaceRange(start, end, prefix + text + suffix);
+    setSelection(start + prefix.length, start + prefix.length + text.length);
+  }
+  renderPreview();
+}
+
+function insertAtCursor(text, cursorOffset){
+  const {start, end} = getSelection();
+  replaceRange(start, end, text);
+  const pos = start + (cursorOffset !== undefined ? cursorOffset : text.length);
+  setSelection(pos, pos);
+  renderPreview();
+}
+
+/* Prefix each selected line (or current line) with given prefix; toggles off if already present */
+function prefixLines(prefix, numbered){
+  const {start, end, value} = getSelection();
+  let lineStart = value.lastIndexOf('\n', start - 1) + 1;
+  let lineEnd = value.indexOf('\n', end);
+  if(lineEnd === -1) lineEnd = value.length;
+  const block = value.slice(lineStart, lineEnd);
+  const lines = block.split('\n');
+
+  const allPrefixed = lines.every(l => numbered ? /^\d+\.\s/.test(l) : l.startsWith(prefix));
+
+  let newLines;
+  if(allPrefixed){
+    newLines = lines.map(l => numbered ? l.replace(/^\d+\.\s/, '') : l.slice(prefix.length));
+  } else {
+    newLines = lines.map((l, i) => numbered ? `${i+1}. ${l.replace(/^\d+\.\s/, '')}` : (l.startsWith(prefix) ? l : prefix + l));
+  }
+  const newBlock = newLines.join('\n');
+  replaceRange(lineStart, lineEnd, newBlock);
+  setSelection(lineStart + newBlock.length, lineStart + newBlock.length);
+  renderPreview();
+}
+
+/* ---------- Toolbar actions ---------- */
+function runAction(action){
+  switch(action){
+    case 'bold': wrapSelection('**'); break;
+    case 'italic': wrapSelection('*'); break;
+    case 'code': wrapSelection('`'); break;
+    case 'link': insertLink(); break;
+    case 'h1': headingToggle(1); break;
+    case 'h2': headingToggle(2); break;
+    case 'h3': headingToggle(3); break;
+    case 'ul': prefixLines('- ', false); break;
+    case 'ol': prefixLines('', true); break;
+    case 'quote': prefixLines('> ', false); break;
+    case 'table': toggleTable(); break;
+    case 'toc': insertTOC(); break;
+    case 'date': insertAtCursor(germanDate(new Date())); break;
+    case 'timestamp': insertAtCursor(germanTimestamp(new Date())); break;
+    case 'pagenum': togglePageNum(); break;
+  }
+}
+
+function insertLink(){
+  const {start, end, value} = getSelection();
+  const selected = value.slice(start, end) || 'Linktext';
+  const text = `[${selected}](https://)`;
+  replaceRange(start, end, text);
+  const urlPos = start + selected.length + 3;
+  setSelection(urlPos, urlPos + 8); // select "https://"
+  renderPreview();
+}
+
+function headingToggle(level){
+  const {start, end, value} = getSelection();
+  let lineStart = value.lastIndexOf('\n', start - 1) + 1;
+  let lineEnd = value.indexOf('\n', end);
+  if(lineEnd === -1) lineEnd = value.length;
+  let line = value.slice(lineStart, lineEnd);
+  const hashes = '#'.repeat(level) + ' ';
+  const stripped = line.replace(/^#{1,6}\s*/, '');
+  let newLine;
+  if(/^#{1,6}\s/.test(line) && line.startsWith(hashes)){
+    newLine = stripped; // toggle off same level
+  } else {
+    newLine = hashes + stripped;
+  }
+  replaceRange(lineStart, lineEnd, newLine);
+  setSelection(lineStart + newLine.length, lineStart + newLine.length);
+  renderPreview();
+}
+
+function toggleTable(){
+  const {start, end, value} = getSelection();
+  let lineStart = value.lastIndexOf('\n', start - 1) + 1;
+  let lineEnd = value.indexOf('\n', end);
+  if(lineEnd === -1) lineEnd = value.length;
+  const block = value.slice(lineStart, lineEnd);
+
+  if(block.includes('|')){
+    // Convert pipe-separated line(s) into a proper table, or remove table markup back to plain pipes-free text
+    const lines = block.split('\n').filter(l => l.trim() !== '');
+    const isAlreadyTable = lines.length >= 2 && /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(lines[1] || '');
+    if(isAlreadyTable){
+      // remove table -> plain text with tabs
+      const plain = lines.filter((_, i) => i !== 1).map(l => l.split('|').map(c => c.trim()).filter(Boolean).join('  ')).join('\n');
+      replaceRange(lineStart, lineEnd, plain);
+      setSelection(lineStart, lineStart + plain.length);
+    } else {
+      const cells = block.split('|').map(c => c.trim()).filter(Boolean);
+      const header = '| ' + cells.join(' | ') + ' |';
+      const sep = '| ' + cells.map(() => '---').join(' | ') + ' |';
+      const newBlock = header + '\n' + sep;
+      replaceRange(lineStart, lineEnd, newBlock);
+      setSelection(lineStart + newBlock.length, lineStart + newBlock.length);
+    }
+  } else {
+    const template = '| Spalte 1 | Spalte 2 | Spalte 3 |\n| --- | --- | --- |\n| Wert | Wert | Wert |';
+    const insertPos = lineStart === lineEnd ? lineStart : lineEnd;
+    const needsNL = value[insertPos - 1] !== '\n' && insertPos !== 0;
+    const text = (needsNL ? '\n' : '') + template;
+    replaceRange(insertPos, insertPos, text);
+    setSelection(insertPos + text.length, insertPos + text.length);
+  }
+  renderPreview();
+}
+
+function insertTOC(){
+  const marker = '[TOC]';
+  const {start, end, value} = getSelection();
+  const needsNLBefore = start !== 0 && value[start - 1] !== '\n';
+  const text = (needsNLBefore ? '\n\n' : '') + marker + '\n\n';
+  replaceRange(start, end, text);
+  const pos = start + text.length;
+  setSelection(pos, pos);
+  renderPreview();
+}
+
+function togglePageNum(){
+  showPageNum = !showPageNum;
+  $('#page-toggle').classList.toggle('active', showPageNum);
+  $('#page-num-display').style.display = showPageNum ? 'block' : 'none';
+  updatePageCount();
+}
+
+function updatePageCount(){
+  if(!showPageNum) return;
+  // Approximate: estimate pages from preview content height vs. a print page height
+  const previewEl = $('#preview-doc');
+  const approxPageHeightPx = 1040; // approx A4 content height at screen zoom
+  const pages = Math.max(1, Math.ceil(previewEl.scrollHeight / approxPageHeightPx));
+  $('#page-num-display').textContent = `Seite 1 von ${pages}`;
+}
+
+/* ---------- Toolbar wiring ---------- */
+document.querySelectorAll('.tb-btn[data-action]').forEach(btn => {
+  btn.addEventListener('click', () => runAction(btn.dataset.action));
+});
+
+$('#clear-btn').addEventListener('click', () => {
+  if(input.value.trim() === '' || confirm('Editor wirklich leeren? Das kann nicht rückgängig gemacht werden.')){
+    input.value = '';
+    renderPreview();
+    showToast('Editor zurückgesetzt');
+  }
+});
+
+$('#export-pdf').addEventListener('click', () => {
+  window.print();
+});
+
+/* ---------- Keyboard shortcuts ---------- */
+input.addEventListener('keydown', (e) => {
+  const ctrl = e.ctrlKey || e.metaKey;
+
+  if(ctrl && !e.altKey && e.key.toLowerCase() === 'b'){ e.preventDefault(); runAction('bold'); return; }
+  if(ctrl && !e.altKey && e.key.toLowerCase() === 'i'){ e.preventDefault(); runAction('italic'); return; }
+  if(ctrl && !e.altKey && e.key.toLowerCase() === 'k'){ e.preventDefault(); runAction('link'); return; }
+  if(ctrl && e.altKey && e.key.toLowerCase() === 't'){ e.preventDefault(); runAction('table'); return; }
+  if(ctrl && e.altKey && e.key.toLowerCase() === 'i'){ e.preventDefault(); runAction('toc'); return; }
+  if(ctrl && e.altKey && e.key.toLowerCase() === 'd'){ e.preventDefault(); runAction('date'); return; }
+  if(ctrl && e.altKey && e.key.toLowerCase() === 'z'){ e.preventDefault(); runAction('timestamp'); return; }
+
+  if(e.key === 'Enter'){
+    handleListContinuation(e);
+  }
+});
+
+function handleListContinuation(e){
+  const {start, end, value} = getSelection();
+  if(start !== end) return; // only for caret, not selection-replace
+  const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+  const currentLine = value.slice(lineStart, start);
+
+  const ulMatch = currentLine.match(/^(\s*)([-*+])\s+(.*)$/);
+  const olMatch = currentLine.match(/^(\s*)(\d+)([.)])\s+(.*)$/);
+  const quoteMatch = currentLine.match(/^(\s*)>\s+(.*)$/);
+
+  if(ulMatch){
+    e.preventDefault();
+    const [, indent, bullet, content] = ulMatch;
+    if(content.trim() === ''){
+      // empty list item -> end the list
+      replaceRange(lineStart, start, '');
+      setSelection(lineStart, lineStart);
+    } else {
+      const insert = `\n${indent}${bullet} `;
+      replaceRange(start, end, insert);
+      setSelection(start + insert.length, start + insert.length);
+    }
+    renderPreview();
+    return;
+  }
+
+  if(olMatch){
+    e.preventDefault();
+    const [, indent, num, delim, content] = olMatch;
+    if(content.trim() === ''){
+      replaceRange(lineStart, start, '');
+      setSelection(lineStart, lineStart);
+    } else {
+      const next = parseInt(num, 10) + 1;
+      const insert = `\n${indent}${next}${delim} `;
+      replaceRange(start, end, insert);
+      setSelection(start + insert.length, start + insert.length);
+    }
+    renderPreview();
+    return;
+  }
+
+  if(quoteMatch){
+    e.preventDefault();
+    const [, indent, content] = quoteMatch;
+    if(content.trim() === ''){
+      replaceRange(lineStart, start, '');
+      setSelection(lineStart, lineStart);
+    } else {
+      const insert = `\n${indent}> `;
+      replaceRange(start, end, insert);
+      setSelection(start + insert.length, start + insert.length);
+    }
+    renderPreview();
+    return;
+  }
+}
+
+/* Global shortcuts that should work even outside the textarea isn't needed; keep scoped to textarea for predictability */
+
+/* ---------- Meta panel toggle ---------- */
+const metaPanel = $('#meta-panel');
+const metaToggleRow = $('#meta-toggle-row');
+function toggleMeta(){
+  const open = metaPanel.classList.toggle('open');
+  metaToggleRow.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+metaToggleRow.addEventListener('click', toggleMeta);
+metaToggleRow.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleMeta(); }
+});
+['meta-title','meta-author','meta-version','meta-date'].forEach(id => {
+  $('#' + id).addEventListener('input', renderPreview);
+});
+
+/* ---------- Minimal Markdown parser ---------- */
+function escapeHTML(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function slugify(text){
+  return text.toLowerCase().trim()
+    .replace(/[^\w\s-äöüß]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+function parseInline(text){
+  // protect inline code first
+  const codeSpans = [];
+  text = text.replace(/`([^`]+)`/g, (m, code) => {
+    codeSpans.push(escapeHTML(code));
+    return `\u0000CODE${codeSpans.length - 1}\u0000`;
+  });
+
+  text = escapeHTML(text);
+
+  // links [text](url)
+  text = text.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  // bold
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  text = text.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+  // italic
+  text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  text = text.replace(/(?<!\w)_([^_]+)_(?!\w)/g, '<em>$1</em>');
+
+  // restore code spans
+  text = text.replace(/\u0000CODE(\d+)\u0000/g, (m, i) => `<code>${codeSpans[parseInt(i,10)]}</code>`);
+
+  return text;
+}
+
+function parseMarkdown(src){
+  const lines = src.replace(/\r\n/g, '\n').split('\n');
+  let html = '';
+  let i = 0;
+  const headings = [];
+
+  while(i < lines.length){
+    let line = lines[i];
+
+    // TOC marker
+    if(/^\s*\[TOC\]\s*$/i.test(line)){
+      html += '\u0000TOC_PLACEHOLDER\u0000';
+      i++; continue;
+    }
+
+    // fenced code block
+    if(/^```/.test(line)){
+      const lang = line.replace(/^```/, '').trim();
+      const codeLines = [];
+      i++;
+      while(i < lines.length && !/^```/.test(lines[i])){
+        codeLines.push(lines[i]);
+        i++;
+      }
+      i++; // skip closing fence
+      html += `<pre><code${lang ? ` data-lang="${escapeHTML(lang)}"` : ''}>${escapeHTML(codeLines.join('\n'))}</code></pre>`;
+      continue;
+    }
+
+    // table
+    if(/\|/.test(line) && i + 1 < lines.length && /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(lines[i+1])){
+      const headerCells = line.split('|').map(c => c.trim()).filter(Boolean);
+      const aligns = lines[i+1].split('|').map(c => c.trim()).filter(Boolean).map(c => {
+        if(/^:-+:$/.test(c)) return 'center';
+        if(/^-+:$/.test(c)) return 'right';
+        if(/^:-+$/.test(c)) return 'left';
+        return '';
+      });
+      i += 2;
+      const rows = [];
+      while(i < lines.length && /\|/.test(lines[i]) && lines[i].trim() !== ''){
+        rows.push(lines[i].split('|').map(c => c.trim()).filter((c,idx,arr) => !(idx===0 && c==='') && !(idx===arr.length-1 && c==='')));
+        i++;
+      }
+      let t = '<table><thead><tr>';
+      headerCells.forEach((c, idx) => {
+        const align = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : '';
+        t += `<th${align}>${parseInline(c)}</th>`;
+      });
+      t += '</tr></thead><tbody>';
+      rows.forEach(r => {
+        t += '<tr>';
+        r.forEach((c, idx) => {
+          const align = aligns[idx] ? ` style="text-align:${aligns[idx]}"` : '';
+          t += `<td${align}>${parseInline(c)}</td>`;
+        });
+        t += '</tr>';
+      });
+      t += '</tbody></table>';
+      html += t;
+      continue;
+    }
+
+    // headings
+    const hMatch = line.match(/^(#{1,4})\s+(.*)$/);
+    if(hMatch){
+      const level = hMatch[1].length;
+      const text = hMatch[2].trim();
+      const slug = slugify(text) + '-' + headings.length;
+      headings.push({level, text, slug});
+      html += `<h${level} id="${slug}">${parseInline(text)}</h${level}>`;
+      i++; continue;
+    }
+
+    // horizontal rule
+    if(/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(line)){
+      html += '<hr>';
+      i++; continue;
+    }
+
+    // blockquote
+    if(/^\s*>\s?/.test(line)){
+      const qLines = [];
+      while(i < lines.length && /^\s*>\s?/.test(lines[i])){
+        qLines.push(lines[i].replace(/^\s*>\s?/, ''));
+        i++;
+      }
+      html += `<blockquote>${qLines.map(parseInline).join('<br>')}</blockquote>`;
+      continue;
+    }
+
+    // unordered list
+    if(/^\s*[-*+]\s+/.test(line)){
+      const items = [];
+      while(i < lines.length && /^\s*[-*+]\s+/.test(lines[i])){
+        items.push(lines[i].replace(/^\s*[-*+]\s+/, ''));
+        i++;
+      }
+      html += '<ul>' + items.map(it => `<li>${parseInline(it)}</li>`).join('') + '</ul>';
+      continue;
+    }
+
+    // ordered list
+    if(/^\s*\d+[.)]\s+/.test(line)){
+      const items = [];
+      while(i < lines.length && /^\s*\d+[.)]\s+/.test(lines[i])){
+        items.push(lines[i].replace(/^\s*\d+[.)]\s+/, ''));
+        i++;
+      }
+      html += '<ol>' + items.map(it => `<li>${parseInline(it)}</li>`).join('') + '</ol>';
+      continue;
+    }
+
+    // blank line
+    if(line.trim() === ''){
+      i++; continue;
+    }
+
+    // paragraph (collect consecutive non-blank, non-special lines)
+    const pLines = [line];
+    i++;
+    while(
+      i < lines.length &&
+      lines[i].trim() !== '' &&
+      !/^(#{1,4})\s+/.test(lines[i]) &&
+      !/^\s*[-*+]\s+/.test(lines[i]) &&
+      !/^\s*\d+[.)]\s+/.test(lines[i]) &&
+      !/^\s*>\s?/.test(lines[i]) &&
+      !/^```/.test(lines[i]) &&
+      !/^\s*(-{3,}|\*{3,}|_{3,})\s*$/.test(lines[i]) &&
+      !/^\s*\[TOC\]\s*$/i.test(lines[i])
+    ){
+      pLines.push(lines[i]);
+      i++;
+    }
+    html += `<p>${pLines.map(parseInline).join('<br>')}</p>`;
+  }
+
+  // build TOC if needed
+  if(html.includes('\u0000TOC_PLACEHOLDER\u0000')){
+    let tocHTML = '<div class="toc-block"><div class="toc-title">Inhaltsverzeichnis</div>';
+    if(headings.length === 0){
+      tocHTML += '<p style="margin:0;color:var(--paper-faint);font-size:.85rem;">Noch keine Überschriften vorhanden.</p>';
+    } else {
+      tocHTML += '<ol>';
+      headings.forEach(h => {
+        tocHTML += `<li style="margin-left:${(h.level-1)*14}px;"><a href="#${h.slug}">${parseInline(h.text)}</a></li>`;
+      });
+      tocHTML += '</ol>';
+    }
+    tocHTML += '</div>';
+    html = html.split('\u0000TOC_PLACEHOLDER\u0000').join(tocHTML);
+  }
+
+  return html;
+}
+
+/* ---------- Render ---------- */
+function renderPreview(){
+  const md = input.value;
+  const title = $('#meta-title').value.trim();
+  const author = $('#meta-author').value.trim();
+  const version = $('#meta-version').value.trim();
+  const date = $('#meta-date').value.trim();
+
+  let metaHTML = '';
+  if(title || author || version || date){
+    metaHTML += '<div class="doc-meta">';
+    if(title) metaHTML += `<h1 class="doc-title">${escapeHTML(title)}</h1>`;
+    const parts = [];
+    if(author) parts.push(`<span class="hl">${escapeHTML(author)}</span>`);
+    if(version) parts.push(escapeHTML(version));
+    if(date) parts.push(escapeHTML(date));
+    if(parts.length) metaHTML += `<div class="doc-subline">${parts.map(p => `<span>${p}</span>`).join('')}</div>`;
+    metaHTML += '</div>';
+  }
+
+  const bodyHTML = parseMarkdown(md);
+  $('#preview-doc').innerHTML = metaHTML + bodyHTML;
+
+  // counts
+  const chars = md.length;
+  const words = md.trim() === '' ? 0 : md.trim().split(/\s+/).length;
+  charCount.textContent = `${chars} Zeichen`;
+  wordCount.textContent = `${words} Wörter`;
+
+  updatePageCount();
+}
+
+input.addEventListener('input', renderPreview);
+
+/* spotlight follows mouse on panes (subtle, reuse signature mechanic) */
+document.querySelectorAll('.pane, .toolbar, .meta-panel').forEach(card => {
+  card.style.position = card.style.position || 'relative';
+});
+
+/* initial render */
+renderPreview();
+
+/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
+  const cv = document.getElementById('digit-field');
+  const ctx = cv.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    const cols = Math.floor(cv.width / 28);
+    drops = [];
+    for(let i=0;i<cols;i++){
+      drops.push({
+        x: i*28 + 14,
+        y: Math.random() * cv.height,
+        speed: 0.4 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
+      });
+    }
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d => {
+      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
+      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > cv.height){
+        d.y = -20;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
