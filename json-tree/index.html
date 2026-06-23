@@ -207,6 +207,11 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 .children.collapsed{display:none;}
 .summary{color:var(--paper-faint); font-style:italic; cursor:pointer;}
 .summary:hover{color:var(--gold);}
+.embedded-badge{
+  color:var(--gold); font-style:italic; font-size:.78rem;
+  border:1px solid var(--line); border-radius:100px; padding:1px 9px; margin-left:2px;
+}
+.node-row.embedded:hover{background:var(--field-base);}
 
 ::-webkit-scrollbar{width:10px; height:10px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -260,7 +265,7 @@ footer a:hover{color:var(--gold);}
 <main>
   <div class="wrap apphead reveal">
     <div class="eyebrow">Werkzeug · JSON</div>
-    <h1>Json <em>Baum</em></h1>
+    <h1>Json <em>Tree</em></h1>
     <p class="lead">Füge JSON ein — einzeilig oder formatiert. Du bekommst eine aufklappbare Baumansicht, in der sofort klar ist, was wozu gehört.</p>
   </div>
 
@@ -310,7 +315,7 @@ footer a:hover{color:var(--gold);}
 
     <div class="tree-card reveal" id="treeCard">
       <div class="empty-state" id="emptyState">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m18 0V5a2 2 0 00-2-2h-4M3 15v4a2 2 0 002 2h4m10-6v4a2 2 0 01-2 2h-4"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="17" cy="6" r="2"/><circle cx="17" cy="18" r="2"/><path d="M7 6h4M7 18h4M11 6v12M11 9h4M11 15h4"/></svg>
         <p>Hier erscheint die Baumansicht, sobald du JSON eingelesen hast.</p>
         <p class="hint">Einfügen oder eintippen, dann „Formatieren" drücken.</p>
       </div>
@@ -419,6 +424,25 @@ function renderValueLeaf(val){
   return escapeHtml(String(val));
 }
 
+/* Prüft, ob ein String selbst ein eingebettetes JSON-Objekt oder -Array ist.
+   Einfache Werte (Zahl, "true", Wort in Anführungszeichen) zählen nicht als
+   eingebettetes JSON — sonst würde jede kurze Zahl-als-Text fälschlich aufgeklappt. */
+function parseEmbeddedJson(str){
+  if(typeof str !== 'string') return null;
+  const trimmed = str.trim();
+  if(trimmed.length < 2) return null;
+  const startsRight = (trimmed[0] === '{' && trimmed[trimmed.length-1] === '}') ||
+                       (trimmed[0] === '[' && trimmed[trimmed.length-1] === ']');
+  if(!startsRight) return null;
+  try{
+    const parsed = JSON.parse(trimmed);
+    if(parsed !== null && typeof parsed === 'object'){
+      return parsed;
+    }
+  } catch(e){ /* kein gültiges JSON, also normaler String */ }
+  return null;
+}
+
 /* Baut den Baum als DOM, key kann null sein (Root) */
 function buildNode(key, value, depth){
   const t = typeOf(value);
@@ -481,6 +505,38 @@ function buildNode(key, value, depth){
 
     wrapper.appendChild(childrenWrap);
     wrapper.appendChild(closePunct);
+
+    row.addEventListener('click', () => toggleNode(row, toggle, childrenWrap));
+    row.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleNode(row, toggle, childrenWrap); }
+    });
+
+  } else if(t === 'string' && parseEmbeddedJson(value) !== null){
+    const embedded = parseEmbeddedJson(value);
+    const row = document.createElement('div');
+    row.className = 'node-row collapsible embedded';
+    row.dataset.searchable = (key !== null ? key : '') + '';
+    row.setAttribute('role','button');
+    row.tabIndex = 0;
+    row.setAttribute('aria-expanded','true');
+
+    const toggle = document.createElement('span');
+    toggle.className = 'toggle';
+    toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    row.appendChild(toggle);
+
+    const label = document.createElement('span');
+    let html = '';
+    if(key !== null) html += `<span class="key">${escapeHtml(key)}</span><span class="colon">:</span> `;
+    html += `<span class="embedded-badge" title="Dieser String enthält selbst gültiges JSON — wurde automatisch aufgeschlüsselt.">eingebettetes JSON</span>`;
+    label.innerHTML = html;
+    row.appendChild(label);
+    wrapper.appendChild(row);
+
+    const childrenWrap = document.createElement('div');
+    childrenWrap.className = 'children';
+    childrenWrap.appendChild(buildNode(null, embedded, depth + 1));
+    wrapper.appendChild(childrenWrap);
 
     row.addEventListener('click', () => toggleNode(row, toggle, childrenWrap));
     row.addEventListener('keydown', (e) => {
