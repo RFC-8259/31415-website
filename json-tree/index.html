@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0e14">
+<title>Json Tree — 31415.me</title>
+<meta name="description" content="JSON einlesen, validieren und in einer aufklappbaren Baumansicht erkunden. Sucht, kopiert, formatiert oder verkürzt — rein im Browser, ohne Server.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+  --t-str:#9fb98a; --t-num:#7fb3c9; --t-bool:#c98a7f; --t-null:#8f8a7d; --t-key:var(--paper);
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+  --t-str:#5d7a4a; --t-num:#3d7b94; --t-bool:#a14c3e; --t-null:#8f8a7d; --t-key:var(--paper);
+}
+
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0; background:var(--ink); color:var(--paper);
+  font-family:'Space Grotesk', sans-serif; font-weight:400; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+a{color:inherit;}
+.wrap{max-width:1180px; margin:0 auto; padding:0 28px; position:relative; z-index:2;}
+@media (max-width:640px){ .wrap{padding:0 20px;} }
+
+/* Header */
+header{
+  position:fixed; top:0; left:0; right:0; height:72px; z-index:50;
+  display:flex; align-items:center;
+  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+header .wrap{display:flex; align-items:center; justify-content:space-between; width:100%;}
+.brand{display:flex; align-items:center; gap:8px; text-decoration:none; font-family:'Space Mono', monospace; font-size:1rem;}
+.brand .pi{font-family:'Fraunces', serif; font-size:26px; color:var(--gold); font-style:italic; line-height:1;}
+.brand .num{color:var(--paper); letter-spacing:.02em;}
+.brand .dot{color:var(--paper-faint);}
+nav.top{display:flex; align-items:center; gap:18px;}
+.theme-toggle{
+  width:38px; height:38px; border-radius:100px; border:1px solid var(--line);
+  background:transparent; color:var(--paper); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover{border-color:var(--gold); color:var(--gold);}
+.theme-toggle:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.theme-toggle svg{width:17px; height:17px;}
+.theme-toggle .sun{display:none;}
+html[data-theme="light"] .theme-toggle .moon{display:none;}
+html[data-theme="light"] .theme-toggle .sun{display:block;}
+
+/* App head */
+.apphead{padding:150px 0 48px;}
+@media (max-width:640px){ .apphead{padding:120px 0 36px;} }
+.eyebrow{
+  font-family:'Space Mono', monospace; font-size:.72rem; letter-spacing:.24em; text-transform:uppercase;
+  color:var(--gold); display:flex; align-items:center; gap:10px; margin-bottom:18px;
+}
+.eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--gold); display:inline-block;}
+h1{
+  font-family:'Fraunces', serif; font-weight:300; font-size:clamp(2.2rem,6vw,3.6rem);
+  letter-spacing:-.02em; line-height:.98; margin:0 0 16px;
+}
+h1 em{font-style:italic; color:var(--gold); font-weight:400;}
+.lead{color:var(--paper-dim); font-size:1.05rem; max-width:580px; margin:0;}
+
+/* Layout */
+main{padding-bottom:130px;}
+@media (max-width:640px){ main{padding-bottom:90px;} }
+
+.toolbar{
+  display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:18px;
+}
+.toolbar .search-wrap{flex:1; min-width:180px; position:relative;}
+.toolbar input[type="text"]{
+  width:100%; padding:10px 14px 10px 38px; border-radius:100px; border:1px solid var(--line);
+  background:var(--ink-soft); color:var(--paper); font-family:'Space Grotesk', sans-serif; font-size:.88rem;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.toolbar input[type="text"]::placeholder{color:var(--paper-faint);}
+.toolbar input[type="text"]:focus{border-color:var(--gold); outline:none;}
+.toolbar input[type="text"]:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.search-wrap svg.search-icon{
+  position:absolute; left:13px; top:50%; transform:translateY(-50%); width:15px; height:15px;
+  color:var(--paper-faint); pointer-events:none;
+}
+.search-count{
+  font-family:'Space Mono', monospace; font-size:.68rem; color:var(--paper-faint);
+  white-space:nowrap; padding:0 4px;
+}
+
+.btn-row{display:flex; flex-wrap:wrap; gap:8px;}
+button.action{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:'Space Grotesk', sans-serif; font-size:.82rem; font-weight:500;
+  padding:9px 16px; border-radius:100px; border:1px solid var(--line); background:transparent;
+  color:var(--paper); cursor:pointer; white-space:nowrap;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
+}
+button.action svg{width:14px; height:14px; flex-shrink:0;}
+button.action:hover{border-color:var(--gold); color:var(--gold); transform:translateY(-2px);}
+button.action:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+button.action.primary{
+  background:var(--gold); border-color:var(--gold); color:var(--ink); font-weight:600;
+}
+button.action.primary:hover{
+  color:var(--ink); transform:translateY(-3px); box-shadow:0 14px 28px -10px var(--shadow);
+}
+button.action.active{border-color:var(--gold); color:var(--gold);}
+
+.editor-card, .tree-card{
+  position:relative; overflow:hidden;
+  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line); border-radius:var(--r);
+  --mx:50%; --my:50%;
+}
+.editor-card::before, .tree-card::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
+}
+.editor-card:hover::before, .tree-card:hover::before{opacity:.14;}
+
+.editor-card{margin-bottom:20px;}
+.editor-card textarea{
+  position:relative; z-index:1; display:block; width:100%; min-height:160px; max-height:340px;
+  resize:vertical; padding:18px 20px; background:transparent; border:none; color:var(--paper);
+  font-family:'Space Mono', monospace; font-size:.85rem; line-height:1.6; outline:none;
+}
+.editor-card textarea::placeholder{color:var(--paper-faint);}
+.editor-card textarea:focus-visible{outline:2px solid var(--gold); outline-offset:-2px;}
+
+.status-line{
+  position:relative; z-index:1; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:12px 20px; border-top:1px solid var(--line);
+  font-family:'Space Mono', monospace; font-size:.74rem;
+}
+.status-line .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+.status-line.ok .dot{background:var(--t-str);}
+.status-line.err .dot{background:var(--t-bool);}
+.status-line.idle .dot{background:var(--paper-faint);}
+.status-line .msg{color:var(--paper-dim);}
+.status-line.err .msg{color:var(--t-bool);}
+.status-line .meta{margin-left:auto; color:var(--paper-faint); display:flex; gap:14px;}
+
+.tree-card{padding:8px 4px;}
+.tree-scroll{
+  position:relative; z-index:1; padding:18px 16px; max-height:none; overflow:auto;
+  font-family:'Space Mono', monospace; font-size:.85rem; line-height:1.7;
+}
+.empty-state{
+  position:relative; z-index:1; padding:60px 24px; text-align:center; color:var(--paper-faint);
+}
+.empty-state svg{width:38px; height:38px; color:var(--paper-faint); margin-bottom:14px;}
+.empty-state p{margin:0; font-size:.92rem;}
+.empty-state .hint{font-family:'Space Mono', monospace; font-size:.7rem; letter-spacing:.08em; margin-top:8px; color:var(--paper-faint);}
+
+/* Tree */
+.node{position:relative;}
+.node-row{
+  display:flex; align-items:flex-start; gap:4px; padding:2px 6px; border-radius:6px;
+  cursor:default;
+}
+.node-row.collapsible{cursor:pointer;}
+.node-row.collapsible:hover{background:var(--field-base);}
+.node-row.match{background:rgba(216,180,106,0.14); border-radius:4px;}
+.toggle{
+  flex-shrink:0; width:16px; height:16px; margin-top:1px; display:flex; align-items:center; justify-content:center;
+  color:var(--gold); transition:transform .2s cubic-bezier(.2,.8,.2,1);
+}
+.toggle svg{width:10px; height:10px;}
+.toggle.collapsed svg{transform:rotate(-90deg);}
+.toggle.leaf{visibility:hidden;}
+.key{color:var(--t-key); font-weight:700;}
+.colon{color:var(--paper-faint); margin-right:6px;}
+.punct{color:var(--paper-faint);}
+.t-string{color:var(--t-str);}
+.t-number{color:var(--t-num);}
+.t-boolean{color:var(--t-bool);}
+.t-null{color:var(--t-null); font-style:italic;}
+.count-badge{
+  color:var(--paper-faint); font-size:.78rem; margin-left:6px;
+}
+.children{margin-left:18px; border-left:1px solid var(--line); padding-left:10px;}
+.children.collapsed{display:none;}
+.summary{color:var(--paper-faint); font-style:italic; cursor:pointer;}
+.summary:hover{color:var(--gold);}
+
+::-webkit-scrollbar{width:10px; height:10px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--line); border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:var(--gold);}
+
+/* Toast */
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translate(-50%, 20px);
+  background:var(--gold); color:var(--ink); font-family:'Space Grotesk', sans-serif; font-weight:600;
+  font-size:.85rem; padding:10px 22px; border-radius:100px; opacity:0; pointer-events:none;
+  transition:opacity .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1); z-index:100;
+  box-shadow:0 14px 28px -10px var(--shadow);
+}
+.toast.show{opacity:1; transform:translate(-50%, 0);}
+
+footer{
+  position:relative; z-index:2; border-top:1px solid var(--line); padding:32px 0;
+  font-family:'Space Mono', monospace; font-size:.74rem; color:var(--paper-faint);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+}
+footer a{color:var(--paper-faint); text-decoration:none; transition:color .3s cubic-bezier(.2,.8,.2,1);}
+footer a:hover{color:var(--gold);}
+
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+@media (prefers-reduced-motion: reduce){
+  *{transition-duration:.001ms !important; animation-duration:.001ms !important;}
+}
+</style>
+</head>
+<body>
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <div class="wrap">
+    <a href="/" class="brand" aria-label="Zur Startseite von 31415.me">
+      <span class="pi">π</span><span class="num">31415</span><span class="dot">.me</span>
+    </a>
+    <nav class="top">
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten" title="Theme umschalten">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap apphead reveal">
+    <div class="eyebrow">Werkzeug · JSON</div>
+    <h1>Json <em>Baum</em></h1>
+    <p class="lead">Füge JSON ein — einzeilig oder formatiert. Du bekommst eine aufklappbare Baumansicht, in der sofort klar ist, was wozu gehört.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="editor-card reveal">
+      <textarea id="input" placeholder='Hier JSON einfügen, z. B. {"name":"Ada","aktiv":true,"tags":["math","code"]}' spellcheck="false" aria-label="JSON-Eingabe"></textarea>
+      <div class="status-line idle" id="statusLine">
+        <span class="dot"></span>
+        <span class="msg" id="statusMsg">Noch kein JSON eingelesen.</span>
+        <span class="meta" id="statusMeta"></span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="searchInput" placeholder="Im Baum suchen (Schlüssel oder Wert) …" aria-label="Im Baum suchen" disabled>
+      </div>
+      <span class="search-count" id="searchCount"></span>
+      <div class="btn-row">
+        <button class="action primary" id="btnFormat" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h7"/></svg>
+          Formatieren
+        </button>
+        <button class="action" id="btnMinify" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 01-2 2H3M16 3v3a2 2 0 002 2h3M3 16h3a2 2 0 012 2v3M16 21v-3a2 2 0 012-2h3"/></svg>
+          Minify
+        </button>
+        <button class="action" id="btnExpand" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9l-7 7-7-7"/></svg>
+          Alles ausklappen
+        </button>
+        <button class="action" id="btnCollapse" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 15l7-7 7 7"/></svg>
+          Alles einklappen
+        </button>
+        <button class="action" id="btnCopy" type="button" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 012-2h10"/></svg>
+          Kopieren
+        </button>
+        <button class="action" id="btnClear" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0l-1 14a2 2 0 01-2 2H7a2 2 0 01-2-2L4 6"/></svg>
+          Zurücksetzen
+        </button>
+      </div>
+    </div>
+
+    <div class="tree-card reveal" id="treeCard">
+      <div class="empty-state" id="emptyState">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m18 0V5a2 2 0 00-2-2h-4M3 15v4a2 2 0 002 2h4m10-6v4a2 2 0 01-2 2h-4"/></svg>
+        <p>Hier erscheint die Baumansicht, sobald du JSON eingelesen hast.</p>
+        <p class="hint">Einfügen oder eintippen, dann „Formatieren" drücken.</p>
+      </div>
+      <div class="tree-scroll" id="treeOutput" style="display:none;" tabindex="0" aria-label="JSON-Baumansicht"></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; width:100%;">
+    <span>31415.me — digitales Taschenmesser</span>
+    <a href="/">&larr; Zurück zur Übersicht</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast">Kopiert</div>
+
+<script>
+/* ---------- Grundlagen: reduceMotion, Theme ---------- */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+(function(){
+  const root = document.documentElement;
+  const stored = localStorage.getItem('theme');
+  const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const initial = stored || (sysDark ? 'dark' : 'light');
+  if(initial === 'light'){ root.setAttribute('data-theme', 'light'); }
+  document.querySelector('meta[name="theme-color"]').setAttribute('content', initial === 'light' ? '#f6f3ea' : '#0a0e14');
+
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const isLight = root.getAttribute('data-theme') === 'light';
+    if(isLight){
+      root.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'dark');
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0a0e14');
+    } else {
+      root.setAttribute('data-theme', 'light');
+      localStorage.setItem('theme', 'light');
+      document.querySelector('meta[name="theme-color"]').setAttribute('content', '#f6f3ea');
+    }
+  });
+})();
+
+/* ---------- Toast ---------- */
+function showToast(text){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ---------- JSON Baum: State ---------- */
+const input = document.getElementById('input');
+const statusLine = document.getElementById('statusLine');
+const statusMsg = document.getElementById('statusMsg');
+const statusMeta = document.getElementById('statusMeta');
+const treeOutput = document.getElementById('treeOutput');
+const emptyState = document.getElementById('emptyState');
+const searchInput = document.getElementById('searchInput');
+const searchCount = document.getElementById('searchCount');
+
+const btnFormat = document.getElementById('btnFormat');
+const btnMinify = document.getElementById('btnMinify');
+const btnExpand = document.getElementById('btnExpand');
+const btnCollapse = document.getElementById('btnCollapse');
+const btnCopy = document.getElementById('btnCopy');
+const btnClear = document.getElementById('btnClear');
+
+let parsedData = null;
+let nodeIdCounter = 0;
+
+function setStatus(kind, msg, meta){
+  statusLine.className = 'status-line ' + kind;
+  statusMsg.textContent = msg;
+  statusMeta.textContent = meta || '';
+}
+
+function setActionsEnabled(enabled){
+  [btnMinify, btnExpand, btnCollapse, btnCopy].forEach(b => b.disabled = !enabled);
+  searchInput.disabled = !enabled;
+}
+
+function typeOf(val){
+  if(val === null) return 'null';
+  if(Array.isArray(val)) return 'array';
+  return typeof val; // object, string, number, boolean
+}
+
+function countEntries(val){
+  if(Array.isArray(val)) return val.length;
+  if(val !== null && typeof val === 'object') return Object.keys(val).length;
+  return 0;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderValueLeaf(val){
+  const t = typeOf(val);
+  if(t === 'string') return `<span class="t-string">"${escapeHtml(val)}"</span>`;
+  if(t === 'number') return `<span class="t-number">${val}</span>`;
+  if(t === 'boolean') return `<span class="t-boolean">${val}</span>`;
+  if(t === 'null') return `<span class="t-null">null</span>`;
+  return escapeHtml(String(val));
+}
+
+/* Baut den Baum als DOM, key kann null sein (Root) */
+function buildNode(key, value, depth){
+  const t = typeOf(value);
+  const wrapper = document.createElement('div');
+  wrapper.className = 'node';
+
+  if(t === 'object' || t === 'array'){
+    const id = 'n' + (nodeIdCounter++);
+    const entries = t === 'array'
+      ? value.map((v, i) => [String(i), v])
+      : Object.entries(value);
+    const count = entries.length;
+
+    const row = document.createElement('div');
+    row.className = 'node-row collapsible';
+    row.dataset.searchable = (key !== null ? key : '') + '';
+    row.setAttribute('role','button');
+    row.tabIndex = 0;
+    row.setAttribute('aria-expanded','true');
+
+    const toggle = document.createElement('span');
+    toggle.className = 'toggle';
+    toggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+    row.appendChild(toggle);
+
+    const label = document.createElement('span');
+    let html = '';
+    if(key !== null) html += `<span class="key">${escapeHtml(key)}</span><span class="colon">:</span> `;
+    html += `<span class="punct">${t === 'array' ? '[' : '{'}</span><span class="count-badge">${count} ${t === 'array' ? (count===1?'Element':'Elemente') : (count===1?'Feld':'Felder')}</span>`;
+    label.innerHTML = html;
+    row.appendChild(label);
+    wrapper.appendChild(row);
+
+    const childrenWrap = document.createElement('div');
+    childrenWrap.className = 'children';
+
+    entries.forEach(([k, v]) => {
+      childrenWrap.appendChild(buildNode(t === 'array' ? null : k, v, depth + 1));
+      // Für Arrays zeigen wir den Index trotzdem als "Schlüssel"-ähnliches Label
+    });
+
+    // Bei Arrays: Index als Pseudo-Key anzeigen
+    if(t === 'array'){
+      Array.from(childrenWrap.children).forEach((child, i) => {
+        const r = child.querySelector(':scope > .node-row');
+        if(r && !r.querySelector('.key')){
+          const lbl = r.querySelector('span:not(.toggle)');
+          if(lbl){
+            lbl.innerHTML = `<span class="key" style="color:var(--paper-faint); font-weight:400;">${i}</span><span class="colon">:</span> ` + lbl.innerHTML;
+          }
+        }
+      });
+    }
+
+    const closePunct = document.createElement('div');
+    closePunct.className = 'punct';
+    closePunct.style.marginLeft = '0px';
+    closePunct.style.paddingLeft = '0px';
+    closePunct.innerHTML = `<span class="punct" style="margin-left:0;">${t === 'array' ? ']' : '}'}</span>`;
+
+    wrapper.appendChild(childrenWrap);
+    wrapper.appendChild(closePunct);
+
+    row.addEventListener('click', () => toggleNode(row, toggle, childrenWrap));
+    row.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleNode(row, toggle, childrenWrap); }
+    });
+
+  } else {
+    const row = document.createElement('div');
+    row.className = 'node-row';
+    row.dataset.searchable = (key !== null ? key + ' ' : '') + String(value);
+
+    const toggle = document.createElement('span');
+    toggle.className = 'toggle leaf';
+    row.appendChild(toggle);
+
+    const label = document.createElement('span');
+    let html = '';
+    if(key !== null) html += `<span class="key">${escapeHtml(key)}</span><span class="colon">:</span> `;
+    html += renderValueLeaf(value);
+    label.innerHTML = html;
+    row.appendChild(label);
+    wrapper.appendChild(row);
+  }
+
+  return wrapper;
+}
+
+function toggleNode(row, toggle, childrenWrap){
+  const collapsed = childrenWrap.classList.toggle('collapsed');
+  toggle.classList.toggle('collapsed', collapsed);
+  row.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+}
+
+function renderTree(data){
+  treeOutput.innerHTML = '';
+  nodeIdCounter = 0;
+  const root = buildNode(null, data, 0);
+  treeOutput.appendChild(root);
+  treeOutput.style.display = 'block';
+  emptyState.style.display = 'none';
+}
+
+function clearTree(){
+  treeOutput.innerHTML = '';
+  treeOutput.style.display = 'none';
+  emptyState.style.display = 'block';
+  parsedData = null;
+  setActionsEnabled(false);
+  searchInput.value = '';
+  searchCount.textContent = '';
+}
+
+/* ---------- Parsen & Formatieren ---------- */
+function tryParse(){
+  const raw = input.value.trim();
+  if(!raw){
+    setStatus('idle', 'Noch kein JSON eingelesen.', '');
+    clearTree();
+    return;
+  }
+  try{
+    const data = JSON.parse(raw);
+    parsedData = data;
+    const pretty = JSON.stringify(data, null, 2);
+    input.value = pretty;
+    const size = new Blob([raw]).size;
+    const count = countDescendants(data);
+    setStatus('ok', 'Gültiges JSON.', `${count} Knoten · ${size} Byte`);
+    renderTree(data);
+    setActionsEnabled(true);
+    triggerSearch();
+  } catch(err){
+    parsedData = null;
+    const info = explainJsonError(err, raw);
+    setStatus('err', info, '');
+    clearTree();
+  }
+}
+
+function countDescendants(val){
+  if(val === null || typeof val !== 'object') return 1;
+  let c = 1;
+  const entries = Array.isArray(val) ? val : Object.values(val);
+  entries.forEach(v => c += countDescendants(v));
+  return c;
+}
+
+function explainJsonError(err, raw){
+  const msg = err.message || 'Unbekannter Fehler';
+  const match = msg.match(/position (\d+)/i);
+  if(match){
+    const pos = parseInt(match[1], 10);
+    let line = 1, col = 1;
+    for(let i = 0; i < pos && i < raw.length; i++){
+      if(raw[i] === '\n'){ line++; col = 1; } else { col++; }
+    }
+    return `Ungültiges JSON in Zeile ${line}, Spalte ${col}. Prüfe Kommas, Anführungszeichen oder Klammern an dieser Stelle.`;
+  }
+  return `Ungültiges JSON: ${msg}. Prüfe Kommas, Anführungszeichen oder Klammern.`;
+}
+
+btnFormat.addEventListener('click', tryParse);
+
+btnMinify.addEventListener('click', () => {
+  if(parsedData === null) return;
+  input.value = JSON.stringify(parsedData);
+  setStatus('ok', 'JSON minifiziert.', `${new Blob([input.value]).size} Byte`);
+});
+
+btnExpand.addEventListener('click', () => {
+  treeOutput.querySelectorAll('.children.collapsed').forEach(c => c.classList.remove('collapsed'));
+  treeOutput.querySelectorAll('.toggle.collapsed').forEach(t => t.classList.remove('collapsed'));
+  treeOutput.querySelectorAll('.node-row.collapsible').forEach(r => r.setAttribute('aria-expanded','true'));
+});
+
+btnCollapse.addEventListener('click', () => {
+  treeOutput.querySelectorAll('.node-row.collapsible').forEach(row => {
+    const wrapper = row.parentElement;
+    const childrenWrap = wrapper.querySelector(':scope > .children');
+    const toggle = row.querySelector('.toggle');
+    if(childrenWrap && wrapper.parentElement !== treeOutput || true){
+      if(childrenWrap){
+        childrenWrap.classList.add('collapsed');
+        toggle.classList.add('collapsed');
+        row.setAttribute('aria-expanded','false');
+      }
+    }
+  });
+  // Wurzel offen lassen, damit man nicht komplett "blind" ist? -> Nutzerwunsch ist "alles einklappen", also auch Wurzel.
+});
+
+btnCopy.addEventListener('click', async () => {
+  if(!input.value){ return; }
+  try{
+    await navigator.clipboard.writeText(input.value);
+    showToast('Kopiert');
+  } catch(e){
+    showToast('Kopieren nicht möglich');
+  }
+});
+
+btnClear.addEventListener('click', () => {
+  input.value = '';
+  setStatus('idle', 'Noch kein JSON eingelesen.', '');
+  clearTree();
+  input.focus();
+});
+
+/* Live-Validierung beim Tippen, mit kleiner Verzögerung */
+let debounceTimer = null;
+input.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(tryParse, 450);
+});
+
+/* ---------- Suche im Baum ---------- */
+function triggerSearch(){
+  const q = searchInput.value.trim().toLowerCase();
+  const rows = treeOutput.querySelectorAll('.node-row');
+  let matches = 0;
+
+  rows.forEach(row => row.classList.remove('match'));
+
+  if(!q){
+    searchCount.textContent = '';
+    return;
+  }
+
+  rows.forEach(row => {
+    const text = (row.dataset.searchable || '').toLowerCase();
+    if(text.includes(q)){
+      row.classList.add('match');
+      matches++;
+      // Pfad zur Wurzel aufklappen
+      let el = row.closest('.node');
+      while(el){
+        const parentChildren = el.parentElement && el.parentElement.classList.contains('children') ? el.parentElement : null;
+        if(parentChildren){
+          parentChildren.classList.remove('collapsed');
+          const parentRow = parentChildren.parentElement.querySelector(':scope > .node-row');
+          if(parentRow) parentRow.querySelector('.toggle')?.classList.remove('collapsed');
+          el = parentChildren.parentElement;
+        } else {
+          el = null;
+        }
+      }
+    }
+  });
+
+  searchCount.textContent = matches === 0 ? 'Keine Treffer' : `${matches} Treffer`;
+}
+
+let searchDebounce = null;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(triggerSearch, 150);
+});
+
+/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
+  const cv = document.getElementById('digit-field');
+  const ctx = cv.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    const cols = Math.floor(cv.width / 28);
+    drops = [];
+    for(let i=0;i<cols;i++){
+      drops.push({
+        x: i*28 + 14,
+        y: Math.random() * cv.height,
+        speed: 0.4 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
+      });
+    }
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d => {
+      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
+      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > cv.height){
+        d.y = -20;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ---------- Spotlight auf Karten ---------- */
+document.querySelectorAll('.editor-card, .tree-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  });
+});
+
+/* ---------- Scroll-Reveal ---------- */
+(function(){
+  const els = document.querySelectorAll('.reveal');
+  if(reduceMotion){ els.forEach(el => el.classList.add('in')); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
+    });
+  }, {threshold:.15});
+  els.forEach(el => obs.observe(el));
+})();
+</script>
+</body>
+</html>
