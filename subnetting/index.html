@@ -78,10 +78,12 @@ header{
   font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
   color:var(--paper-dim);display:flex;align-items:center;gap:6px;
   transition:color .3s cubic-bezier(.2,.8,.2,1);
+  border-radius:4px;
 }
 .back-link:hover{color:var(--gold);}
+.back-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .back-link svg{width:13px;height:13px;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
-.back-link:hover svg{transform:translateX(-3px);}
+.back-link:hover svg{transform:translateX(6px);}
 
 .theme-toggle{
   width:40px;height:40px;border-radius:100px;border:1px solid var(--line);
@@ -92,9 +94,9 @@ header{
 .theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
 .theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .theme-toggle svg{width:17px;height:17px;}
-.theme-toggle .sun{display:none;}
-html[data-theme="light"] .theme-toggle .moon{display:none;}
-html[data-theme="light"] .theme-toggle .sun{display:block;}
+.icon-sun{display:none;}
+html[data-theme="light"] .icon-moon{display:none;}
+html[data-theme="light"] .icon-sun{display:block;}
 
 /* ---------- App head ---------- */
 .app-head{padding:150px 0 56px;}
@@ -124,7 +126,7 @@ h1 em{font-style:italic;color:var(--gold-bright);font-weight:400;}
 }
 .mode-btn:hover{color:var(--paper);}
 .mode-btn.active{background:var(--gold);color:var(--ink);font-weight:700;}
-.mode-btn:focus-visible{outline:2px solid var(--gold-bright);outline-offset:2px;}
+.mode-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 /* ---------- Work area ---------- */
 .workspace{padding-bottom:130px;}
@@ -169,7 +171,6 @@ h1 em{font-style:italic;color:var(--gold-bright);font-weight:400;}
 html[data-theme="light"] .field input, html[data-theme="light"] .field select{background:var(--panel);}
 .field input::placeholder{color:var(--paper-faint);}
 .field input:focus, .field select:focus{outline:none;border-color:var(--gold);}
-.field input:focus-visible, .field select:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .field select{cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:.92rem;}
 .field .hint{font-size:.78rem;color:var(--paper-faint);margin-top:6px;font-family:'Space Grotesk',sans-serif;}
 
@@ -187,7 +188,7 @@ html[data-theme="light"] .field input, html[data-theme="light"] .field select{ba
 .btn-primary:focus-visible{outline:2px solid var(--gold-bright);outline-offset:3px;}
 .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--paper);}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-.btn-ghost:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+.btn-ghost:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .btn-sm{padding:9px 18px;font-size:.82rem;}
 
 .error-box{
@@ -219,9 +220,10 @@ html[data-theme="light"] .field input, html[data-theme="light"] .field select{ba
 }
 .result-table td:last-child .copy-inline{
   background:none;border:none;color:var(--paper-faint);cursor:pointer;padding:0 0 0 8px;
-  vertical-align:middle;transition:color .3s cubic-bezier(.2,.8,.2,1);
+  vertical-align:middle;transition:color .3s cubic-bezier(.2,.8,.2,1);border-radius:4px;
 }
 .result-table td:last-child .copy-inline:hover{color:var(--gold);}
+.result-table td:last-child .copy-inline:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .result-table td:last-child .copy-inline svg{width:13px;height:13px;display:block;}
 
 .binary-block{
@@ -242,10 +244,10 @@ html[data-theme="light"] .field input, html[data-theme="light"] .field select{ba
 .vlsm-item input{
   background:var(--ink-soft);border:1px solid var(--line);border-radius:8px;
   padding:11px 13px;color:var(--paper);font-family:'Space Grotesk',sans-serif;font-size:.88rem;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
 }
 html[data-theme="light"] .vlsm-item input{background:var(--panel);}
 .vlsm-item input:focus{outline:none;border-color:var(--gold);}
-.vlsm-item input:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .vlsm-item input[type="number"]{font-family:'Space Mono',monospace;}
 .vlsm-remove{
   width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:transparent;
@@ -271,28 +273,29 @@ html[data-theme="light"] .vlsm-item input{background:var(--panel);}
 
 /* ---------- Toast ---------- */
 .toast{
-  position:fixed;bottom:32px;left:50%;z-index:100;
-  background:var(--gold);color:var(--ink);font-family:'Space Grotesk',sans-serif;font-weight:500;
-  font-size:.85rem;padding:12px 24px;border-radius:100px;
-  transform:translate(-50%, 20px);opacity:0;pointer-events:none;
-  transition:transform .35s cubic-bezier(.2,.8,.2,1), opacity .35s cubic-bezier(.2,.8,.2,1);
+  position:fixed;bottom:28px;left:50%;
+  background:var(--gold);color:var(--ink);font-family:'Space Grotesk',sans-serif;
+  font-weight:600;font-size:.88rem;padding:13px 24px;border-radius:100px;
+  box-shadow:0 16px 32px -8px var(--shadow);opacity:0;pointer-events:none;z-index:100;
+  transform:translate(-50%, 20px);
+  transition:opacity .35s cubic-bezier(.2,.8,.2,1), transform .35s cubic-bezier(.2,.8,.2,1);
 }
 .toast.show{transform:translate(-50%, 0);opacity:1;}
 
 /* ---------- Footer ---------- */
-footer{
-  border-top:1px solid var(--line);padding:32px 0;
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
-}
-footer p{margin:0;font-size:.8rem;color:var(--paper-faint);}
-footer a{color:var(--paper-faint);transition:color .3s cubic-bezier(.2,.8,.2,1);}
+footer{padding:50px 0 70px; border-top:1px solid var(--line); margin-top:0;}
+footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
+footer p{margin:0; font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); letter-spacing:.05em;}
+footer a{color:var(--paper-faint); transition:color .3s cubic-bezier(.2,.8,.2,1);}
 footer a:hover{color:var(--gold);}
 
 .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
 .reveal.in{opacity:1;transform:translateY(0);}
 
 @media(prefers-reduced-motion:reduce){
-  *{transition-duration:.001ms !important; animation-duration:.001ms !important;}
+  *{transition:none !important; animation:none !important;}
+  .reveal{opacity:1; transform:none;}
+  #digit-field{display:none;}
 }
 </style>
 </head>
@@ -310,9 +313,9 @@ footer a:hover{color:var(--gold);}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Alle Werkzeuge
       </a>
-      <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten" type="button">
-        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln" type="button">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
       </button>
     </div>
   </div>
@@ -320,7 +323,7 @@ footer a:hover{color:var(--gold);}
 
 <main class="wrap">
   <div class="app-head reveal">
-    <span class="eyebrow">Netzwerk · Werkzeug 04</span>
+    <span class="eyebrow">Wekzeug · Netzwerk</span>
     <h1>Subnetting-<em>Rechner</em></h1>
     <p class="lede">IP-Netze analysieren, die passende Maske aus deinem Bedarf ableiten oder ein Netz per VLSM in mehrere Subnetze schneiden.</p>
   </div>
@@ -429,48 +432,47 @@ footer a:hover{color:var(--gold);}
 <div class="toast" id="toast"></div>
 
 <footer>
-  <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;width:100%;">
-    <p>Läuft vollständig in deinem Browser. Keine Daten verlassen dein Gerät.</p>
-    <p><a href="/">31415.me</a></p>
+  <div class="wrap container">
+    <p>Teil von <a href="/">31415.me</a> — läuft vollständig lokal in deinem Browser.</p>
+    <p>Nur deine Theme-Wahl wird lokal gespeichert, sonst verlässt nichts dieses Gerät.</p>
   </div>
 </footer>
 
 <script>
-/* ---------- Setup ---------- */
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ---------- Theme ---------- */
+/* ---------- Theme (verbindlicher Referenzcode — nicht verändern) ---------- */
 (function(){
   const root = document.documentElement;
-  const saved = localStorage.getItem('theme');
-  if(saved){
-    root.setAttribute('data-theme', saved);
-  } else {
-    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-    if(prefersLight) root.setAttribute('data-theme', 'light');
-  }
-  function syncThemeColor(){
+  const stored = localStorage.getItem('theme');
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  if(stored){ root.setAttribute('data-theme', stored); }
+  else if(prefersLight){ root.setAttribute('data-theme','light'); }
+
+  function updateMeta(){
     const isLight = root.getAttribute('data-theme') === 'light';
     document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
   }
-  syncThemeColor();
+  updateMeta();
+
   document.getElementById('themeToggle').addEventListener('click', () => {
     const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
     const next = current === 'light' ? 'dark' : 'light';
-    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme', 'light'); }
+    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
     localStorage.setItem('theme', next);
-    syncThemeColor();
+    updateMeta();
   });
 })();
 
+/* ---------- Reduced motion ---------- */
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 /* ---------- Toast ---------- */
-let toastTimer = null;
+let toastTimer;
 function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
 }
 function copyToClipboard(text){
   navigator.clipboard.writeText(text).then(() => showToast('Kopiert')).catch(() => showToast('Kopieren fehlgeschlagen'));
