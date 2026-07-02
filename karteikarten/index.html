@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0e14">
+<title>Karten — 31415.me</title>
+<meta name="description" content="Lernkarten mit Spaced Repetition (SM-2). Läuft vollständig lokal in deinem Browser.">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+  --accent2:#c9705a; --accent2-bright:#e2907a;
+  /* Bewertungsfarben (bestätigte Ausnahme für die vier Lern-Buttons) */
+  --rate-again:#c9705a; --rate-hard:#d59550; --rate-good:#8fbd8a; --rate-easy:#7dabd0;
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+  --accent2:#a8452f; --accent2-bright:#8c3521;
+  --rate-again:#a8452f; --rate-hard:#9c651c; --rate-good:#48763f; --rate-easy:#38638c;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ink); color:var(--paper);
+  font-family:'Space Grotesk',sans-serif; font-weight:400; line-height:1.6;
+  min-height:100vh; overflow-x:hidden;
+  transition:background .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+
+#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+.container{max-width:1180px;margin:0 auto;padding:0 28px;}
+
+/* ---------- Header ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;height:72px;z-index:50;
+  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+header .container{height:72px;display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:baseline;gap:8px;text-decoration:none;}
+.brand .pi{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:var(--gold);line-height:1;}
+.brand .num{font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:var(--paper);letter-spacing:.06em;}
+.brand .tld{font-family:'Space Mono',monospace;font-size:1rem;color:var(--paper-faint);}
+.header-right{display:flex;align-items:center;gap:14px;}
+
+.theme-toggle{
+  width:40px;height:40px;border-radius:100px;display:flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid var(--line);color:var(--paper);cursor:pointer;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
+.theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.theme-toggle svg{width:18px;height:18px;}
+.icon-sun{display:none;}
+html[data-theme="light"] .icon-moon{display:none;}
+html[data-theme="light"] .icon-sun{display:block;}
+
+/* ---------- App-Kopf ---------- */
+main{position:relative;z-index:2;}
+.app-head{padding:150px 0 56px;}
+.eyebrow{
+  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:18px;
+}
+.app-head h1{
+  font-family:'Fraunces',serif;font-weight:300;font-size:clamp(2.2rem,6vw,3.6rem);
+  letter-spacing:-.02em;line-height:.96;margin-bottom:16px;
+}
+.app-head h1 em{font-style:italic;font-weight:400;color:var(--gold);}
+.app-head .lede{color:var(--paper-dim);max-width:56ch;font-weight:300;}
+
+/* ---------- Gemeinsame Bausteine ---------- */
+.btn-primary{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--gold);color:var(--ink);border:none;border-radius:100px;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.92rem;padding:13px 28px;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 14px 28px -10px var(--shadow);}
+.btn-primary:focus-visible{outline:2px solid var(--gold-bright);outline-offset:3px;}
+
+.btn-ghost{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:transparent;color:var(--paper);border:1px solid var(--line);border-radius:100px;cursor:pointer;
+  font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:.88rem;padding:12px 24px;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-ghost:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+.btn-ghost.danger{color:var(--paper-dim);}
+.btn-ghost.danger:hover{border-color:var(--accent2);color:var(--accent2);}
+.btn-ghost.danger.armed{border-color:var(--accent2);color:var(--accent2);}
+
+.btn-sm{padding:9px 18px;font-size:.82rem;}
+
+.panel{
+  position:relative;background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line);border-radius:var(--r);padding:26px;overflow:hidden;
+}
+.panel > *{position:relative;z-index:1;}
+
+/* Spotlight (6c) */
+.deck-card, .panel{--mx:50%; --my:50%;}
+.deck-card::before, .panel::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
+}
+.deck-card:hover::before, .panel:hover::before{opacity:.14;}
+
+.mono-label{
+  display:block;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--paper-faint);margin-bottom:8px;
+}
+
+input[type="text"], textarea{
+  width:100%;background:var(--ink-soft);border:1px solid var(--line);border-radius:10px;
+  color:var(--paper);font-family:'Space Grotesk',sans-serif;font-size:.95rem;padding:12px 14px;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+input[type="text"]:focus, textarea:focus{outline:none;border-color:var(--gold);}
+textarea{resize:vertical;min-height:76px;line-height:1.5;}
+::placeholder{color:var(--paper-faint);}
+
+.error-line{
+  display:none;font-family:'Space Mono',monospace;font-size:.78rem;color:var(--accent2);
+  margin-top:14px;letter-spacing:.02em;
+}
+.error-line.show{display:block;}
+
+/* ---------- Startansicht: Decks & Tagesziel ---------- */
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:26px;}
+
+.goal-panel{margin-bottom:34px;}
+.goal-grid{display:flex;align-items:center;gap:26px;flex-wrap:wrap;}
+.count-row{display:flex;align-items:center;gap:10px;}
+.count-row button{
+  width:40px;height:40px;border-radius:100px;flex:none;
+  background:transparent;border:1px solid var(--line);color:var(--paper);cursor:pointer;
+  font-family:'Space Mono',monospace;font-size:1.05rem;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.count-row button:hover{border-color:var(--gold);color:var(--gold);}
+.count-row button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.count-row input{
+  width:74px;text-align:center;font-family:'Space Mono',monospace;font-size:1rem;padding:9px 8px;
+}
+.goal-status{flex:1;min-width:220px;}
+.goal-text{font-family:'Space Mono',monospace;font-size:.74rem;color:var(--paper-faint);letter-spacing:.05em;margin-bottom:10px;}
+.goal-text b{color:var(--gold);font-weight:700;}
+.goal-bar{height:6px;border-radius:100px;background:var(--field-base);border:1px solid var(--line);overflow:hidden;}
+.goal-fill{height:100%;background:var(--gold);border-radius:100px;width:0%;transition:width .45s cubic-bezier(.2,.8,.2,1);}
+
+.deck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+.deck-card{
+  position:relative;background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line);border-radius:var(--r);padding:26px;overflow:hidden;
+  display:flex;flex-direction:column;gap:14px;
+}
+.deck-card > *{position:relative;z-index:1;}
+.deck-card h3{font-family:'Fraunces',serif;font-weight:400;font-size:1.45rem;letter-spacing:-.01em;line-height:1.15;word-break:break-word;}
+.deck-stats{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--paper-faint);letter-spacing:.05em;}
+.deck-stats .due{color:var(--gold);}
+.deck-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto;}
+
+.empty-state{text-align:center;padding:70px 20px;}
+.empty-state .pi-big{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:4.5rem;
+  color:var(--gold);opacity:.5;line-height:1;display:block;margin-bottom:18px;
+}
+.empty-state p{color:var(--paper-faint);max-width:44ch;margin:0 auto;font-weight:300;}
+
+/* ---------- Anleitung ---------- */
+.help{margin-top:64px;}
+.help-item{background:var(--ink-soft);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
+.help-item summary{
+  list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:16px 20px;font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--paper);
+  transition:color .3s cubic-bezier(.2,.8,.2,1);
+}
+.help-item summary::-webkit-details-marker{display:none;}
+.help-item summary:hover{color:var(--gold);}
+.help-item summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.help-item summary .chev{flex:none;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+.help-item summary .chev svg{width:14px;height:14px;display:block;}
+.help-item[open] summary{color:var(--gold);}
+.help-item[open] .chev{transform:rotate(90deg);}
+.help-body{padding:2px 20px 20px;color:var(--paper-dim);font-size:.9rem;font-weight:300;max-width:78ch;}
+.help-body p{margin-bottom:10px;}
+.help-body p:last-child{margin-bottom:0;}
+.help-body b{color:var(--paper);font-weight:500;}
+.help-body .k{font-family:'Space Mono',monospace;font-size:.82em;color:var(--gold);letter-spacing:.03em;}
+
+/* ---------- Deckansicht ---------- */
+.back-link{
+  display:inline-flex;align-items:center;gap:8px;color:var(--paper);text-decoration:none;
+  font-family:'Space Mono',monospace;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:none;cursor:pointer;padding:0;margin-bottom:26px;
+  transition:color .3s cubic-bezier(.2,.8,.2,1);
+}
+.back-link .arr{display:inline-block;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+.back-link:hover .arr{transform:translateX(6px);}
+.back-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+.deck-title-input{
+  font-family:'Fraunces',serif;font-weight:300;font-size:clamp(1.7rem,4.5vw,2.6rem);
+  letter-spacing:-.02em;background:transparent;border:1px solid transparent;border-radius:10px;
+  color:var(--paper);width:100%;padding:6px 10px;margin-left:-10px;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.deck-title-input:hover{border-color:var(--line);}
+.deck-title-input:focus{outline:none;border-color:var(--gold);}
+
+.deck-meta{font-family:'Space Mono',monospace;font-size:.74rem;color:var(--paper-faint);letter-spacing:.05em;margin:8px 0 24px;}
+.deck-meta .due{color:var(--gold);}
+
+.deck-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:34px;}
+
+.card-form{margin-bottom:34px;}
+.card-form .fields{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+.card-form .form-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.form-mode{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-left:auto;display:none;}
+.form-mode.show{display:block;}
+
+.card-list{display:flex;flex-direction:column;gap:10px;}
+.row{
+  display:flex;align-items:center;gap:16px;background:var(--ink-soft);
+  border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;
+}
+.row .row-text{flex:1;min-width:0;}
+.row .row-front{font-weight:500;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.row .row-back{color:var(--paper-dim);font-size:.82rem;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.row .row-due{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-faint);white-space:nowrap;}
+.row .row-due.is-due{color:var(--gold);}
+.row .row-due.is-new{color:var(--paper-dim);}
+.row-actions{display:flex;gap:8px;}
+.icon-btn{
+  width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid var(--line);color:var(--paper-faint);cursor:pointer;
+  transition:border-color .25s cubic-bezier(.2,.8,.2,1), color .25s cubic-bezier(.2,.8,.2,1), background .25s cubic-bezier(.2,.8,.2,1);
+}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold);}
+.icon-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.icon-btn.danger:hover{border-color:var(--accent2);color:var(--accent2);}
+.icon-btn.armed{border-color:var(--accent2);color:var(--accent2);}
+.icon-btn svg{width:16px;height:16px;}
+
+/* ---------- Lernansicht ---------- */
+.study-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
+.study-counts{font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.08em;color:var(--paper-faint);}
+.study-counts b{color:var(--gold);font-weight:700;}
+
+.study-stats{
+  display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;
+  font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.05em;color:var(--paper-faint);
+}
+.study-stats b{color:var(--gold);font-weight:700;}
+.mini-goal{display:inline-flex;align-items:center;gap:10px;}
+.mini-bar{width:110px;height:5px;border-radius:100px;background:var(--field-base);border:1px solid var(--line);overflow:hidden;display:inline-block;}
+.mini-fill{display:block;height:100%;background:var(--gold);border-radius:100px;width:0%;transition:width .45s cubic-bezier(.2,.8,.2,1);}
+
+.study-card{
+  min-height:300px;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;padding:44px 30px;cursor:pointer;
+}
+.study-side-label{
+  font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--paper-faint);margin-bottom:20px;
+}
+.study-text{
+  font-family:'Fraunces',serif;font-weight:400;font-size:clamp(1.3rem,3.5vw,1.9rem);
+  letter-spacing:-.01em;line-height:1.3;max-width:34ch;white-space:pre-wrap;word-break:break-word;
+}
+/* Trennstrich exakt mittig zwischen Frage und Antwort: identischer Abstand nach oben und unten */
+.study-divider{width:56px;height:1px;background:var(--gold);opacity:.6;margin:28px 0;flex:none;}
+.study-back{color:var(--paper-dim);font-weight:300;}
+
+.study-actions{margin-top:26px;}
+.flip-row{display:flex;justify-content:center;}
+.free-row{display:none;justify-content:center;}
+.free-row.show{display:flex;}
+
+.rating-bar{display:none;grid-template-columns:repeat(4,1fr);gap:12px;}
+.rating-bar.show{display:grid;}
+.rate-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  min-height:60px;border-radius:100px;cursor:pointer;
+  background:transparent;border:1px solid var(--line);
+  font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.88rem;padding:10px 12px;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1), background .3s cubic-bezier(.2,.8,.2,1);
+}
+.rate-btn .ivl{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.06em;font-weight:400;color:currentColor;opacity:.75;}
+.rate-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+/* Bestätigte Ausnahme: je Bewertungs-Button eine eigene Farbe */
+.rate-btn.again{color:var(--rate-again);}
+.rate-btn.hard{color:var(--rate-hard);}
+.rate-btn.good{color:var(--rate-good);}
+.rate-btn.easy{color:var(--rate-easy);}
+.rate-btn.again:hover{background:var(--rate-again);border-color:var(--rate-again);color:var(--ink);}
+.rate-btn.hard:hover{background:var(--rate-hard);border-color:var(--rate-hard);color:var(--ink);}
+.rate-btn.good:hover{background:var(--rate-good);border-color:var(--rate-good);color:var(--ink);}
+.rate-btn.easy:hover{background:var(--rate-easy);border-color:var(--rate-easy);color:var(--ink);}
+
+.key-hint{
+  text-align:center;margin-top:20px;font-family:'Space Mono',monospace;font-size:.66rem;
+  letter-spacing:.1em;color:var(--paper-faint);
+}
+
+.study-done{text-align:center;padding:60px 20px;}
+.study-done .pi-big{
+  font-family:'Fraunces',serif;font-style:italic;font-weight:400;font-size:4.5rem;
+  color:var(--gold);opacity:.5;line-height:1;display:block;margin-bottom:18px;
+}
+.study-done h2{font-family:'Fraunces',serif;font-weight:300;font-size:1.9rem;letter-spacing:-.02em;margin-bottom:10px;}
+.study-done p{color:var(--paper-faint);margin-bottom:28px;font-weight:300;}
+.study-done .done-actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+
+/* ---------- Ansichten & Sektionen ---------- */
+.view{padding-bottom:130px;}
+[hidden]{display:none !important;}
+
+/* Scroll-Reveal (6f) */
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+/* Toast (6g) */
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translate(-50%,20px);
+  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif;
+  font-weight:600; font-size:.88rem; padding:13px 24px; border-radius:100px;
+  box-shadow:0 16px 32px -8px var(--shadow); opacity:0; pointer-events:none; z-index:100;
+  transition:opacity .35s cubic-bezier(.2,.8,.2,1), transform .35s cubic-bezier(.2,.8,.2,1);
+}
+.toast.show{opacity:1; transform:translate(-50%,0);}
+
+/* ---------- Footer ---------- */
+footer{padding:50px 0 70px; border-top:1px solid var(--line); margin-top:0; position:relative; z-index:2;}
+footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
+footer p{margin:0; font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); letter-spacing:.05em;}
+footer a{color:var(--paper-faint); transition:color .3s cubic-bezier(.2,.8,.2,1);}
+footer a:hover{color:var(--gold);}
+
+/* ---------- Mobil ---------- */
+@media (max-width:720px){
+  .container{padding:0 20px;}
+  .app-head{padding:120px 0 40px;}
+  .view{padding-bottom:90px;}
+  .card-form .fields{grid-template-columns:1fr;}
+  .row{flex-wrap:wrap;}
+  .row .row-due{order:3;width:100%;margin-top:4px;}
+  .study-card{min-height:240px;padding:36px 22px;}
+  .goal-grid{gap:18px;}
+}
+@media (max-width:460px){
+  .rating-bar{grid-template-columns:repeat(2,1fr);}
+  .rate-btn{min-height:64px;}
+  .deck-grid{grid-template-columns:1fr;}
+  .toolbar .btn-primary, .toolbar .btn-ghost{flex:1;}
+}
+
+/* ---------- Reduced Motion ---------- */
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important;}
+  .reveal{opacity:1; transform:none;}
+  #digit-field{display:none;}
+}
+</style>
+</head>
+<body>
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <div class="container">
+    <a class="brand" href="/" aria-label="Zurück zur Startseite von 31415.me">
+      <span class="pi">π</span><span class="num">31415</span><span class="tld">.me</span>
+    </a>
+    <div class="header-right">
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="container">
+
+    <section class="app-head reveal">
+      <p class="eyebrow">Werkzeug · Lernen</p>
+      <h1>Karten, die <em>wiederkommen.</em></h1>
+      <p class="lede">Lernkarten mit Spaced Repetition nach dem SM-2-Verfahren: Jede Antwort bestimmt, wann eine Karte wieder auftaucht. Decks bleiben in deinem Browser gespeichert und lassen sich jederzeit importieren und exportieren.</p>
+    </section>
+
+    <!-- ============ Ansicht: Decks ============ -->
+    <section id="view-home" class="view reveal">
+      <div class="toolbar">
+        <button class="btn-primary" id="btnNewDeck">Neues Deck anlegen</button>
+        <button class="btn-ghost" id="btnImportHome">Deck importieren (CSV / JSON)</button>
+        <input type="file" id="fileHome" accept=".csv,.json,.txt" hidden>
+      </div>
+      <p class="error-line" id="errHome"></p>
+
+      <div class="panel goal-panel">
+        <span class="mono-label">Tagesziel</span>
+        <div class="goal-grid">
+          <div class="count-row">
+            <button id="goalMinus" aria-label="Tagesziel verringern">−</button>
+            <input type="text" id="goalInput" inputmode="numeric" aria-label="Tagesziel in Karten pro Tag">
+            <button id="goalPlus" aria-label="Tagesziel erhöhen">+</button>
+          </div>
+          <div class="goal-status">
+            <p class="goal-text" id="goalText"></p>
+            <div class="goal-bar" role="img" aria-label="Fortschritt zum Tagesziel"><div class="goal-fill" id="goalFill"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="deck-grid" id="deckGrid"></div>
+      <div class="empty-state" id="homeEmpty" hidden>
+        <span class="pi-big">π</span>
+        <p>Noch keine Decks. Lege ein neues Deck an oder importiere eine CSV-Datei im Format <span style="font-family:'Space Mono',monospace">Vorderseite;Rückseite</span> — eine Karte pro Zeile.</p>
+      </div>
+
+      <div class="help">
+        <span class="mono-label">Anleitung</span>
+        <details class="help-item">
+          <summary>Bewerten &amp; Wiederholung (SM-2)
+            <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></span>
+          </summary>
+          <div class="help-body">
+            <p>Nach dem Aufdecken bewertest du ehrlich, wie gut du dich erinnert hast: <b>Nochmal</b> (nicht gewusst), <b>Schwer</b> (nur mit Mühe), <b>Gut</b> (gewusst) oder <b>Einfach</b> (sofort gewusst). Auf jedem Button steht, wann die Karte dann wiederkommt.</p>
+            <p><b>Neue Karten</b> durchlaufen kurze Lernschritte: <span class="k">1 Min → 10 Min → 1 Tag</span> (bei „Einfach" direkt 4 Tage). Danach wächst der Abstand mit jeder guten Antwort — aus 1 Tag werden 3, dann 8, dann Wochen. Genau dieses wachsende Intervall ist der wissenschaftlich belegte Kern des Verfahrens: Wiederholen kurz bevor du vergisst.</p>
+            <p><b>Schwer</b> lässt das Intervall nur langsam wachsen, <b>Nochmal</b> halbiert es und schickt die Karte zurück in die Lernphase. Faustregel: „Gut" ist die normale Antwort — nicht zu streng, nicht zu großzügig bewerten.</p>
+          </div>
+        </details>
+        <details class="help-item">
+          <summary>Score, Serie &amp; Tagesziel
+            <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></span>
+          </summary>
+          <div class="help-body">
+            <p>Jede bewertete Karte bringt Punkte — es gibt <b>nie Abzüge</b>, jede Wiederholung zählt. Basis: <span class="k">Nochmal 1 · Schwer 2 · Gut 3 · Einfach 4</span>. Dazu kommt deine <b>Serie</b> als Bonus: Sie wächst mit jeder Karte in Folge, die du mit „Gut" oder „Einfach" beantwortest, und beginnt bei „Nochmal" oder „Schwer" wieder bei null. Punkte pro Karte = Basis + Serie.</p>
+            <p>Das <b>Tagesziel</b> stellst du oben in der Deck-Übersicht ein (z. B. 20 Karten pro Tag). Der Balken zeigt dir während des Lernens, wie weit du heute bist. Um Mitternacht starten Zähler und Punkte neu — dein Lernstand der Karten bleibt natürlich erhalten.</p>
+            <p>Im <b>freien Modus</b> blätterst du ohne Wertung durch ein gemischtes Deck: keine Punkte, kein Einfluss auf die Wiederholungsplanung — ideal zum lockeren Durchgehen kurz vor der Prüfung.</p>
+          </div>
+        </details>
+        <details class="help-item">
+          <summary>Lernstand mitnehmen &amp; sichern
+            <span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg></span>
+          </summary>
+          <div class="help-body">
+            <p>Öffne ein Deck über <b>Verwalten</b> und wähle <b>Export JSON (mit Lernstand)</b>. Die Datei enthält alle Karten samt Wiederholungsdaten (Fälligkeit, Intervall, Ease-Faktor). Auf einem anderen Gerät importierst du sie über <b>Deck importieren</b> — und machst exakt dort weiter, wo du warst. Auch manuell ergänzte Karten sind immer enthalten.</p>
+            <p>Der gleiche Export ist dein <b>Backup</b>: Deine Decks liegen nur im Speicher dieses Browsers. Löschst du die Websitedaten oder wechselst den Browser, sind sie weg — exportiere deshalb vor Prüfungen oder größeren Änderungen einmal als JSON.</p>
+            <p><b>Export CSV</b> enthält nur Vorder- und Rückseiten ohne Lernstand — praktisch zum Weitergeben an andere oder zum Bearbeiten in einer Tabellenkalkulation.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- ============ Ansicht: Deck bearbeiten ============ -->
+    <section id="view-deck" class="view" hidden>
+      <button class="back-link" id="btnBackHome"><span class="arr">←</span> Alle Decks</button>
+      <label class="mono-label" for="deckTitle">Deckname</label>
+      <input type="text" class="deck-title-input" id="deckTitle" aria-label="Deckname bearbeiten">
+      <p class="deck-meta" id="deckMeta"></p>
+
+      <div class="deck-toolbar">
+        <button class="btn-primary" id="btnStudy">Jetzt lernen</button>
+        <button class="btn-ghost" id="btnFree">Frei üben</button>
+        <button class="btn-ghost" id="btnImportDeck">Karten importieren</button>
+        <button class="btn-ghost" id="btnExportJson">Export JSON (mit Lernstand)</button>
+        <button class="btn-ghost" id="btnExportCsv">Export CSV</button>
+        <button class="btn-ghost danger" id="btnDeleteDeck">Deck löschen</button>
+        <input type="file" id="fileDeck" accept=".csv,.json,.txt" hidden>
+      </div>
+      <p class="error-line" id="errDeck"></p>
+
+      <div class="panel card-form">
+        <div class="fields">
+          <div>
+            <label class="mono-label" for="cardFront">Vorderseite</label>
+            <textarea id="cardFront" placeholder="Frage oder Begriff"></textarea>
+          </div>
+          <div>
+            <label class="mono-label" for="cardBack">Rückseite</label>
+            <textarea id="cardBack" placeholder="Antwort oder Erklärung"></textarea>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary btn-sm" id="btnSaveCard">Karte hinzufügen</button>
+          <button class="btn-ghost btn-sm" id="btnCancelEdit" hidden>Abbrechen</button>
+          <span class="form-mode" id="formMode">Karte bearbeiten</span>
+        </div>
+      </div>
+
+      <div class="card-list" id="cardList"></div>
+      <div class="empty-state" id="deckEmpty" hidden>
+        <span class="pi-big">π</span>
+        <p>Dieses Deck ist noch leer. Füge oben deine erste Karte hinzu oder importiere eine Datei.</p>
+      </div>
+    </section>
+
+    <!-- ============ Ansicht: Lernen ============ -->
+    <section id="view-study" class="view" hidden>
+      <div class="study-top">
+        <button class="back-link" id="btnBackDeck" style="margin-bottom:0"><span class="arr">←</span> Zum Deck</button>
+        <p class="study-counts" id="studyCounts"></p>
+      </div>
+      <div class="study-stats" id="studyStats"></div>
+
+      <div id="studyArea">
+        <div class="panel study-card" id="studyCard" role="group" aria-label="Aktuelle Lernkarte">
+          <p class="study-side-label" id="sideLabel">Vorderseite</p>
+          <p class="study-text" id="studyFront"></p>
+          <div class="study-divider" id="studyDivider" hidden aria-hidden="true"></div>
+          <p class="study-text study-back" id="studyBack" hidden></p>
+        </div>
+
+        <div class="study-actions">
+          <div class="flip-row" id="flipRow">
+            <button class="btn-primary" id="btnFlip">Aufdecken</button>
+          </div>
+          <div class="free-row" id="freeRow">
+            <button class="btn-primary" id="btnNext">Weiter</button>
+          </div>
+          <div class="rating-bar" id="ratingBar">
+            <button class="rate-btn again" data-grade="0">Nochmal<span class="ivl" data-ivl="0"></span></button>
+            <button class="rate-btn hard" data-grade="1">Schwer<span class="ivl" data-ivl="1"></span></button>
+            <button class="rate-btn good" data-grade="2">Gut<span class="ivl" data-ivl="2"></span></button>
+            <button class="rate-btn easy" data-grade="3">Einfach<span class="ivl" data-ivl="3"></span></button>
+          </div>
+          <p class="key-hint" id="keyHint"></p>
+        </div>
+      </div>
+
+      <div class="study-done" id="studyDone" hidden>
+        <span class="pi-big">π</span>
+        <h2 id="doneTitle">Für heute erledigt.</h2>
+        <p id="doneText"></p>
+        <div class="done-actions">
+          <button class="btn-primary" id="btnShuffleAgain" hidden>Nochmal mischen</button>
+          <button class="btn-primary" id="btnDoneBack">Zurück zum Deck</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<div class="toast" id="toast">Kopiert</div>
+
+<footer>
+  <div class="container">
+    <p>Teil von <a href="/">31415.me</a> — dein Lernstand lebt in diesem Browser.</p>
+    <p>Decks, Lernstand, Tagesziel und Theme-Wahl werden nur lokal gespeichert — nichts verlässt dieses Gerät.</p>
+  </div>
+</footer>
+
+<script>
+/* ---------- Theme (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  const root = document.documentElement;
+  const stored = localStorage.getItem('theme');
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  if(stored){ root.setAttribute('data-theme', stored); }
+  else if(prefersLight){ root.setAttribute('data-theme','light'); }
+
+  function updateMeta(){
+    const isLight = root.getAttribute('data-theme') === 'light';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
+  }
+  updateMeta();
+
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    localStorage.setItem('theme', next);
+    updateMeta();
+  });
+})();
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ================================================================
+   Lernkarten-App — Daten, SM-2, Score, Ansichten
+   ================================================================ */
+(function(){
+  'use strict';
+  const LS_KEY = 'karten.decks.v1';
+  const MIN = 60000, DAY = 86400000;
+  const LEARN_STEPS = [1, 10];      // Minuten (neue Karten)
+  const RELEARN_STEPS = [10];       // Minuten (nach Fehlschlag)
+  const GRADUATE_IVL = 1;           // Tage
+  const EASY_IVL = 4;               // Tage
+  const BASE_POINTS = [1, 2, 3, 4]; // Nochmal / Schwer / Gut / Einfach
+
+  let state = { decks: [], settings: { dailyGoal: 20 }, stats: null };
+  let currentDeckId = null;
+  let editCardId = null;
+  let session = null;
+  let currentView = 'home';
+
+  /* ---------- Persistenz ---------- */
+  function load(){
+    try{
+      const raw = localStorage.getItem(LS_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        if(parsed && Array.isArray(parsed.decks)){
+          state.decks = parsed.decks;
+          if(parsed.settings && typeof parsed.settings.dailyGoal === 'number') state.settings = parsed.settings;
+          if(parsed.stats) state.stats = parsed.stats;
+        }
+      }
+    }catch(e){ /* korrupter Speicher → frisch starten */ }
+    rollover();
+  }
+  function save(){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+    catch(e){ showError(currentView === 'home' ? 'errHome' : 'errDeck', 'Speichern fehlgeschlagen: Browser-Speicher voll oder blockiert. Exportiere dein Deck als JSON, um nichts zu verlieren.'); }
+  }
+
+  /* ---------- Tagesstatistik ---------- */
+  function todayKey(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function rollover(){
+    if(!state.stats || state.stats.date !== todayKey()){
+      state.stats = { date: todayKey(), reviewed: 0, points: 0 };
+    }
+    if(!state.settings || typeof state.settings.dailyGoal !== 'number'){
+      state.settings = { dailyGoal: 20 };
+    }
+  }
+
+  /* ---------- Helfer ---------- */
+  const $ = id => document.getElementById(id);
+  function uid(){ return (crypto.randomUUID) ? crypto.randomUUID() : 'id-' + Date.now() + '-' + Math.random().toString(36).slice(2,10); }
+  function getDeck(id){ return state.decks.find(d => d.id === id); }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function endOfToday(){ const d = new Date(); d.setHours(23,59,59,999); return d.getTime(); }
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i = a.length - 1; i > 0; i--){
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+  function newCard(front, back){
+    return { id: uid(), front: String(front), back: String(back),
+      state:'new', step:0, ease:2.5, interval:0, reps:0, lapses:0,
+      due: Date.now(), created: Date.now() };
+  }
+  function normalizeImportedCard(c){
+    if(Array.isArray(c)) return c.length >= 2 ? newCard(c[0], c[1]) : null;
+    if(typeof c !== 'object' || c === null) return null;
+    const front = c.front ?? c.vorderseite ?? c.question ?? c.frage ?? c.f;
+    const back  = c.back ?? c.rueckseite ?? c['rückseite'] ?? c.answer ?? c.antwort ?? c.b;
+    if(front === undefined || back === undefined) return null;
+    const card = newCard(front, back);
+    if(typeof c.ease === 'number') card.ease = Math.max(1.3, c.ease);
+    if(typeof c.interval === 'number') card.interval = Math.max(0, c.interval);
+    if(typeof c.reps === 'number') card.reps = c.reps;
+    if(typeof c.lapses === 'number') card.lapses = c.lapses;
+    if(typeof c.step === 'number') card.step = c.step;
+    if(typeof c.due === 'number') card.due = c.due;
+    if(typeof c.created === 'number') card.created = c.created;
+    if(['new','learn','relearn','review'].includes(c.state)) card.state = c.state;
+    return card;
+  }
+
+  let errTimer = {};
+  function showError(id, msg){
+    const el = $(id); if(!el) return;
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(errTimer[id]);
+    errTimer[id] = setTimeout(() => el.classList.remove('show'), 8000);
+  }
+  function clearErrors(){ document.querySelectorAll('.error-line').forEach(el => el.classList.remove('show')); }
+
+  /* Toast (6g) */
+  let toastTimer;
+  function showToast(msg){
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  /* ---------- SM-2 ---------- */
+  function applyRating(c, g, now){
+    now = now ?? Date.now();
+    c.reps = (c.reps || 0) + 1;
+    if(c.state === 'review'){
+      if(g === 0){
+        c.lapses = (c.lapses || 0) + 1;
+        c.ease = Math.max(1.3, (c.ease || 2.5) - 0.2);
+        c.interval = Math.max(1, Math.round(c.interval * 0.5));
+        c.state = 'relearn'; c.step = 0;
+        c.due = now + RELEARN_STEPS[0] * MIN;
+      } else {
+        if(g === 1){ c.ease = Math.max(1.3, c.ease - 0.15); c.interval = Math.max(c.interval + 1, Math.round(c.interval * 1.2)); }
+        else if(g === 2){ c.interval = Math.max(c.interval + 1, Math.round(c.interval * c.ease)); }
+        else { c.ease = c.ease + 0.15; c.interval = Math.max(c.interval + 1, Math.round(c.interval * c.ease * 1.3)); }
+        c.due = now + c.interval * DAY;
+      }
+    } else {
+      const steps = (c.state === 'relearn') ? RELEARN_STEPS : LEARN_STEPS;
+      if(c.state === 'new'){ c.state = 'learn'; c.step = 0; c.ease = c.ease || 2.5; }
+      if(g === 0){ c.step = 0; c.due = now + steps[0] * MIN; }
+      else if(g === 1){ c.due = now + steps[Math.min(c.step || 0, steps.length - 1)] * MIN; }
+      else if(g === 2){
+        c.step = (c.step || 0) + 1;
+        if(c.step >= steps.length){ graduate(c, false, now); }
+        else { c.due = now + steps[c.step] * MIN; }
+      } else { graduate(c, true, now); }
+    }
+  }
+  function graduate(c, easy, now){
+    if(c.state === 'relearn'){ c.interval = Math.max(easy ? EASY_IVL : GRADUATE_IVL, c.interval || GRADUATE_IVL); }
+    else { c.interval = easy ? EASY_IVL : GRADUATE_IVL; }
+    c.state = 'review'; c.step = 0;
+    c.due = now + c.interval * DAY;
+  }
+  function previewInterval(card, g){
+    const clone = JSON.parse(JSON.stringify(card));
+    const now = Date.now();
+    applyRating(clone, g, now);
+    return formatSpan(clone.due - now);
+  }
+  function formatSpan(ms){
+    const min = ms / MIN;
+    if(min < 1.5) return '1 Min';
+    if(min < 60) return Math.round(min) + ' Min';
+    const days = ms / DAY;
+    if(days < 1.5) return '1 T';
+    if(days < 31) return Math.round(days) + ' T';
+    if(days < 365) return (days / 30.44).toFixed(1).replace('.', ',') + ' Mon';
+    return (days / 365.25).toFixed(1).replace('.', ',') + ' J';
+  }
+
+  function deckCounts(deck){
+    const now = Date.now(), eod = endOfToday();
+    let due = 0, fresh = 0;
+    deck.cards.forEach(c => {
+      if(c.state === 'new'){ fresh++; }
+      else if(c.state === 'review' ? c.due <= eod : c.due <= now){ due++; }
+    });
+    return { due, fresh, total: deck.cards.length };
+  }
+  function collectQueue(deck){
+    const eod = endOfToday();
+    return deck.cards
+      .filter(c => c.state === 'new' || c.due <= eod)
+      .sort((a, b) => a.due - b.due)
+      .map(c => c.id);
+  }
+
+  /* ---------- Ansichten ---------- */
+  function showView(name){
+    currentView = name;
+    ['home','deck','study'].forEach(v => { $('view-' + v).hidden = (v !== name); });
+    clearErrors();
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }
+
+  /* ---------- Tagesziel-Anzeige ---------- */
+  function renderGoal(){
+    rollover();
+    const goal = state.settings.dailyGoal;
+    const done = state.stats.reviewed;
+    $('goalInput').value = goal;
+    const pct = Math.min(100, Math.round(done / goal * 100));
+    $('goalFill').style.width = pct + '%';
+    $('goalText').innerHTML = '<b>' + done + '</b> / ' + goal + ' Karten heute · ' + state.stats.points + ' Punkte' +
+      (done >= goal ? ' · Ziel erreicht' : '');
+  }
+  function setGoal(n){
+    n = Math.max(1, Math.min(500, Math.round(n)));
+    state.settings.dailyGoal = n;
+    save(); renderGoal();
+  }
+  $('goalMinus').addEventListener('click', () => setGoal(state.settings.dailyGoal - 1));
+  $('goalPlus').addEventListener('click', () => setGoal(state.settings.dailyGoal + 1));
+  $('goalInput').addEventListener('change', () => {
+    const n = parseInt($('goalInput').value, 10);
+    if(isNaN(n)){ renderGoal(); return; }
+    setGoal(n);
+  });
+
+  function renderHome(){
+    renderGoal();
+    const grid = $('deckGrid');
+    grid.innerHTML = '';
+    $('homeEmpty').hidden = state.decks.length > 0;
+    state.decks.forEach(deck => {
+      const n = deckCounts(deck);
+      const el = document.createElement('div');
+      el.className = 'deck-card';
+      el.innerHTML =
+        '<h3>' + escapeHtml(deck.name) + '</h3>' +
+        '<p class="deck-stats">' +
+          (n.due ? '<span class="due">' + n.due + ' fällig</span>' : '0 fällig') +
+          ' · ' + n.fresh + ' neu · ' + n.total + ' Karten</p>' +
+        '<div class="deck-actions">' +
+          '<button class="btn-primary btn-sm" data-act="study">Lernen</button>' +
+          '<button class="btn-ghost btn-sm" data-act="free">Frei üben</button>' +
+          '<button class="btn-ghost btn-sm" data-act="open">Verwalten</button>' +
+        '</div>';
+      el.querySelector('[data-act="study"]').addEventListener('click', () => startSession(deck.id, 'srs'));
+      el.querySelector('[data-act="free"]').addEventListener('click', () => startSession(deck.id, 'free'));
+      el.querySelector('[data-act="open"]').addEventListener('click', () => openDeck(deck.id));
+      grid.appendChild(el);
+    });
+    bindSpotlight();
+  }
+
+  function openDeck(id){
+    currentDeckId = id;
+    cancelEdit();
+    renderDeck();
+    showView('deck');
+  }
+
+  function renderDeck(){
+    const deck = getDeck(currentDeckId);
+    if(!deck){ showView('home'); renderHome(); return; }
+    $('deckTitle').value = deck.name;
+    const n = deckCounts(deck);
+    $('deckMeta').innerHTML = (n.due ? '<span class="due">' + n.due + ' fällig</span>' : '0 fällig') +
+      ' · ' + n.fresh + ' neu · ' + n.total + ' Karten insgesamt';
+
+    const list = $('cardList');
+    list.innerHTML = '';
+    $('deckEmpty').hidden = deck.cards.length > 0;
+    const now = Date.now();
+    deck.cards.forEach(card => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      let dueCls = '', dueTxt = '';
+      if(card.state === 'new'){ dueCls = 'is-new'; dueTxt = 'Neu'; }
+      else if(card.state === 'learn' || card.state === 'relearn'){ dueCls = 'is-due'; dueTxt = 'Lernphase'; }
+      else if(card.due <= endOfToday()){ dueCls = 'is-due'; dueTxt = 'Fällig'; }
+      else { dueTxt = 'in ' + formatSpan(card.due - now); }
+      row.innerHTML =
+        '<div class="row-text">' +
+          '<div class="row-front">' + escapeHtml(card.front) + '</div>' +
+          '<div class="row-back">' + escapeHtml(card.back) + '</div>' +
+        '</div>' +
+        '<span class="row-due ' + dueCls + '">' + dueTxt + '</span>' +
+        '<div class="row-actions">' +
+          '<button class="icon-btn" data-act="edit" aria-label="Karte bearbeiten">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button>' +
+          '<button class="icon-btn danger" data-act="del" aria-label="Karte löschen">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>' +
+        '</div>';
+      row.querySelector('[data-act="edit"]').addEventListener('click', () => startEdit(card.id));
+      const delBtn = row.querySelector('[data-act="del"]');
+      armThenRun(delBtn, () => {
+        deck.cards = deck.cards.filter(c => c.id !== card.id);
+        if(editCardId === card.id) cancelEdit();
+        save(); renderDeck(); showToast('Karte gelöscht');
+      });
+      list.appendChild(row);
+    });
+  }
+
+  /* Zweistufiges Löschen: erster Klick „scharfschalten", zweiter Klick ausführen */
+  function armThenRun(btn, fn){
+    let armed = false, t;
+    btn.addEventListener('click', () => {
+      if(armed){ clearTimeout(t); fn(); return; }
+      armed = true;
+      btn.classList.add('armed');
+      const prevLabel = btn.getAttribute('aria-label');
+      btn.setAttribute('aria-label', prevLabel + ' — erneut klicken zum Bestätigen');
+      if(btn.dataset.textConfirm){ btn.dataset.textOrig = btn.textContent; btn.textContent = btn.dataset.textConfirm; }
+      t = setTimeout(() => {
+        armed = false; btn.classList.remove('armed');
+        btn.setAttribute('aria-label', prevLabel);
+        if(btn.dataset.textOrig){ btn.textContent = btn.dataset.textOrig; }
+      }, 2600);
+    });
+  }
+
+  /* ---------- Karten anlegen / bearbeiten ---------- */
+  function startEdit(cardId){
+    const deck = getDeck(currentDeckId);
+    const card = deck.cards.find(c => c.id === cardId);
+    if(!card) return;
+    editCardId = cardId;
+    $('cardFront').value = card.front;
+    $('cardBack').value = card.back;
+    $('btnSaveCard').textContent = 'Änderung speichern';
+    $('btnCancelEdit').hidden = false;
+    $('formMode').classList.add('show');
+    $('cardFront').focus();
+    $('cardFront').scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block:'center' });
+  }
+  function cancelEdit(){
+    editCardId = null;
+    $('cardFront').value = ''; $('cardBack').value = '';
+    $('btnSaveCard').textContent = 'Karte hinzufügen';
+    $('btnCancelEdit').hidden = true;
+    $('formMode').classList.remove('show');
+  }
+  $('btnCancelEdit').addEventListener('click', cancelEdit);
+  $('btnSaveCard').addEventListener('click', () => {
+    const front = $('cardFront').value.trim();
+    const back = $('cardBack').value.trim();
+    if(!front || !back){
+      showError('errDeck', 'Beide Seiten brauchen Inhalt: Fülle Vorder- und Rückseite aus, dann klappt das Speichern.');
+      return;
+    }
+    const deck = getDeck(currentDeckId);
+    if(editCardId){
+      const card = deck.cards.find(c => c.id === editCardId);
+      if(card){ card.front = front; card.back = back; }
+      showToast('Änderung gespeichert');
+    } else {
+      deck.cards.push(newCard(front, back));
+      showToast('Karte hinzugefügt');
+    }
+    cancelEdit(); save(); renderDeck();
+    $('cardFront').focus();
+  });
+
+  /* ---------- Deck-Aktionen ---------- */
+  $('btnNewDeck').addEventListener('click', () => {
+    const deck = { id: uid(), name: 'Neues Deck', created: Date.now(), cards: [] };
+    state.decks.push(deck);
+    save();
+    openDeck(deck.id);
+    $('deckTitle').focus();
+    $('deckTitle').select();
+  });
+  $('deckTitle').addEventListener('change', () => {
+    const deck = getDeck(currentDeckId);
+    const name = $('deckTitle').value.trim();
+    if(!name){ $('deckTitle').value = deck.name; return; }
+    deck.name = name; save(); showToast('Gespeichert');
+  });
+  $('btnBackHome').addEventListener('click', () => { renderHome(); showView('home'); });
+
+  armThenRun($('btnDeleteDeck'), () => {
+    state.decks = state.decks.filter(d => d.id !== currentDeckId);
+    save(); renderHome(); showView('home'); showToast('Deck gelöscht');
+  });
+  $('btnDeleteDeck').dataset.textConfirm = 'Wirklich löschen?';
+
+  $('btnStudy').addEventListener('click', () => startSession(currentDeckId, 'srs'));
+  $('btnFree').addEventListener('click', () => startSession(currentDeckId, 'free'));
+
+  /* ---------- Import ---------- */
+  function detectDelimiter(line){
+    const counts = { ';': (line.match(/;/g) || []).length, ',': (line.match(/,/g) || []).length, '\t': (line.match(/\t/g) || []).length };
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][1] > 0
+      ? Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0] : ';';
+  }
+  function parseCSV(text){
+    const firstLine = text.split(/\r?\n/).find(l => l.trim().length) || '';
+    const delim = detectDelimiter(firstLine);
+    const rows = [];
+    let cur = '', row = [], inQ = false;
+    for(let i = 0; i < text.length; i++){
+      const ch = text[i];
+      if(inQ){
+        if(ch === '"'){
+          if(text[i+1] === '"'){ cur += '"'; i++; } else { inQ = false; }
+        } else cur += ch;
+      } else {
+        if(ch === '"'){ inQ = true; }
+        else if(ch === delim){ row.push(cur); cur = ''; }
+        else if(ch === '\n' || ch === '\r'){
+          if(ch === '\r' && text[i+1] === '\n') i++;
+          row.push(cur); cur = '';
+          if(row.some(f => f.trim().length)) rows.push(row);
+          row = [];
+        } else cur += ch;
+      }
+    }
+    row.push(cur);
+    if(row.some(f => f.trim().length)) rows.push(row);
+    if(rows.length && /^(front|vorderseite|frage|question)$/i.test((rows[0][0] || '').trim())) rows.shift();
+    return rows.filter(r => r.length >= 2 && r[0].trim() && r[1].trim())
+               .map(r => newCard(r[0].trim(), r[1].trim()));
+  }
+  function parseImport(text, filename){
+    const trimmed = text.trim();
+    if(trimmed.startsWith('{') || trimmed.startsWith('[')){
+      let data;
+      try{ data = JSON.parse(trimmed); }
+      catch(e){ throw new Error('Die JSON-Datei ist ungültig. Prüfe die Syntax oder exportiere sie neu.'); }
+      let rawCards, name = null;
+      if(Array.isArray(data)) rawCards = data;
+      else if(data && Array.isArray(data.cards)){ rawCards = data.cards; name = data.name || null; }
+      else throw new Error('Unbekanntes JSON-Format. Erwartet wird ein Array von Karten oder ein Objekt mit „cards".');
+      const cards = rawCards.map(normalizeImportedCard).filter(Boolean);
+      if(!cards.length) throw new Error('Keine Karten gefunden. Jede Karte braucht „front" und „back".');
+      return { cards, name };
+    }
+    const cards = parseCSV(text);
+    if(!cards.length) throw new Error('Keine Karten gefunden. Erwartet wird pro Zeile: Vorderseite;Rückseite (auch , oder Tab möglich).');
+    return { cards, name: null };
+  }
+  function readFile(input, cb){
+    const file = input.files && input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => cb(String(reader.result), file.name);
+    reader.readAsText(file, 'UTF-8');
+    input.value = '';
+  }
+
+  $('btnImportHome').addEventListener('click', () => $('fileHome').click());
+  $('fileHome').addEventListener('change', () => readFile($('fileHome'), (text, filename) => {
+    try{
+      const { cards, name } = parseImport(text, filename);
+      const deck = { id: uid(), name: name || filename.replace(/\.(csv|json|txt)$/i, ''), created: Date.now(), cards };
+      state.decks.push(deck); save();
+      openDeck(deck.id);
+      showToast(cards.length + ' Karten importiert');
+    }catch(e){ showError('errHome', 'Import fehlgeschlagen: ' + e.message); }
+  }));
+
+  $('btnImportDeck').addEventListener('click', () => $('fileDeck').click());
+  $('fileDeck').addEventListener('change', () => readFile($('fileDeck'), (text, filename) => {
+    try{
+      const { cards } = parseImport(text, filename);
+      const deck = getDeck(currentDeckId);
+      deck.cards = deck.cards.concat(cards);
+      save(); renderDeck();
+      showToast(cards.length + ' Karten importiert');
+    }catch(e){ showError('errDeck', 'Import fehlgeschlagen: ' + e.message); }
+  }));
+
+  /* ---------- Export ---------- */
+  function download(filename, content, mime){
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function slug(name){ return name.toLowerCase().replace(/[^a-z0-9äöüß]+/gi, '-').replace(/^-+|-+$/g, '') || 'deck'; }
+
+  $('btnExportJson').addEventListener('click', () => {
+    const deck = getDeck(currentDeckId);
+    const payload = {
+      format: '31415-karten', version: 1,
+      name: deck.name, exported: new Date().toISOString(),
+      cards: deck.cards.map(c => ({
+        front: c.front, back: c.back, state: c.state, step: c.step,
+        ease: c.ease, interval: c.interval, reps: c.reps, lapses: c.lapses,
+        due: c.due, created: c.created
+      }))
+    };
+    download(slug(deck.name) + '.json', JSON.stringify(payload, null, 2), 'application/json');
+    showToast('Exportiert');
+  });
+  $('btnExportCsv').addEventListener('click', () => {
+    const deck = getDeck(currentDeckId);
+    const esc = s => '"' + String(s).replace(/"/g, '""') + '"';
+    const lines = deck.cards.map(c => esc(c.front) + ';' + esc(c.back));
+    download(slug(deck.name) + '.csv', lines.join('\n'), 'text/csv');
+    showToast('Exportiert');
+  });
+
+  /* ---------- Lernsitzung (SRS & freier Modus) ---------- */
+  function startSession(deckId, mode){
+    const deck = getDeck(deckId);
+    if(!deck) return;
+    rollover();
+    currentDeckId = deckId;
+    const queue = (mode === 'free')
+      ? shuffle(deck.cards.map(c => c.id))
+      : collectQueue(deck);
+    session = { deckId, mode, queue, currentId: null, revealed: false, streak: 0 };
+    showView('study');
+    if(!queue.length){
+      showDone(deck.cards.length
+        ? (mode === 'free'
+            ? 'Dieses Deck hat noch keine Karten zum Üben.'
+            : 'Gerade ist keine Karte fällig. Der Algorithmus meldet sich, wenn es wieder etwas zu tun gibt.')
+        : 'Dieses Deck hat noch keine Karten. Lege im Deck welche an oder importiere eine Datei.');
+      return;
+    }
+    nextCard();
+  }
+  function showDone(text){
+    $('studyArea').hidden = true;
+    $('studyDone').hidden = false;
+    const free = session && session.mode === 'free';
+    $('doneTitle').textContent = free ? 'Runde geschafft.' : 'Für heute erledigt.';
+    $('doneText').textContent = text;
+    $('btnShuffleAgain').hidden = !free || !getDeck(session.deckId).cards.length;
+    updateCounts(); renderStudyStats();
+  }
+  function updateCounts(){
+    if(!session){ $('studyCounts').textContent = ''; return; }
+    if(session.mode === 'free'){
+      $('studyCounts').innerHTML = '<b>' + session.queue.length + '</b> übrig · gemischt';
+      return;
+    }
+    const deck = getDeck(session.deckId);
+    let fresh = 0, learn = 0, rev = 0;
+    session.queue.forEach(id => {
+      const c = deck.cards.find(x => x.id === id);
+      if(!c) return;
+      if(c.state === 'new') fresh++;
+      else if(c.state === 'review') rev++;
+      else learn++;
+    });
+    $('studyCounts').innerHTML = '<b>' + session.queue.length + '</b> übrig · ' + fresh + ' neu · ' + learn + ' lernen · ' + rev + ' wiederholen';
+  }
+  function renderStudyStats(){
+    const el = $('studyStats');
+    if(!session){ el.innerHTML = ''; return; }
+    if(session.mode === 'free'){
+      el.innerHTML = '<span>Freier Modus · ohne Wertung, ohne Einfluss auf den Lernstand</span>';
+      return;
+    }
+    rollover();
+    const goal = state.settings.dailyGoal;
+    const done = state.stats.reviewed;
+    const pct = Math.min(100, Math.round(done / goal * 100));
+    el.innerHTML =
+      '<span><b>' + state.stats.points + '</b> Punkte heute</span>' +
+      '<span>Serie ' + session.streak + '</span>' +
+      '<span class="mini-goal"><span class="mini-bar"><span class="mini-fill" style="width:' + pct + '%"></span></span>' +
+      done + '/' + goal + (done >= goal ? ' · Ziel erreicht' : '') + '</span>';
+  }
+  function nextCard(){
+    if(!session.queue.length){
+      showDone(session.mode === 'free'
+        ? 'Alle Karten einmal durch. Misch neu für eine weitere Runde oder kehr zurück.'
+        : 'Alle fälligen Karten sind gelernt. Der Algorithmus meldet sich, wenn es wieder etwas zu tun gibt.');
+      return;
+    }
+    $('studyArea').hidden = false;
+    $('studyDone').hidden = true;
+    session.currentId = session.queue[0];
+    session.revealed = false;
+    const deck = getDeck(session.deckId);
+    const card = deck.cards.find(c => c.id === session.currentId);
+    $('studyFront').textContent = card.front;
+    $('studyBack').textContent = card.back;
+    $('sideLabel').textContent = 'Vorderseite';
+    $('studyDivider').hidden = true;
+    $('studyBack').hidden = true;
+    $('flipRow').style.display = 'flex';
+    $('freeRow').classList.remove('show');
+    $('ratingBar').classList.remove('show');
+    $('keyHint').textContent = session.mode === 'free'
+      ? 'Leertaste: aufdecken / weiter'
+      : 'Leertaste: aufdecken · Tasten 1–4: bewerten';
+    updateCounts(); renderStudyStats();
+  }
+  function reveal(){
+    if(!session || session.revealed) return;
+    session.revealed = true;
+    const deck = getDeck(session.deckId);
+    const card = deck.cards.find(c => c.id === session.currentId);
+    $('sideLabel').textContent = 'Vorderseite · Rückseite';
+    $('studyDivider').hidden = false;
+    $('studyBack').hidden = false;
+    $('flipRow').style.display = 'none';
+    if(session.mode === 'free'){
+      $('freeRow').classList.add('show');
+      $('keyHint').textContent = 'Leertaste: weiter';
+      return;
+    }
+    for(let g = 0; g < 4; g++){
+      document.querySelector('[data-ivl="' + g + '"]').textContent = previewInterval(card, g);
+    }
+    $('ratingBar').classList.add('show');
+    $('keyHint').textContent = '1 Nochmal · 2 Schwer · 3 Gut · 4 Einfach';
+  }
+  function rate(g){
+    if(!session || !session.revealed || session.mode === 'free') return;
+    const deck = getDeck(session.deckId);
+    const card = deck.cards.find(c => c.id === session.currentId);
+    applyRating(card, g);
+    /* Score: Basis + Serie, niemals Abzüge */
+    rollover();
+    if(g >= 2){ session.streak++; } else { session.streak = 0; }
+    state.stats.points += BASE_POINTS[g] + session.streak;
+    const before = state.stats.reviewed;
+    state.stats.reviewed++;
+    save();
+    if(before < state.settings.dailyGoal && state.stats.reviewed >= state.settings.dailyGoal){
+      showToast('Tagesziel erreicht — stark!');
+    }
+    session.queue.shift();
+    if(card.state !== 'review' && card.due <= Date.now() + 15 * MIN){
+      const pos = Math.min(session.queue.length, g === 0 ? 3 : 6);
+      session.queue.splice(pos, 0, card.id);
+    }
+    nextCard();
+  }
+  function freeNext(){
+    if(!session || session.mode !== 'free' || !session.revealed) return;
+    session.queue.shift();
+    nextCard();
+  }
+
+  $('studyCard').addEventListener('click', reveal);
+  $('btnFlip').addEventListener('click', e => { e.stopPropagation(); reveal(); });
+  $('btnNext').addEventListener('click', freeNext);
+  document.querySelectorAll('.rate-btn').forEach(btn => {
+    btn.addEventListener('click', () => rate(parseInt(btn.dataset.grade, 10)));
+  });
+  $('btnBackDeck').addEventListener('click', () => { session = null; renderDeck(); showView('deck'); });
+  $('btnDoneBack').addEventListener('click', () => { session = null; renderDeck(); showView('deck'); });
+  $('btnShuffleAgain').addEventListener('click', () => { if(session) startSession(session.deckId, 'free'); });
+
+  document.addEventListener('keydown', e => {
+    if(currentView !== 'study' || !session) return;
+    if(e.target.closest('input, textarea')) return;
+    if((e.key === ' ' || e.key === 'Enter') && !e.target.closest('.back-link')){
+      if(!session.revealed){ e.preventDefault(); reveal(); return; }
+      if(session.mode === 'free'){ e.preventDefault(); freeNext(); return; }
+    }
+    if(session.revealed && session.mode !== 'free' && ['1','2','3','4'].includes(e.key)){
+      e.preventDefault(); rate(parseInt(e.key, 10) - 1);
+    }
+  });
+
+  /* ---------- Spotlight (6c) ---------- */
+  function bindSpotlight(){
+    document.querySelectorAll('.deck-card, .panel').forEach(card => {
+      if(card.dataset.spot) return;
+      card.dataset.spot = '1';
+      card.addEventListener('mousemove', e => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+        card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+      });
+    });
+  }
+
+  /* ---------- Start ---------- */
+  load();
+  renderHome();
+  bindSpotlight();
+})();
+
+/* ---------- Scroll-Reveal (6f) ---------- */
+(function(){
+  const els = document.querySelectorAll('.reveal');
+  if(reduceMotion){ els.forEach(el => el.classList.add('in')); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
+    });
+  }, {threshold:.15});
+  els.forEach(el => obs.observe(el));
+})();
+
+/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
+  const cv = document.getElementById('digit-field');
+  const ctx = cv.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    const cols = Math.floor(cv.width / 28);
+    drops = [];
+    for(let i=0;i<cols;i++){
+      drops.push({
+        x: i*28 + 14,
+        y: Math.random() * cv.height,
+        speed: 0.4 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
+      });
+    }
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d => {
+      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
+      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > cv.height){
+        d.y = -20;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
