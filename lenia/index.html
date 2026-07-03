@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0e14">
+<title>Lenia — 31415.me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+}
+
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--ink); color:var(--paper);
+  font-family:'Space Grotesk',sans-serif; font-weight:300; line-height:1.6;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  min-height:100vh;
+}
+
+#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+.container{max-width:1180px; margin:0 auto; padding:0 28px;}
+main{position:relative; z-index:2;}
+
+/* ---------- Header ---------- */
+header{
+  position:fixed; top:0; left:0; right:0; height:72px; z-index:20;
+  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+.header-inner{height:72px; display:flex; align-items:center; justify-content:space-between;}
+.brand{display:flex; align-items:baseline; gap:7px; text-decoration:none;}
+.brand .pi{font-family:'Fraunces',serif; font-size:26px; font-weight:400; color:var(--gold); line-height:1;}
+.brand .num{font-family:'Space Mono',monospace; font-size:1rem; font-weight:700; color:var(--paper); letter-spacing:.08em;}
+.brand .tld{font-family:'Space Mono',monospace; font-size:1rem; color:var(--paper-faint);}
+.theme-toggle{
+  width:40px; height:40px; border-radius:100px; display:flex; align-items:center; justify-content:center;
+  background:transparent; border:1px solid var(--line); color:var(--paper); cursor:pointer;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover{border-color:var(--gold); color:var(--gold);}
+.theme-toggle:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.theme-toggle svg{width:18px; height:18px;}
+.icon-sun{display:none;}
+html[data-theme="light"] .icon-moon{display:none;}
+html[data-theme="light"] .icon-sun{display:block;}
+
+/* ---------- App-Kopf ---------- */
+.app-head{padding:150px 0 56px;}
+.eyebrow{
+  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--gold); margin-bottom:16px;
+}
+.app-head h1{
+  font-family:'Fraunces',serif; font-weight:300; font-size:clamp(2.2rem,6vw,3.6rem);
+  letter-spacing:-.02em; line-height:.96; color:var(--paper);
+}
+.app-head h1 em{font-style:italic; font-weight:400; color:var(--gold);}
+.app-head p{margin-top:18px; max-width:640px; color:var(--paper-dim); font-size:1.02rem;}
+
+/* ---------- Arbeitsbereich ---------- */
+.work{display:grid; grid-template-columns:minmax(0,1fr) 350px; gap:22px; align-items:start; padding-bottom:110px;}
+
+.output-card, .controls-card{
+  position:relative; overflow:hidden;
+  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line); border-radius:var(--r);
+  transition:border-color .4s cubic-bezier(.2,.8,.2,1);
+}
+.controls-card, .output-card{--mx:50%; --my:50%;}
+.controls-card::before, .output-card::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
+}
+.controls-card:hover::before, .output-card:hover::before{opacity:.14;}
+.card-inner{position:relative; z-index:1; padding:20px;}
+
+/* Simulation */
+#lenia-canvas{
+  display:block; width:100%; aspect-ratio:1/1;
+  border-radius:calc(var(--r) - 6px); background:#0a0e14;
+  cursor:crosshair; touch-action:none;
+}
+.stats{
+  display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;
+  margin-top:16px;
+}
+.stats .stat{
+  font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--paper-faint);
+}
+.stats .stat b{font-weight:700; color:var(--gold);}
+.hint{
+  margin-top:12px; font-size:.84rem; color:var(--paper-faint);
+}
+
+.empty-state{display:none; text-align:center; padding:70px 20px;}
+.empty-state .pi-big{
+  font-family:'Fraunces',serif; font-style:italic; font-size:4.2rem; color:var(--gold); opacity:.5;
+  line-height:1; display:block; margin-bottom:18px;
+}
+.empty-state p{color:var(--paper-faint); max-width:420px; margin:0 auto; font-size:.94rem;}
+
+/* Controls */
+.ctl-label{
+  font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--paper-faint); margin-bottom:10px;
+}
+.ctl-group{margin-bottom:26px;}
+.ctl-group:last-child{margin-bottom:0;}
+
+.btn-row{display:flex; flex-wrap:wrap; gap:10px;}
+.btn-primary{
+  border:none; cursor:pointer; border-radius:100px; padding:12px 26px;
+  background:var(--gold); color:var(--ink);
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:.92rem;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-primary:hover{transform:translateY(-3px); box-shadow:0 14px 28px -10px var(--shadow);}
+.btn-primary:focus-visible{outline:2px solid var(--gold-bright); outline-offset:3px;}
+.btn-ghost{
+  cursor:pointer; border-radius:100px; padding:11px 20px;
+  background:transparent; border:1px solid var(--line); color:var(--paper);
+  font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:.88rem;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-ghost:hover{border-color:var(--gold); color:var(--gold);}
+.btn-ghost:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+
+.seg{
+  display:inline-flex; gap:2px; padding:3px; border-radius:100px;
+  border:1px solid var(--line); background:var(--field-base);
+}
+.seg button{
+  border:none; cursor:pointer; border-radius:100px; padding:8px 16px;
+  background:transparent; color:var(--paper-dim);
+  font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:.84rem;
+  transition:color .3s cubic-bezier(.2,.8,.2,1), background-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.seg button:hover{color:var(--paper);}
+.seg button:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+.seg button.active{background:var(--gold); color:var(--ink);}
+.seg button.active:hover{color:var(--ink);}
+
+.slider-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;}
+.slider-head .val{font-family:'Space Mono',monospace; font-size:.78rem; color:var(--gold);}
+input[type="range"]{
+  -webkit-appearance:none; appearance:none; width:100%; height:20px;
+  background:transparent; cursor:pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track{height:2px; background:var(--line); border-radius:2px;}
+input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--gold); margin-top:-7px; border:none;
+  transition:background-color .3s cubic-bezier(.2,.8,.2,1);
+}
+input[type="range"]::-moz-range-track{height:2px; background:var(--line); border-radius:2px;}
+input[type="range"]::-moz-range-thumb{width:16px; height:16px; border-radius:50%; background:var(--gold); border:none;}
+input[type="range"]:focus-visible{outline:2px solid var(--gold); outline-offset:2px; border-radius:4px;}
+
+.slider-note{font-size:.78rem; color:var(--paper-faint); margin-top:4px;}
+
+/* ---------- Footer ---------- */
+footer{padding:50px 0 70px; border-top:1px solid var(--line); margin-top:0;}
+footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
+footer p{margin:0; font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); letter-spacing:.05em;}
+footer a{color:var(--paper-faint); transition:color .3s cubic-bezier(.2,.8,.2,1);}
+footer a:hover{color:var(--gold);}
+
+/* ---------- Responsiv ---------- */
+@media (max-width:900px){
+  .work{grid-template-columns:1fr;}
+}
+@media (max-width:640px){
+  .container{padding:0 20px;}
+  .app-head{padding:120px 0 40px;}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important;}
+  .reveal{opacity:1; transform:none;}
+  #digit-field{display:none;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="Zurück zur Startseite von 31415.me">
+      <span class="pi">π</span><span class="num">31415</span><span class="tld">.me</span>
+    </a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="app-head">
+    <div class="container">
+      <div class="eyebrow">Kontinuierlicher zellulärer Automat</div>
+      <h1>Lenia — <em>Leben im Fluss</em></h1>
+      <p>Aus einer einzigen Wachstumsregel entstehen weiche, fast biologische Muster,
+      die durchs Feld gleiten, pulsieren und sich teilen. Säe eine Welt, zeichne mit
+      dem Zeiger eigene Materie hinein — und schau dem Leben zu.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="container work">
+
+      <div class="output-card">
+        <div class="card-inner">
+          <canvas id="lenia-canvas" width="256" height="256"
+            aria-label="Lenia-Simulationsfläche. Ziehen zeichnet Materie, Shift und Ziehen radiert."></canvas>
+          <div class="empty-state" id="glError">
+            <span class="pi-big">π</span>
+            <p>Dein Browser stellt kein WebGL&nbsp;2 mit Float-Texturen bereit — die Simulation
+            kann so nicht laufen. Öffne die Seite in einem aktuellen Browser
+            (Firefox, Chrome, Edge oder Safari), dann erwacht das Feld.</p>
+          </div>
+          <div class="stats">
+            <span class="stat">Generation <b id="genCount">000000</b></span>
+            <span class="stat">Zustand <b id="runState">läuft</b></span>
+            <span class="stat">Feld <b>256&thinsp;×&thinsp;256</b></span>
+          </div>
+          <p class="hint">Ziehen zeichnet Materie ins Feld, Shift&thinsp;+&thinsp;Ziehen radiert.</p>
+        </div>
+      </div>
+
+      <div class="controls-card">
+        <div class="card-inner">
+
+          <div class="ctl-group">
+            <div class="ctl-label">Steuerung</div>
+            <div class="btn-row">
+              <button class="btn-primary" id="btnPlay">Pause</button>
+              <button class="btn-ghost" id="btnStep">Schritt</button>
+              <button class="btn-ghost" id="btnSeed">Neu säen</button>
+              <button class="btn-ghost" id="btnClear">Leeren</button>
+            </div>
+          </div>
+
+          <div class="ctl-group">
+            <div class="ctl-label">Welt</div>
+            <div class="seg" role="group" aria-label="Startmuster wählen">
+              <button data-preset="soup" class="active">Ursuppe</button>
+              <button data-preset="orbium">Orbium</button>
+              <button data-preset="islands">Inseln</button>
+            </div>
+          </div>
+
+          <div class="ctl-group">
+            <div class="ctl-label">Farbwelt</div>
+            <div class="seg" role="group" aria-label="Farbschema der Simulation wählen">
+              <button data-cmap="0" class="active">Gold</button>
+              <button data-cmap="1">Lagune</button>
+              <button data-cmap="2">Plasma</button>
+              <button data-cmap="3">Aurora</button>
+            </div>
+          </div>
+
+          <div class="ctl-group">
+            <div class="slider-head">
+              <span class="ctl-label" style="margin:0">Wachstum μ</span>
+              <span class="val" id="muVal">0.150</span>
+            </div>
+            <input type="range" id="muSlider" min="0.05" max="0.30" step="0.001" value="0.15"
+              aria-label="Wachstumszentrum mu">
+            <p class="slider-note">Wo Leben gedeiht: das Zentrum der Wachstumsfunktion.</p>
+          </div>
+
+          <div class="ctl-group">
+            <div class="slider-head">
+              <span class="ctl-label" style="margin:0">Toleranz σ</span>
+              <span class="val" id="sigmaVal">0.017</span>
+            </div>
+            <input type="range" id="sigmaSlider" min="0.005" max="0.050" step="0.0005" value="0.017"
+              aria-label="Wachstumsbreite sigma">
+            <p class="slider-note">Wie viel Abweichung die Muster verzeihen.</p>
+          </div>
+
+          <div class="ctl-group">
+            <div class="slider-head">
+              <span class="ctl-label" style="margin:0">Tempo</span>
+              <span class="val" id="speedVal">×2</span>
+            </div>
+            <input type="range" id="speedSlider" min="1" max="6" step="1" value="2"
+              aria-label="Simulationsschritte pro Bild">
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <p>Teil von <a href="/">31415.me</a> — simuliert kontinuierliches Leben direkt in deinem Browser.</p>
+    <p>Nur deine Theme-Wahl wird lokal gespeichert, sonst verlässt nichts dieses Gerät.</p>
+  </div>
+</footer>
+
+<script>
+/* ---------- Theme (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  const root = document.documentElement;
+  const stored = localStorage.getItem('theme');
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  if(stored){ root.setAttribute('data-theme', stored); }
+  else if(prefersLight){ root.setAttribute('data-theme','light'); }
+
+  function updateMeta(){
+    const isLight = root.getAttribute('data-theme') === 'light';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
+  }
+  updateMeta();
+
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    localStorage.setItem('theme', next);
+    updateMeta();
+  });
+})();
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- Lenia-Simulation (WebGL 2) ---------- */
+(function(){
+  const SIZE = 256;          // Feldgröße in Zellen
+  const R = 13;              // Kernel-Radius
+  const DT = 0.1;            // Zeitschritt (T = 10)
+
+  const canvas = document.getElementById('lenia-canvas');
+  const errBox = document.getElementById('glError');
+  const genEl  = document.getElementById('genCount');
+  const stateEl = document.getElementById('runState');
+
+  const gl = canvas.getContext('webgl2', {antialias:false, alpha:false});
+  if(!gl || !gl.getExtension('EXT_color_buffer_float')){
+    canvas.style.display = 'none';
+    errBox.style.display = 'block';
+    stateEl.textContent = 'nicht verfügbar';
+    return;
+  }
+
+  /* --- Shader-Quellen --- */
+  const VS = `#version 300 es
+  in vec2 p; out vec2 uv;
+  void main(){ uv = p*0.5+0.5; gl_Position = vec4(p,0.0,1.0); }`;
+
+  const FS_UPDATE = `#version 300 es
+  precision highp float;
+  uniform sampler2D state;
+  uniform vec2 texel;
+  uniform float kernSum;
+  uniform float mu;
+  uniform float sigma;
+  uniform float dt;
+  in vec2 uv; out vec4 frag;
+  float bell(float x, float m, float s){ float d=(x-m)/s; return exp(-d*d*0.5); }
+  void main(){
+    float U = 0.0;
+    for(int dy=-13; dy<=13; dy++){
+      for(int dx=-13; dx<=13; dx++){
+        float r = sqrt(float(dx*dx+dy*dy)) / 13.0;
+        if(r > 1.0) continue;
+        float w = bell(r, 0.5, 0.15);
+        float a = texture(state, fract(uv + vec2(float(dx),float(dy))*texel)).r;
+        U += a * w;
+      }
+    }
+    U /= kernSum;
+    float g = 2.0 * bell(U, mu, sigma) - 1.0;
+    float a0 = texture(state, uv).r;
+    frag = vec4(clamp(a0 + dt*g, 0.0, 1.0), 0.0, 0.0, 1.0);
+  }`;
+
+  const FS_BRUSH = `#version 300 es
+  precision highp float;
+  uniform sampler2D state;
+  uniform vec2 center;
+  uniform float radius;   // in Zellen
+  uniform float amount;   // negativ = radieren
+  uniform float gridSize;
+  in vec2 uv; out vec4 frag;
+  void main(){
+    float a0 = texture(state, uv).r;
+    float d = length(uv - center) * gridSize;
+    float s = radius * 0.5;
+    float g = exp(-(d*d)/(2.0*s*s));
+    frag = vec4(clamp(a0 + amount*g, 0.0, 1.0), 0.0, 0.0, 1.0);
+  }`;
+
+  const FS_SHOW = `#version 300 es
+  precision highp float;
+  uniform sampler2D state;
+  uniform int cmap;
+  in vec2 uv; out vec4 frag;
+  vec3 ramp(float t, vec3 c0, vec3 c1, vec3 c2, vec3 c3){
+    if(t < 0.34) return mix(c0, c1, t/0.34);
+    if(t < 0.67) return mix(c1, c2, (t-0.34)/0.33);
+    return mix(c2, c3, (t-0.67)/0.33);
+  }
+  void main(){
+    float a = texture(state, uv).r;
+    vec3 c;
+    if(cmap == 0){       /* Gold */
+      c = ramp(a, vec3(0.040,0.055,0.078), vec3(0.318,0.255,0.137),
+                  vec3(0.847,0.706,0.416), vec3(0.980,0.918,0.780));
+    } else if(cmap == 1){ /* Lagune */
+      c = ramp(a, vec3(0.016,0.055,0.086), vec3(0.020,0.310,0.345),
+                  vec3(0.290,0.855,0.760), vec3(0.910,1.000,0.960));
+    } else if(cmap == 2){ /* Plasma */
+      c = ramp(a, vec3(0.055,0.027,0.125), vec3(0.470,0.106,0.475),
+                  vec3(0.945,0.455,0.204), vec3(0.988,0.930,0.560));
+    } else {              /* Aurora */
+      c = ramp(a, vec3(0.020,0.043,0.078), vec3(0.043,0.310,0.235),
+                  vec3(0.330,0.850,0.560), vec3(0.760,0.980,0.870));
+    }
+    frag = vec4(c, 1.0);
+  }`;
+
+  function compile(type, src){
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src); gl.compileShader(sh);
+    if(!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh));
+    return sh;
+  }
+  function program(fsSrc){
+    const pr = gl.createProgram();
+    gl.attachShader(pr, compile(gl.VERTEX_SHADER, VS));
+    gl.attachShader(pr, compile(gl.FRAGMENT_SHADER, fsSrc));
+    gl.linkProgram(pr);
+    if(!gl.getProgramParameter(pr, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
+    return pr;
+  }
+
+  let progUpdate, progBrush, progShow;
+  try{
+    progUpdate = program(FS_UPDATE);
+    progBrush  = program(FS_BRUSH);
+    progShow   = program(FS_SHOW);
+  }catch(e){
+    canvas.style.display = 'none';
+    errBox.style.display = 'block';
+    stateEl.textContent = 'nicht verfügbar';
+    return;
+  }
+
+  /* Fullscreen-Quad */
+  const quad = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  function bindQuad(pr){
+    const loc = gl.getAttribLocation(pr, 'p');
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  }
+
+  /* Ping-Pong-Texturen */
+  function makeTex(){
+    const t = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, t);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, SIZE, SIZE, 0, gl.RED, gl.FLOAT, null);
+    return t;
+  }
+  const tex = [makeTex(), makeTex()];
+  const fbo = [gl.createFramebuffer(), gl.createFramebuffer()];
+  for(let i=0;i<2;i++){
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[i]);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex[i], 0);
+  }
+  let src = 0; /* aktueller Lesetextur-Index */
+
+  /* Kernel-Normierung — identische Formel wie im Shader */
+  function bell(x, m, s){ const d = (x-m)/s; return Math.exp(-d*d*0.5); }
+  let kernSum = 0;
+  for(let dy=-R; dy<=R; dy++) for(let dx=-R; dx<=R; dx++){
+    const r = Math.hypot(dx, dy) / R;
+    if(r > 1) continue;
+    kernSum += bell(r, 0.5, 0.15);
+  }
+
+  /* --- Parameter & UI-Zustand --- */
+  let mu = 0.15, sigma = 0.017, stepsPerFrame = 2, cmap = 0;
+  let running = !reduceMotion;   /* bei reduzierter Bewegung: pausiert starten */
+  let gen = 0;
+
+  const muSlider = document.getElementById('muSlider');
+  const sigmaSlider = document.getElementById('sigmaSlider');
+  const speedSlider = document.getElementById('speedSlider');
+  const muVal = document.getElementById('muVal');
+  const sigmaVal = document.getElementById('sigmaVal');
+  const speedVal = document.getElementById('speedVal');
+  const btnPlay = document.getElementById('btnPlay');
+
+  function syncUI(){
+    muVal.textContent = mu.toFixed(3);
+    sigmaVal.textContent = sigma.toFixed(3);
+    speedVal.textContent = '×' + stepsPerFrame;
+    muSlider.value = mu; sigmaSlider.value = sigma; speedSlider.value = stepsPerFrame;
+    btnPlay.textContent = running ? 'Pause' : 'Start';
+    stateEl.textContent = running ? 'läuft' : 'pausiert';
+    genEl.textContent = String(gen).padStart(6, '0');
+  }
+
+  /* --- Startmuster --- */
+  /* Orbium — der klassische Lenia-Gleiter (B. Chan, 2019) */
+  const ORBIUM = [
+    [0,0,0,0,0,0,0.1,0.14,0.1,0,0,0.03,0.03,0,0,0.3,0,0,0,0],
+    [0,0,0,0,0,0.08,0.24,0.3,0.3,0.18,0.14,0.15,0.16,0.15,0.09,0.2,0,0,0,0],
+    [0,0,0,0,0,0.15,0.34,0.44,0.46,0.38,0.18,0.14,0.11,0.13,0.19,0.18,0.45,0,0,0],
+    [0,0,0,0,0.06,0.13,0.39,0.5,0.5,0.37,0.06,0,0,0,0.02,0.16,0.68,0,0,0],
+    [0,0,0,0.11,0.17,0.17,0.33,0.4,0.38,0.28,0.14,0,0,0,0,0,0.18,0.42,0,0],
+    [0,0,0.09,0.18,0.13,0.06,0.08,0.26,0.32,0.32,0.27,0,0,0,0,0,0,0.82,0,0],
+    [0.27,0,0.16,0.12,0,0,0,0.25,0.38,0.44,0.45,0.34,0,0,0,0,0,0.22,0.17,0],
+    [0,0.07,0.2,0.02,0,0,0,0.31,0.48,0.57,0.6,0.57,0,0,0,0,0,0,0.49,0],
+    [0,0.59,0.19,0,0,0,0,0.2,0.57,0.69,0.76,0.76,0.49,0,0,0,0,0,0.36,0],
+    [0,0.58,0.19,0,0,0,0,0,0.67,0.83,0.9,0.92,0.87,0.12,0,0,0,0,0.22,0.07],
+    [0,0,0.46,0,0,0,0,0,0.7,0.93,1,1,1,0.61,0,0,0,0,0.18,0.11],
+    [0,0,0.82,0,0,0,0,0,0.47,1,1,0.98,1,0.96,0.27,0,0,0,0.19,0.1],
+    [0,0,0.46,0,0,0,0,0,0.25,1,1,0.84,0.92,0.97,0.54,0.14,0.04,0.1,0.21,0.05],
+    [0,0,0,0.4,0,0,0,0,0.09,0.8,1,0.82,0.8,0.85,0.63,0.31,0.18,0.19,0.2,0.01],
+    [0,0,0,0.36,0.1,0,0,0,0.05,0.54,0.86,0.79,0.74,0.72,0.6,0.39,0.28,0.24,0.13,0],
+    [0,0,0,0.01,0.3,0.07,0,0,0.08,0.36,0.64,0.7,0.64,0.6,0.51,0.39,0.29,0.19,0.04,0],
+    [0,0,0,0,0.1,0.24,0.14,0.1,0.15,0.29,0.45,0.53,0.52,0.46,0.4,0.31,0.21,0.08,0,0],
+    [0,0,0,0,0,0.08,0.21,0.21,0.22,0.29,0.36,0.39,0.37,0.33,0.26,0.18,0.09,0,0,0],
+    [0,0,0,0,0,0,0.03,0.13,0.19,0.22,0.24,0.24,0.23,0.18,0.13,0.05,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0.02,0.06,0.08,0.09,0.07,0.05,0.01,0,0,0,0,0]
+  ];
+
+  function rotate(mat, times){
+    let m = mat;
+    for(let t=0; t<times; t++){
+      const h = m.length, w = m[0].length;
+      const out = Array.from({length:w}, () => new Array(h).fill(0));
+      for(let y=0;y<h;y++) for(let x=0;x<w;x++) out[x][h-1-y] = m[y][x];
+      m = out;
+    }
+    return m;
+  }
+
+  function stamp(data, mat, cx, cy){
+    const h = mat.length, w = mat[0].length;
+    for(let y=0;y<h;y++) for(let x=0;x<w;x++){
+      const gx = ((cx + x - (w>>1)) % SIZE + SIZE) % SIZE;
+      const gy = ((cy + y - (h>>1)) % SIZE + SIZE) % SIZE;
+      const i = gy*SIZE + gx;
+      data[i] = Math.min(1, data[i] + mat[y][x]);
+    }
+  }
+
+  function blob(data, cx, cy, rad, amp){
+    const s2 = 2 * (rad*0.5) * (rad*0.5);
+    const lim = Math.ceil(rad*1.6);
+    for(let dy=-lim; dy<=lim; dy++) for(let dx=-lim; dx<=lim; dx++){
+      const g = amp * Math.exp(-(dx*dx+dy*dy)/s2);
+      if(g < 0.004) continue;
+      const gx = ((cx+dx) % SIZE + SIZE) % SIZE;
+      const gy = ((cy+dy) % SIZE + SIZE) % SIZE;
+      const i = gy*SIZE + gx;
+      data[i] = Math.min(1, data[i] + g);
+    }
+  }
+
+  const PRESETS = {
+    soup(){
+      const d = new Float32Array(SIZE*SIZE);
+      for(let n=0; n<46; n++){
+        blob(d, (Math.random()*SIZE)|0, (Math.random()*SIZE)|0,
+             5 + Math.random()*9, 0.5 + Math.random()*0.5);
+      }
+      mu = 0.15; sigma = 0.017;
+      return d;
+    },
+    orbium(){
+      const d = new Float32Array(SIZE*SIZE);
+      for(let n=0; n<4; n++){
+        stamp(d, rotate(ORBIUM, n % 4),
+              40 + ((Math.random()*(SIZE-80))|0),
+              40 + ((Math.random()*(SIZE-80))|0));
+      }
+      mu = 0.15; sigma = 0.015;
+      return d;
+    },
+    islands(){
+      const d = new Float32Array(SIZE*SIZE);
+      for(let n=0; n<9; n++){
+        blob(d, (Math.random()*SIZE)|0, (Math.random()*SIZE)|0,
+             14 + Math.random()*12, 0.75 + Math.random()*0.25);
+      }
+      mu = 0.15; sigma = 0.020;
+      return d;
+    }
+  };
+  let currentPreset = 'soup';
+
+  function uploadState(data){
+    gl.bindTexture(gl.TEXTURE_2D, tex[src]);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, SIZE, SIZE, 0, gl.RED, gl.FLOAT, data);
+    gen = 0;
+    syncUI();
+  }
+
+  function seed(name){
+    currentPreset = name;
+    uploadState(PRESETS[name]());
+    syncUI();
+  }
+
+  /* --- Simulationsschritt --- */
+  const uUpd = {
+    state: gl.getUniformLocation(progUpdate,'state'),
+    texel: gl.getUniformLocation(progUpdate,'texel'),
+    kernSum: gl.getUniformLocation(progUpdate,'kernSum'),
+    mu: gl.getUniformLocation(progUpdate,'mu'),
+    sigma: gl.getUniformLocation(progUpdate,'sigma'),
+    dt: gl.getUniformLocation(progUpdate,'dt')
+  };
+  const uBr = {
+    state: gl.getUniformLocation(progBrush,'state'),
+    center: gl.getUniformLocation(progBrush,'center'),
+    radius: gl.getUniformLocation(progBrush,'radius'),
+    amount: gl.getUniformLocation(progBrush,'amount'),
+    gridSize: gl.getUniformLocation(progBrush,'gridSize')
+  };
+  const uSh = {
+    state: gl.getUniformLocation(progShow,'state'),
+    cmap: gl.getUniformLocation(progShow,'cmap')
+  };
+
+  function stepSim(){
+    const dst = 1 - src;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[dst]);
+    gl.viewport(0, 0, SIZE, SIZE);
+    gl.useProgram(progUpdate);
+    bindQuad(progUpdate);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex[src]);
+    gl.uniform1i(uUpd.state, 0);
+    gl.uniform2f(uUpd.texel, 1/SIZE, 1/SIZE);
+    gl.uniform1f(uUpd.kernSum, kernSum);
+    gl.uniform1f(uUpd.mu, mu);
+    gl.uniform1f(uUpd.sigma, sigma);
+    gl.uniform1f(uUpd.dt, DT);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    src = dst;
+    gen++;
+  }
+
+  function brush(cx, cy, amount){
+    const dst = 1 - src;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo[dst]);
+    gl.viewport(0, 0, SIZE, SIZE);
+    gl.useProgram(progBrush);
+    bindQuad(progBrush);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex[src]);
+    gl.uniform1i(uBr.state, 0);
+    gl.uniform2f(uBr.center, cx, cy);
+    gl.uniform1f(uBr.radius, 7.0);
+    gl.uniform1f(uBr.amount, amount);
+    gl.uniform1f(uBr.gridSize, SIZE);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    src = dst;
+  }
+
+  function renderSim(){
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.useProgram(progShow);
+    bindQuad(progShow);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, tex[src]);
+    gl.uniform1i(uSh.state, 0);
+    gl.uniform1i(uSh.cmap, cmap);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  /* --- Zeichnen mit dem Zeiger --- */
+  let drawing = false;
+  function pointerToUV(e){
+    const rect = canvas.getBoundingClientRect();
+    return [
+      (e.clientX - rect.left) / rect.width,
+      1 - (e.clientY - rect.top) / rect.height
+    ];
+  }
+  canvas.addEventListener('pointerdown', e => {
+    drawing = true;
+    canvas.setPointerCapture(e.pointerId);
+    const [x, y] = pointerToUV(e);
+    brush(x, y, e.shiftKey ? -0.9 : 0.9);
+  });
+  canvas.addEventListener('pointermove', e => {
+    if(!drawing) return;
+    const [x, y] = pointerToUV(e);
+    brush(x, y, e.shiftKey ? -0.9 : 0.9);
+  });
+  addEventListener('pointerup', () => { drawing = false; });
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+  /* --- Bedienelemente --- */
+  btnPlay.addEventListener('click', () => { running = !running; syncUI(); });
+  document.getElementById('btnStep').addEventListener('click', () => {
+    running = false; stepSim(); syncUI();
+  });
+  document.getElementById('btnSeed').addEventListener('click', () => seed(currentPreset));
+  document.getElementById('btnClear').addEventListener('click', () => {
+    uploadState(new Float32Array(SIZE*SIZE));
+  });
+
+  document.querySelectorAll('[data-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-preset]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      seed(btn.dataset.preset);
+    });
+  });
+  document.querySelectorAll('[data-cmap]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('[data-cmap]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      cmap = parseInt(btn.dataset.cmap, 10);
+    });
+  });
+
+  muSlider.addEventListener('input', () => { mu = parseFloat(muSlider.value); syncUI(); });
+  sigmaSlider.addEventListener('input', () => { sigma = parseFloat(sigmaSlider.value); syncUI(); });
+  speedSlider.addEventListener('input', () => { stepsPerFrame = parseInt(speedSlider.value, 10); syncUI(); });
+
+  /* --- Hauptschleife --- */
+  seed('soup');
+  function frame(){
+    if(running){
+      for(let i=0; i<stepsPerFrame; i++) stepSim();
+      genEl.textContent = String(gen).padStart(6, '0');
+    }
+    renderSim();
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
+/* ---------- Karten-Spotlight ---------- */
+document.querySelectorAll('.controls-card, .output-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  });
+});
+
+/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
+  const cv = document.getElementById('digit-field');
+  const ctx = cv.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    const cols = Math.floor(cv.width / 28);
+    drops = [];
+    for(let i=0;i<cols;i++){
+      drops.push({
+        x: i*28 + 14,
+        y: Math.random() * cv.height,
+        speed: 0.4 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
+      });
+    }
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d => {
+      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
+      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > cv.height){
+        d.y = -20;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
