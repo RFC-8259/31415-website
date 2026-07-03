@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0e14">
+<title>Netzplan — 31415.me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{ /* DARK (Default) */
+  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
+  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
+  --gold:#d8b46a; --gold-bright:#f0cd84;
+  --field-base:rgba(10,14,20,0.12);
+  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --shadow:rgba(216,180,106,.55); --r:14px;
+  /* Bestätigte Zweitfarbe: kritischer Pfad & Fehlerzustände */
+  --accent2:#d0796a; --accent2-bright:#eb9b8b;
+}
+html[data-theme="light"]{
+  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
+  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
+  --gold:#a9802e; --gold-bright:#8c6618;
+  --field-base:rgba(246,243,234,0.14);
+  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --shadow:rgba(169,128,46,.32);
+  --accent2:#b04a33; --accent2-bright:#8f3a27;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink); color:var(--paper);
+  font-family:'Space Grotesk',sans-serif; font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  transition:background .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.container{max-width:1180px;margin:0 auto;padding:0 28px}
+
+#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
+
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html[data-theme="light"] .grain{opacity:.02;}
+
+/* ---------- Header ---------- */
+header.site{
+  position:fixed;top:0;left:0;right:0;height:72px;z-index:50;
+  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.header-inner{height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:baseline;gap:9px;text-decoration:none}
+.brand .pi{font-family:'Fraunces',serif;font-weight:500;font-size:26px;color:var(--gold);line-height:1}
+.brand .num{font-family:'Space Mono',monospace;font-weight:700;font-size:1rem;letter-spacing:.08em;color:var(--paper)}
+.brand .tld{font-family:'Space Mono',monospace;font-size:1rem;color:var(--paper-faint)}
+
+.theme-toggle{
+  width:40px;height:40px;border-radius:100px;border:1px solid var(--line);
+  background:transparent;color:var(--paper);cursor:pointer;
+  display:grid;place-items:center;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.theme-toggle:hover{border-color:var(--gold);color:var(--gold)}
+.theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.theme-toggle svg{width:18px;height:18px}
+.icon-sun{display:none;}
+html[data-theme="light"] .icon-moon{display:none;}
+html[data-theme="light"] .icon-sun{display:block;}
+
+/* ---------- App-Kopf ---------- */
+.app-head{padding:150px 0 56px}
+.eyebrow{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+.app-head h1{
+  font-family:'Fraunces',serif;font-weight:300;letter-spacing:-.02em;line-height:.96;
+  font-size:clamp(2.2rem,6vw,3.6rem);margin:16px 0 18px;
+}
+.app-head h1 em{font-style:italic;font-weight:400;color:var(--gold)}
+.lede{color:var(--paper-dim);font-weight:300;max-width:660px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+
+/* ---------- Buttons ---------- */
+button{font-family:inherit}
+.btn-primary{
+  font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.92rem;
+  background:var(--gold);color:var(--ink);border:none;border-radius:100px;
+  padding:13px 26px;cursor:pointer;display:inline-flex;align-items:center;gap:9px;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1), box-shadow .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 14px 28px -10px var(--shadow)}
+.btn-primary:focus-visible{outline:2px solid var(--gold-bright);outline-offset:3px}
+.btn-ghost{
+  font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:.9rem;
+  background:transparent;color:var(--paper);border:1px solid var(--line);border-radius:100px;
+  padding:11px 20px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.btn-ghost.sm{padding:8px 16px;font-size:.84rem}
+.btn-primary svg,.btn-ghost svg{width:15px;height:15px;flex:none}
+
+.icon-btn{
+  width:34px;height:34px;border-radius:8px;border:1px solid var(--line);
+  background:transparent;color:var(--paper-faint);cursor:pointer;
+  display:inline-grid;place-items:center;flex:none;
+  transition:border-color .25s cubic-bezier(.2,.8,.2,1), color .25s cubic-bezier(.2,.8,.2,1);
+}
+.icon-btn:hover{border-color:var(--gold);color:var(--gold)}
+.icon-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.icon-btn svg{width:16px;height:16px}
+
+/* ---------- Karten ---------- */
+.app-card{
+  position:relative;
+  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line);border-radius:var(--r);
+  margin-bottom:34px;
+  --mx:50%; --my:50%;
+}
+.app-card::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  border-radius:var(--r);
+  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
+}
+.app-card:hover::before{opacity:.14;}
+.card-head{
+  position:relative;z-index:1;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  padding:22px 26px;border-bottom:1px solid var(--line);
+}
+.card-index{font-family:'Space Mono',monospace;font-size:.78rem;letter-spacing:.14em;color:var(--gold)}
+.card-head h2{font-family:'Fraunces',serif;font-weight:400;font-size:1.35rem;letter-spacing:-.01em}
+.card-sub{font-size:.86rem;font-weight:300;color:var(--paper-faint)}
+.spacer{margin-left:auto}
+.card-body{position:relative;z-index:1;padding:24px 26px}
+
+/* ---------- Phasen ---------- */
+.phase-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-height:40px}
+.phase-hint{color:var(--paper-faint);font-size:.88rem;font-weight:300}
+.phase-chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--field-base);border:1px solid var(--line);
+  border-radius:100px;padding:7px 8px 7px 14px;
+}
+.swatch{width:15px;height:15px;border-radius:5px;flex:none;cursor:pointer;position:relative;overflow:hidden;border:1px solid var(--line)}
+.swatch input{position:absolute;inset:-6px;opacity:0;cursor:pointer}
+.phase-chip input[type=text]{
+  background:transparent;border:none;border-bottom:1px solid transparent;
+  font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:.9rem;color:var(--paper);
+  min-width:70px;max-width:160px;padding:2px 0;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.phase-chip input[type=text]:focus{outline:none;border-bottom-color:var(--gold)}
+.phase-del{width:26px;height:26px;border-radius:100px}
+
+/* ---------- Tabelle ---------- */
+.tbl-scroll{overflow-x:auto;margin:0 -26px;padding:0 26px}
+table.pkg{width:100%;border-collapse:collapse;min-width:820px}
+table.pkg th{
+  font-family:'Space Mono',monospace;font-weight:400;font-size:.66rem;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--paper-faint);
+  text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap;
+}
+table.pkg td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.nr-badge{font-family:'Space Mono',monospace;font-weight:700;font-size:.9rem;color:var(--gold)}
+.tbl-empty{text-align:center;color:var(--paper-faint);padding:30px 10px;font-weight:300}
+
+.cell-input,.cell-select{
+  width:100%;background:var(--field-base);border:1px solid var(--line);border-radius:8px;
+  font-family:'Space Grotesk',sans-serif;font-size:.92rem;color:var(--paper);
+  padding:9px 11px;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.cell-input:focus,.cell-select:focus{outline:none;border-color:var(--gold)}
+.cell-input::placeholder{color:var(--paper-faint)}
+td.col-name .cell-input{font-weight:500}
+td.col-dur{width:96px}
+td.col-dur .cell-input{font-family:'Space Mono',monospace;text-align:center}
+.cell-input[type=number]{-moz-appearance:textfield;appearance:textfield}
+.cell-input[type=number]::-webkit-outer-spin-button,
+.cell-input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.cell-select{
+  appearance:none;-webkit-appearance:none;cursor:pointer;padding-right:30px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236f6c63' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center;
+}
+html[data-theme="light"] .cell-select{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238f8a7d' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* Vorgänger-Mehrfachauswahl */
+.ms{position:relative}
+.ms-btn{
+  width:100%;min-height:39px;text-align:left;cursor:pointer;position:relative;
+  background:var(--field-base);border:1px solid var(--line);border-radius:8px;
+  font-family:'Space Grotesk',sans-serif;font-size:.88rem;color:var(--paper);
+  padding:7px 30px 7px 11px;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.ms-btn:hover{border-color:var(--gold)}
+.ms-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ms-btn::after{
+  content:"";position:absolute;right:12px;top:50%;width:7px;height:7px;
+  border-right:1.5px solid var(--paper-faint);border-bottom:1.5px solid var(--paper-faint);
+  transform:translateY(-70%) rotate(45deg);
+}
+.ms-btn .none{color:var(--paper-faint)}
+.ms-tag{
+  display:inline-block;font-family:'Space Mono',monospace;font-weight:700;font-size:.72rem;
+  color:var(--gold);background:color-mix(in srgb, var(--gold) 14%, transparent);
+  border-radius:5px;padding:2px 7px;margin:1px 4px 1px 0;
+}
+.ms-panel{
+  position:absolute;z-index:30;top:calc(100% + 6px);left:0;min-width:260px;max-height:250px;overflow:auto;
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 20px 40px -12px rgba(0,0,0,.5);padding:6px;
+}
+.ms-opt{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:.88rem;color:var(--paper)}
+.ms-opt:hover{background:var(--field-base)}
+.ms-opt.disabled{opacity:.45;cursor:not-allowed}
+.ms-opt.disabled:hover{background:transparent}
+.ms-opt .mini-nr{font-family:'Space Mono',monospace;font-weight:700;font-size:.72rem;color:var(--gold);flex:none}
+.ms-opt .cycle-hint{margin-left:auto;font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent2);flex:none}
+.ms-empty{padding:12px;color:var(--paper-faint);font-size:.84rem;text-align:center;font-weight:300}
+
+.opt-check{
+  appearance:none;-webkit-appearance:none;width:19px;height:19px;flex:none;cursor:pointer;position:relative;
+  border:1px solid var(--line);border-radius:5px;background:var(--ink-soft);
+  transition:background .3s cubic-bezier(.2,.8,.2,1), border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.opt-check:checked{background:var(--gold);border-color:var(--gold)}
+.opt-check:checked::after{
+  content:"";position:absolute;left:6px;top:2.5px;width:4px;height:9px;
+  border:solid var(--ink);border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.opt-check:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.opt-check:disabled{cursor:not-allowed}
+
+td.col-desc{width:50px;text-align:center}
+.desc-toggle{position:relative}
+.desc-toggle.has-text::after{
+  content:"";position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;
+  background:var(--gold);border:1.5px solid var(--panel);
+}
+td.col-act{width:50px;text-align:center}
+
+tr.desc-row td{padding:0 8px;border-bottom:1px solid var(--line)}
+.desc-wrap{max-height:0;overflow:hidden;transition:max-height .3s cubic-bezier(.2,.8,.2,1)}
+.desc-wrap.open{max-height:280px}
+.desc-inner{padding:6px 0 16px;display:flex;gap:14px;align-items:flex-start}
+.desc-inner .lbl{
+  font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--paper-faint);padding-top:13px;white-space:nowrap;
+}
+.desc-area{
+  flex:1;width:100%;min-height:72px;resize:vertical;line-height:1.55;
+  background:var(--field-base);border:1px solid var(--line);border-radius:10px;
+  font-family:'Space Grotesk',sans-serif;font-size:.9rem;color:var(--paper);
+  padding:12px 14px;
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1);
+}
+.desc-area:focus{outline:none;border-color:var(--gold)}
+.desc-area::placeholder{color:var(--paper-faint)}
+
+.table-foot{display:flex;gap:10px;padding-top:20px}
+
+/* ---------- Netzplan ---------- */
+.diagram-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.zoom-val{font-family:'Space Mono',monospace;font-size:.78rem;color:var(--paper-faint);min-width:44px;text-align:center}
+
+.banner{
+  display:none;align-items:flex-start;gap:10px;
+  background:color-mix(in srgb, var(--accent2) 10%, transparent);
+  border:1px solid color-mix(in srgb, var(--accent2) 40%, transparent);
+  color:var(--accent2-bright);
+  padding:13px 16px;border-radius:10px;margin-bottom:18px;font-size:.9rem;
+}
+.banner.show{display:flex}
+.banner svg{width:17px;height:17px;flex:none;margin-top:2px}
+
+.stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  margin-bottom:18px;
+}
+.stat{background:var(--ink-soft);padding:16px 18px}
+.stat .k{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--paper-faint)}
+.stat .v{font-family:'Space Mono',monospace;font-weight:700;font-size:1.5rem;margin-top:4px;color:var(--paper)}
+.stat .v small{font-size:.7rem;font-weight:400;color:var(--paper-faint)}
+.stat .v.gold{color:var(--gold)}
+.stat .v.crit{color:var(--accent2)}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.03em;color:var(--paper-dim);margin-bottom:14px}
+.legend .item{display:flex;align-items:center;gap:8px}
+.legend .dot{width:12px;height:12px;border-radius:4px;flex:none}
+.legend .crit-line{width:22px;height:0;border-top:2.5px solid var(--accent2);flex:none}
+.legend .norm-line{width:22px;height:0;border-top:1.6px solid var(--paper-faint);flex:none}
+.legend .note{margin-left:auto;color:var(--paper-faint)}
+
+.canvas-shell{
+  position:relative;background:var(--field-base);
+  border:1px solid var(--line);border-radius:12px;
+  overflow:auto;max-height:76vh;
+}
+#canvas{display:block;min-height:220px}
+#canvas svg{display:block}
+
+.empty-state{padding:80px 24px;text-align:center;color:var(--paper-faint)}
+.pi-big{display:block;font-family:'Fraunces',serif;font-style:italic;font-size:64px;line-height:1;color:var(--gold);opacity:.5;margin-bottom:16px}
+.empty-state b{display:block;font-weight:500;font-size:1rem;color:var(--paper-dim);margin-bottom:6px}
+.empty-state span{font-weight:300;font-size:.9rem}
+
+/* ---------- Modal ---------- */
+.modal-back{
+  position:fixed;inset:0;z-index:100;background:rgba(10,14,20,.65);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:24px;
+}
+.modal-back.show{display:flex}
+.modal{
+  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  border:1px solid var(--line);border-radius:var(--r);
+  width:min(560px,100%);max-height:86vh;overflow:auto;
+  animation:pop .25s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+.modal-head{padding:22px 24px 18px;border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:flex-start}
+.modal-head .big-nr{
+  font-family:'Space Mono',monospace;font-weight:700;font-size:.86rem;flex:none;
+  padding:6px 12px;border-radius:8px;color:var(--gold);
+  background:color-mix(in srgb, var(--gold) 14%, transparent);
+}
+.modal-head h3{font-family:'Fraunces',serif;font-weight:400;font-size:1.45rem;letter-spacing:-.01em;line-height:1.25}
+.phase-pill{display:inline-flex;align-items:center;gap:7px;font-size:.8rem;color:var(--paper-dim);margin-top:7px}
+.phase-pill .dot{width:11px;height:11px;border-radius:3px}
+.crit-flag{
+  display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+  font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--accent2-bright);
+  background:color-mix(in srgb, var(--accent2) 12%, transparent);
+  border:1px solid color-mix(in srgb, var(--accent2) 40%, transparent);
+  padding:5px 11px;border-radius:100px;
+}
+.crit-flag svg{width:12px;height:12px}
+.modal-close{margin-left:auto}
+.modal-body{padding:20px 24px 26px}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px}
+.kpi{background:var(--field-base);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.kpi .k{font-family:'Space Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-faint)}
+.kpi .v{font-family:'Space Mono',monospace;font-weight:700;font-size:1.2rem;margin-top:3px;color:var(--paper)}
+.kpi.is-crit{border-color:color-mix(in srgb, var(--accent2) 45%, transparent)}
+.kpi.is-crit .v{color:var(--accent2)}
+.modal-body h4{
+  font-family:'Space Mono',monospace;font-weight:400;font-size:.62rem;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--paper-faint);margin-bottom:10px;
+}
+.modal-desc{
+  background:var(--field-base);border:1px solid var(--line);border-radius:10px;
+  padding:14px 16px;font-size:.92rem;line-height:1.6;white-space:pre-wrap;color:var(--paper);
+}
+.modal-desc.empty{color:var(--paper-faint);font-style:italic;font-weight:300}
+
+/* ---------- Reveal ---------- */
+.reveal{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
+.reveal.in{opacity:1; transform:translateY(0);}
+
+/* ---------- Toast ---------- */
+.toast{
+  position:fixed; bottom:28px; left:50%; transform:translate(-50%,20px);
+  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif;
+  font-weight:600; font-size:.88rem; padding:13px 24px; border-radius:100px;
+  box-shadow:0 16px 32px -8px var(--shadow); opacity:0; pointer-events:none; z-index:100;
+  transition:opacity .35s cubic-bezier(.2,.8,.2,1), transform .35s cubic-bezier(.2,.8,.2,1);
+}
+.toast.show{opacity:1; transform:translate(-50%,0);}
+
+/* ---------- Footer ---------- */
+main{padding-bottom:70px}
+footer{padding:50px 0 70px; border-top:1px solid var(--line); margin-top:0;}
+footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
+footer p{margin:0; font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); letter-spacing:.05em;}
+footer a{color:var(--paper-faint); transition:color .3s cubic-bezier(.2,.8,.2,1);}
+footer a:hover{color:var(--gold);}
+
+/* ---------- Responsiv ---------- */
+@media (max-width:640px){
+  .container{padding:0 20px}
+  .app-head{padding:120px 0 40px}
+  .card-head{padding:18px 20px}
+  .card-body{padding:20px}
+  .tbl-scroll{margin:0 -20px;padding:0 20px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important;}
+  .reveal{opacity:1; transform:none;}
+  #digit-field{display:none;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="site">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="Zurück zur Startseite von 31415.me">
+      <span class="pi">π</span><span class="num">31415</span><span class="tld">.me</span>
+    </a>
+    <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="app-head reveal">
+    <span class="eyebrow">CPM · Vorgangsknoten</span>
+    <h1>Netzplan</h1>
+    <p class="lede">Arbeitspakete erfassen, Abhängigkeiten setzen — Vorwärts- und Rückwärtsterminierung, Puffer und der <em style="font-style:normal;color:var(--accent2)">kritische Pfad</em> berechnen sich von selbst. Dein Projekt bleibt automatisch in diesem Browser gespeichert.</p>
+    <div class="toolbar">
+      <button class="btn-ghost" id="btnExample">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+        Beispiel laden
+      </button>
+      <button class="btn-ghost" id="btnImport">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        JSON importieren
+      </button>
+      <button class="btn-ghost" id="btnExportJson">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5-5 5 5M12 5v10"/></svg>
+        JSON exportieren
+      </button>
+      <button class="btn-ghost" id="btnReset">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        Zurücksetzen
+      </button>
+      <input type="file" id="fileInput" accept="application/json,.json" hidden>
+    </div>
+  </div>
+
+  <!-- 01 PHASEN -->
+  <section class="app-card reveal" aria-labelledby="hPhasen">
+    <div class="card-head">
+      <span class="card-index">01</span>
+      <h2 id="hPhasen">Phasen</h2>
+      <span class="card-sub">Optional — gruppieren und färben deine Arbeitspakete</span>
+      <span class="spacer"></span>
+      <button class="btn-ghost sm" id="btnAddPhase">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+        Phase
+      </button>
+    </div>
+    <div class="card-body">
+      <div class="phase-row" id="phaseRow"></div>
+    </div>
+  </section>
+
+  <!-- 02 ARBEITSPAKETE -->
+  <section class="app-card reveal" aria-labelledby="hPakete">
+    <div class="card-head">
+      <span class="card-index">02</span>
+      <h2 id="hPakete">Arbeitspakete</h2>
+      <span class="card-sub">Dauer und Vorgänger erfassen — Schleifen werden automatisch verhindert</span>
+    </div>
+    <div class="card-body">
+      <div class="tbl-scroll">
+        <table class="pkg">
+          <thead>
+            <tr>
+              <th style="width:46px">Nr</th>
+              <th>Bezeichnung</th>
+              <th style="width:96px">Dauer (ZE)</th>
+              <th style="width:210px">Vorgänger</th>
+              <th style="width:160px">Phase</th>
+              <th style="width:50px">Info</th>
+              <th style="width:50px"><span style="position:absolute;clip:rect(0 0 0 0)">Aktionen</span></th>
+            </tr>
+          </thead>
+          <tbody id="pkgBody"></tbody>
+        </table>
+      </div>
+      <div class="table-foot">
+        <button class="btn-primary" id="btnAddPkg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+          Arbeitspaket hinzufügen
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 NETZPLAN -->
+  <section class="app-card reveal" aria-labelledby="hPlan">
+    <div class="card-head">
+      <span class="card-index">03</span>
+      <h2 id="hPlan">Netzplan</h2>
+      <span class="card-sub">Kritischer Pfad in Warmrot · Knoten anklicken für Details</span>
+      <span class="spacer"></span>
+      <div class="diagram-tools">
+        <button class="icon-btn" id="zoomOut" aria-label="Verkleinern"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/></svg></button>
+        <span class="zoom-val" id="zoomVal" aria-live="polite">100%</span>
+        <button class="icon-btn" id="zoomIn" aria-label="Vergrößern"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button class="btn-ghost sm" id="zoomFit">Einpassen</button>
+        <button class="btn-ghost sm" id="btnExportSvg">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16l4.5-6 3 4 3.5-5L21 16M3 20h18M3 4h18"/></svg>
+          SVG exportieren
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="banner" id="banner" role="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+        <span id="bannerText"></span>
+      </div>
+
+      <div class="stats" id="stats" hidden></div>
+      <div class="legend" id="legend"></div>
+
+      <div class="canvas-shell" id="canvasShell">
+        <div id="canvas"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>Teil von <a href="/">31415.me</a> — Netzplantechnik direkt im Browser.</p>
+    <p>Projektdaten und Theme-Wahl werden nur lokal gespeichert — nichts verlässt dieses Gerät.</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast">Kopiert</div>
+
+<div class="modal-back" id="modalBack">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Details zum Arbeitspaket"></div>
+</div>
+
+<script>
+/* ---------- Theme (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  const root = document.documentElement;
+  const stored = localStorage.getItem('theme');
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  if(stored){ root.setAttribute('data-theme', stored); }
+  else if(prefersLight){ root.setAttribute('data-theme','light'); }
+
+  function updateMeta(){
+    const isLight = root.getAttribute('data-theme') === 'light';
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
+  }
+  updateMeta();
+
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+    const next = current === 'light' ? 'dark' : 'light';
+    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
+    localStorage.setItem('theme', next);
+    updateMeta();
+  });
+})();
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* =========================================================================
+   NETZPLAN — Vorgangsknoten-Editor
+   Single-File-App · CPM (Critical Path Method) mit Layered-Layout
+   ========================================================================= */
+"use strict";
+
+/* ---------------------------------------------------------------------------
+   STATE
+--------------------------------------------------------------------------- */
+const PHASE_PALETTE = ["#6d8fb5","#7f9c6d","#5fa8a0","#a97fb0","#c0895f","#b07a92","#8a9bb8","#9aa66b"];
+let phaseColorCursor = 0;
+
+const state = {
+  phases: [],     // {id, name, color}
+  packages: [],   // {id, name, duration, predecessors:[id], description, phaseId}
+};
+
+let zoom = 1;
+let lastLayout = null;
+
+const STORE_KEY = "netzplan-data";
+const uid = () => "id" + Math.random().toString(36).slice(2, 9);
+const $  = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+/* ---------------------------------------------------------------------------
+   TOAST (Referenzcode)
+--------------------------------------------------------------------------- */
+let toastTimer;
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+/* ---------------------------------------------------------------------------
+   PERSISTENZ (Autosave in localStorage)
+--------------------------------------------------------------------------- */
+let persistTimer = null;
+function schedulePersist(){
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(() => {
+    try{
+      localStorage.setItem(STORE_KEY, JSON.stringify({ phases: state.phases, packages: state.packages }));
+    }catch(e){ /* Speicher voll o. ä. — App bleibt funktionsfähig */ }
+  }, 300);
+}
+function restoreState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return false;
+    const d = JSON.parse(raw);
+    if(Array.isArray(d.phases))   state.phases   = d.phases;
+    if(Array.isArray(d.packages)) state.packages = d.packages;
+    return state.packages.length > 0 || state.phases.length > 0;
+  }catch(e){ return false; }
+}
+
+/* ---------------------------------------------------------------------------
+   KNOTEN-GEOMETRIE (Layout + Render + Export)
+--------------------------------------------------------------------------- */
+const NODE_W = 186, NODE_H = 100;
+const HEAD_H = 28;
+const ROW_H  = (NODE_H - HEAD_H) / 2;
+const HGAP   = 92;     // horizontaler Abstand zwischen Ebenen
+const VGAP   = 30;     // minimaler vertikaler Abstand
+const DUMMY_H = 14;
+const MARGIN = 34;
+
+/* ---------------------------------------------------------------------------
+   HELFER
+--------------------------------------------------------------------------- */
+function escapeXml(s){
+  return String(s ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+}
+function truncate(s, n){ s = String(s ?? ""); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+function fmtNum(n){
+  if(n === null || n === undefined || isNaN(n)) return "–";
+  return (Math.round(n * 100) / 100).toString();
+}
+function hexToRgba(hex, a){
+  hex = (hex || "#888888").replace("#","");
+  if(hex.length === 3) hex = hex.split("").map(c=>c+c).join("");
+  const r = parseInt(hex.slice(0,2),16), g = parseInt(hex.slice(2,4),16), b = parseInt(hex.slice(4,6),16);
+  return `rgba(${r},${g},${b},${a})`;
+}
+function nrOf(pkgId){ const i = state.packages.findIndex(p => p.id === pkgId); return i < 0 ? "?" : (i + 1); }
+function phaseById(id){ return state.phases.find(p => p.id === id) || null; }
+
+/* Alle Nachfolger (transitiv) eines Pakets — für die Schleifen-Prävention */
+function descendantsOf(startId){
+  const succ = {};
+  state.packages.forEach(p => succ[p.id] = []);
+  state.packages.forEach(p => p.predecessors.forEach(pre => { if(succ[pre]) succ[pre].push(p.id); }));
+  const seen = new Set();
+  const stack = [startId];
+  while(stack.length){
+    const n = stack.pop();
+    (succ[n] || []).forEach(s => { if(!seen.has(s)){ seen.add(s); stack.push(s); } });
+  }
+  return seen;
+}
+
+/* ---------------------------------------------------------------------------
+   PHASEN
+--------------------------------------------------------------------------- */
+function addPhase(name, color){
+  const c = color || PHASE_PALETTE[phaseColorCursor++ % PHASE_PALETTE.length];
+  state.phases.push({ id: uid(), name: name || "Neue Phase", color: c });
+  renderPhases(); renderTable(); scheduleDiagram();
+}
+function renderPhases(){
+  const row = $("#phaseRow");
+  row.innerHTML = "";
+  if(state.phases.length === 0){
+    row.innerHTML = `<span class="phase-hint">Noch keine Phasen. Füge welche hinzu, um Pakete im Plan farblich zu gruppieren.</span>`;
+    return;
+  }
+  state.phases.forEach(ph => {
+    const chip = document.createElement("div");
+    chip.className = "phase-chip";
+    chip.innerHTML = `
+      <label class="swatch" style="background:${escapeXml(ph.color)}">
+        <input type="color" value="${escapeXml(ph.color)}" aria-label="Farbe der Phase ${escapeXml(ph.name)}">
+      </label>
+      <input type="text" value="${escapeXml(ph.name)}" spellcheck="false" aria-label="Name der Phase">
+      <button class="icon-btn phase-del" aria-label="Phase ${escapeXml(ph.name)} löschen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>`;
+    const colorInput = $("input[type=color]", chip);
+    const swatch = $(".swatch", chip);
+    colorInput.addEventListener("input", e => {
+      ph.color = e.target.value; swatch.style.background = ph.color;
+      renderTable(); scheduleDiagram();
+    });
+    $("input[type=text]", chip).addEventListener("input", e => {
+      ph.name = e.target.value; refreshPhaseSelects(); scheduleDiagram();
+    });
+    $(".phase-del", chip).addEventListener("click", () => {
+      state.packages.forEach(p => { if(p.phaseId === ph.id) p.phaseId = null; });
+      state.phases = state.phases.filter(x => x.id !== ph.id);
+      renderPhases(); renderTable(); scheduleDiagram();
+    });
+    row.appendChild(chip);
+  });
+}
+function refreshPhaseSelects(){
+  $$("select.phase-select").forEach(sel => {
+    const pkg = state.packages.find(p => p.id === sel.dataset.pkg);
+    const cur = pkg ? pkg.phaseId : null;
+    sel.innerHTML = `<option value="">— keine —</option>` +
+      state.phases.map(ph => `<option value="${ph.id}" ${ph.id===cur?"selected":""}>${escapeXml(ph.name)}</option>`).join("");
+  });
+}
+
+/* ---------------------------------------------------------------------------
+   ARBEITSPAKET-TABELLE
+--------------------------------------------------------------------------- */
+function addPackage(data, focusName){
+  state.packages.push(Object.assign({
+    id: uid(), name: "", duration: 1, predecessors: [], description: "", phaseId: null
+  }, data || {}));
+  renderTable(); scheduleDiagram();
+  if(focusName){
+    const rows = $$("#pkgBody tr.pkg-row");
+    const last = rows[rows.length - 1];
+    if(last) $(".col-name .cell-input", last).focus();
+  }
+}
+
+function renderTable(){
+  const body = $("#pkgBody");
+  body.innerHTML = "";
+  if(state.packages.length === 0){
+    body.innerHTML = `<tr><td colspan="7" class="tbl-empty">
+      Noch keine Arbeitspakete — füge unten eines hinzu oder lade oben das Beispiel.</td></tr>`;
+    return;
+  }
+  state.packages.forEach((pkg, idx) => {
+    const tr = document.createElement("tr");
+    tr.className = "pkg-row";
+
+    // Nr
+    const tdNr = document.createElement("td");
+    tdNr.innerHTML = `<span class="nr-badge">${idx + 1}</span>`;
+    tr.appendChild(tdNr);
+
+    // Bezeichnung
+    const tdName = document.createElement("td");
+    tdName.className = "col-name";
+    const nameI = document.createElement("input");
+    nameI.className = "cell-input"; nameI.type = "text"; nameI.value = pkg.name;
+    nameI.placeholder = "Bezeichnung…"; nameI.spellcheck = false;
+    nameI.setAttribute("aria-label", `Bezeichnung Arbeitspaket ${idx + 1}`);
+    nameI.addEventListener("input", e => { pkg.name = e.target.value; refreshMsLabels(); scheduleDiagram(); });
+    tdName.appendChild(nameI);
+    tr.appendChild(tdName);
+
+    // Dauer
+    const tdDur = document.createElement("td");
+    tdDur.className = "col-dur";
+    const durI = document.createElement("input");
+    durI.className = "cell-input"; durI.type = "number"; durI.min = "0"; durI.step = "1";
+    durI.value = pkg.duration;
+    durI.setAttribute("aria-label", `Dauer Arbeitspaket ${idx + 1} in Zeiteinheiten`);
+    durI.addEventListener("input", e => {
+      const v = parseFloat(e.target.value);
+      pkg.duration = isNaN(v) ? 0 : Math.max(0, v); scheduleDiagram();
+    });
+    tdDur.appendChild(durI);
+    tr.appendChild(tdDur);
+
+    // Vorgänger (Mehrfachauswahl)
+    const tdPre = document.createElement("td");
+    tdPre.appendChild(buildPredecessorSelect(pkg));
+    tr.appendChild(tdPre);
+
+    // Phase
+    const tdPh = document.createElement("td");
+    const sel = document.createElement("select");
+    sel.className = "cell-select phase-select"; sel.dataset.pkg = pkg.id;
+    sel.setAttribute("aria-label", `Phase Arbeitspaket ${idx + 1}`);
+    sel.innerHTML = `<option value="">— keine —</option>` +
+      state.phases.map(ph => `<option value="${ph.id}" ${ph.id===pkg.phaseId?"selected":""}>${escapeXml(ph.name)}</option>`).join("");
+    sel.addEventListener("change", e => { pkg.phaseId = e.target.value || null; scheduleDiagram(); });
+    tdPh.appendChild(sel);
+    tr.appendChild(tdPh);
+
+    // Beschreibung ein-/ausklappen
+    const tdDesc = document.createElement("td");
+    tdDesc.className = "col-desc";
+    const dBtn = document.createElement("button");
+    dBtn.className = "icon-btn desc-toggle" + (pkg.description && pkg.description.trim() ? " has-text" : "");
+    dBtn.setAttribute("aria-label", `Beschreibung von Arbeitspaket ${idx + 1} bearbeiten`);
+    dBtn.setAttribute("aria-expanded", "false");
+    dBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>`;
+    tdDesc.appendChild(dBtn);
+    tr.appendChild(tdDesc);
+
+    // Löschen
+    const tdAct = document.createElement("td");
+    tdAct.className = "col-act";
+    const del = document.createElement("button");
+    del.className = "icon-btn";
+    del.setAttribute("aria-label", `Arbeitspaket ${idx + 1} löschen`);
+    del.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>`;
+    del.addEventListener("click", () => {
+      state.packages = state.packages.filter(p => p.id !== pkg.id);
+      state.packages.forEach(p => p.predecessors = p.predecessors.filter(id => id !== pkg.id));
+      renderTable(); scheduleDiagram();
+    });
+    tdAct.appendChild(del);
+    tr.appendChild(tdAct);
+
+    body.appendChild(tr);
+
+    // Beschreibungszeile
+    const dr = document.createElement("tr");
+    dr.className = "desc-row";
+    const dtd = document.createElement("td");
+    dtd.colSpan = 7;
+    const wrap = document.createElement("div");
+    wrap.className = "desc-wrap";
+    const inner = document.createElement("div");
+    inner.className = "desc-inner";
+    inner.innerHTML = `<span class="lbl">Beschreibung</span>`;
+    const area = document.createElement("textarea");
+    area.className = "desc-area";
+    area.placeholder = "Detaillierte Beschreibung des Arbeitspakets — sichtbar beim Klick auf den Knoten im Netzplan.";
+    area.value = pkg.description || "";
+    area.setAttribute("aria-label", `Beschreibung Arbeitspaket ${idx + 1}`);
+    area.addEventListener("input", e => {
+      pkg.description = e.target.value;
+      dBtn.classList.toggle("has-text", !!e.target.value.trim());
+      schedulePersist();
+    });
+    inner.appendChild(area);
+    wrap.appendChild(inner);
+    dtd.appendChild(wrap);
+    dr.appendChild(dtd);
+    body.appendChild(dr);
+
+    dBtn.addEventListener("click", () => {
+      const open = wrap.classList.toggle("open");
+      dBtn.setAttribute("aria-expanded", String(open));
+      if(open) setTimeout(() => area.focus(), reduceMotion ? 0 : 150);
+    });
+  });
+}
+
+/* Vorgänger-Mehrfachauswahl — mit Schleifen-Prävention */
+function buildPredecessorSelect(pkg){
+  const root = document.createElement("div");
+  root.className = "ms";
+  const btn = document.createElement("button");
+  btn.className = "ms-btn"; btn.type = "button";
+  btn.setAttribute("aria-haspopup", "true");
+  btn.setAttribute("aria-label", "Vorgänger auswählen");
+  root.appendChild(btn);
+
+  function labelHtml(){
+    const sel = pkg.predecessors.filter(id => state.packages.some(p => p.id === id));
+    pkg.predecessors = sel;
+    if(sel.length === 0) return `<span class="none">— keine —</span>`;
+    return sel.map(id => `<span class="ms-tag">${nrOf(id)}</span>`).join("");
+  }
+  function renderBtn(){ btn.innerHTML = labelHtml(); }
+  renderBtn();
+  btn._render = renderBtn;
+
+  let panel = null;
+  function close(){
+    if(panel){
+      panel.remove(); panel = null;
+      document.removeEventListener("click", onDoc, true);
+      document.removeEventListener("keydown", onKey, true);
+    }
+  }
+  function onDoc(e){ if(panel && !root.contains(e.target)) close(); }
+  function onKey(e){ if(e.key === "Escape"){ close(); btn.focus(); } }
+
+  btn.addEventListener("click", () => {
+    if(panel){ close(); return; }
+    panel = document.createElement("div");
+    panel.className = "ms-panel";
+    const others = state.packages.filter(p => p.id !== pkg.id);
+    if(others.length === 0){
+      panel.innerHTML = `<div class="ms-empty">Keine anderen Arbeitspakete vorhanden</div>`;
+    } else {
+      const blocked = descendantsOf(pkg.id); // Nachfolger würden eine Schleife erzeugen
+      others.forEach(o => {
+        const checked = pkg.predecessors.includes(o.id);
+        const isBlocked = blocked.has(o.id) && !checked;
+        const opt = document.createElement("label");
+        opt.className = "ms-opt" + (isBlocked ? " disabled" : "");
+        opt.innerHTML = `<input type="checkbox" class="opt-check" ${checked?"checked":""} ${isBlocked?"disabled":""}>
+          <span class="mini-nr">${nrOf(o.id)}</span>
+          <span>${escapeXml(o.name || "(ohne Namen)")}</span>
+          ${isBlocked ? `<span class="cycle-hint">Schleife</span>` : ""}`;
+        if(isBlocked) opt.title = "Nicht wählbar — dieses Paket hängt bereits (indirekt) von der aktuellen Zeile ab.";
+        $("input", opt).addEventListener("change", e => {
+          if(e.target.checked){ if(!pkg.predecessors.includes(o.id)) pkg.predecessors.push(o.id); }
+          else { pkg.predecessors = pkg.predecessors.filter(id => id !== o.id); }
+          renderBtn(); scheduleDiagram();
+        });
+        panel.appendChild(opt);
+      });
+    }
+    root.appendChild(panel);
+    setTimeout(() => {
+      document.addEventListener("click", onDoc, true);
+      document.addEventListener("keydown", onKey, true);
+    }, 0);
+  });
+  return root;
+}
+function refreshMsLabels(){ $$(".ms-btn").forEach(b => b._render && b._render()); }
+
+/* ---------------------------------------------------------------------------
+   CPM-BERECHNUNG (Vorwärts-/Rückwärtsterminierung)
+--------------------------------------------------------------------------- */
+function computeCPM(){
+  const pkgs = state.packages;
+  if(pkgs.length === 0) return { error: "empty" };
+
+  const ids = new Set(pkgs.map(p => p.id));
+  const byId = {};
+  pkgs.forEach(p => byId[p.id] = p);
+
+  // Vorgänger bereinigen (nur existierende, kein Selbstbezug)
+  pkgs.forEach(p => p.predecessors = p.predecessors.filter(x => ids.has(x) && x !== p.id));
+
+  const succ = {}; pkgs.forEach(p => succ[p.id] = []);
+  pkgs.forEach(p => p.predecessors.forEach(pre => succ[pre].push(p.id)));
+
+  // Topologische Sortierung (Kahn) + Zykluserkennung
+  const indeg = {}; pkgs.forEach(p => indeg[p.id] = p.predecessors.length);
+  const q = pkgs.filter(p => indeg[p.id] === 0).map(p => p.id);
+  const topo = [];
+  while(q.length){
+    const n = q.shift(); topo.push(n);
+    succ[n].forEach(s => { if(--indeg[s] === 0) q.push(s); });
+  }
+  if(topo.length !== pkgs.length){
+    const inCycle = pkgs.filter(p => indeg[p.id] > 0).map(p => nrOf(p.id));
+    return { error: "cycle", nodes: inCycle };
+  }
+
+  const dur = id => Math.max(0, byId[id].duration || 0);
+
+  // Vorwärtsrechnung → FAZ, FEZ
+  const FAZ = {}, FEZ = {};
+  topo.forEach(id => {
+    const preds = byId[id].predecessors;
+    FAZ[id] = preds.length ? Math.max(...preds.map(x => FEZ[x])) : 0;
+    FEZ[id] = FAZ[id] + dur(id);
+  });
+  const projectEnd = Math.max(0, ...pkgs.map(p => FEZ[p.id]));
+
+  // Rückwärtsrechnung → SEZ, SAZ
+  const SEZ = {}, SAZ = {};
+  [...topo].reverse().forEach(id => {
+    const sucs = succ[id];
+    SEZ[id] = sucs.length ? Math.min(...sucs.map(s => SAZ[s])) : projectEnd;
+    SAZ[id] = SEZ[id] - dur(id);
+  });
+
+  // Puffer
+  const GP = {}, FP = {}, crit = new Set();
+  pkgs.forEach(p => {
+    const id = p.id;
+    GP[id] = SAZ[id] - FAZ[id];
+    const sucs = succ[id];
+    const minSuccFAZ = sucs.length ? Math.min(...sucs.map(s => FAZ[s])) : projectEnd;
+    FP[id] = Math.max(0, minSuccFAZ - FEZ[id]);
+    if(Math.abs(GP[id]) < 1e-9) crit.add(id);
+  });
+
+  return { error: null, byId, succ, topo, FAZ, FEZ, SAZ, SEZ, GP, FP, crit, projectEnd };
+}
+
+/* ---------------------------------------------------------------------------
+   LAYERED-LAYOUT (Rank → Dummies → Barycenter → Koordinaten)
+--------------------------------------------------------------------------- */
+function isotonic(vals){
+  // Pool-Adjacent-Violators: optimaler nicht-fallender L2-Fit
+  const v = [], c = [];
+  for(let i = 0; i < vals.length; i++){
+    let nv = vals[i], nc = 1;
+    while(v.length && v[v.length-1] > nv){
+      const pv = v.pop(), pc = c.pop();
+      nv = (nv*nc + pv*pc) / (nc + pc); nc += pc;
+    }
+    v.push(nv); c.push(nc);
+  }
+  const out = [];
+  for(let i = 0; i < v.length; i++) for(let k = 0; k < c[i]; k++) out.push(v[i]);
+  return out;
+}
+
+function computeLayout(cpm){
+  const pkgs = state.packages;
+  const byId = cpm.byId, topo = cpm.topo;
+
+  // Rank = längster Pfad (ASAP)
+  const rank = {};
+  topo.forEach(id => {
+    const preds = byId[id].predecessors;
+    rank[id] = preds.length ? Math.max(...preds.map(x => rank[x] + 1)) : 0;
+  });
+  const maxRank = Math.max(0, ...Object.values(rank));
+  const layers = []; for(let r = 0; r <= maxRank; r++) layers[r] = [];
+
+  const cells = {};
+  function nodeCell(id){
+    const k = "n:" + id;
+    if(!cells[k]) cells[k] = { key:k, type:"node", id, h:NODE_H, up:[], down:[], order:0, y:0, ty:null, bc:0 };
+    return cells[k];
+  }
+  pkgs.forEach(p => layers[rank[p.id]].push(nodeCell(p.id)));
+
+  // Kanten + Dummy-Ketten
+  const edges = [];
+  pkgs.forEach(p => {
+    p.predecessors.forEach(pre => {
+      const r0 = rank[pre], r1 = rank[p.id];
+      const chain = [nodeCell(pre)];
+      for(let r = r0 + 1; r < r1; r++){
+        const k = "d:" + pre + ">" + p.id + ":" + r;
+        const dc = { key:k, type:"dummy", h:DUMMY_H, up:[], down:[], order:0, y:0, ty:null, bc:0 };
+        cells[k] = dc; layers[r].push(dc); chain.push(dc);
+      }
+      chain.push(nodeCell(p.id));
+      for(let i = 0; i < chain.length - 1; i++){
+        chain[i].down.push(chain[i+1]); chain[i+1].up.push(chain[i]);
+      }
+      const isCrit = cpm.crit.has(pre) && cpm.crit.has(p.id) &&
+                     Math.abs(cpm.FAZ[p.id] - cpm.FEZ[pre]) < 1e-9;
+      edges.push({ from:pre, to:p.id, chain, critical:isCrit });
+    });
+  });
+
+  layers.forEach(L => L.forEach((c, i) => c.order = i));
+
+  // Barycenter-Durchläufe zur Kreuzungsreduktion
+  function sweep(down){
+    const order = down ? layers.map((_,i)=>i) : layers.map((_,i)=>i).reverse();
+    order.forEach(r => {
+      const L = layers[r];
+      L.forEach(c => {
+        const nb = down ? c.up : c.down;
+        c.bc = nb.length ? nb.reduce((s,n)=>s+n.order,0)/nb.length : c.order;
+      });
+      const idx = L.map((c,i)=>({c,i}));
+      idx.sort((a,b)=> a.c.bc - b.c.bc || a.i - b.i);
+      idx.forEach((o,i)=> o.c.order = i);
+      L.sort((a,b)=> a.order - b.order);
+    });
+  }
+  for(let it = 0; it < 10; it++){ sweep(true); sweep(false); }
+
+  // y-Koordinaten: iterative Median-Ausrichtung mit isotoner Überlappungsfreiheit
+  function placeLayer(L){
+    if(L.length === 0) return;
+    const S = [0];
+    for(let i = 1; i < L.length; i++){
+      S[i] = S[i-1] + (L[i-1].h + L[i].h)/2 + VGAP;
+    }
+    const target = L.map((c,i)=> (c.ty != null ? c.ty : c.y) - S[i]);
+    const w = isotonic(target);
+    L.forEach((c,i)=> c.y = w[i] + S[i]);
+  }
+  layers.forEach(L => { let y = 0; L.forEach((c,i)=>{ if(i>0) y += (L[i-1].h + c.h)/2 + VGAP; c.y = y; }); });
+
+  for(let it = 0; it < 40; it++){
+    for(let r = 1; r <= maxRank; r++){
+      layers[r].forEach(c => { c.ty = c.up.length ? c.up.reduce((s,n)=>s+n.y,0)/c.up.length : null; });
+      placeLayer(layers[r]); layers[r].forEach(c => c.ty = null);
+    }
+    for(let r = maxRank - 1; r >= 0; r--){
+      layers[r].forEach(c => { c.ty = c.down.length ? c.down.reduce((s,n)=>s+n.y,0)/c.down.length : null; });
+      placeLayer(layers[r]); layers[r].forEach(c => c.ty = null);
+    }
+  }
+
+  // x per Rank; Koordinaten normalisieren
+  Object.values(cells).forEach(c => {
+    c.rank = c.type === "node" ? rank[c.id] : parseInt(c.key.split(":").pop(), 10);
+  });
+  let minY = Infinity, maxY = -Infinity;
+  Object.values(cells).forEach(c => {
+    c.x = MARGIN + c.rank * (NODE_W + HGAP);
+    minY = Math.min(minY, c.y - c.h/2);
+    maxY = Math.max(maxY, c.y + c.h/2);
+  });
+  const shift = MARGIN - minY;
+  Object.values(cells).forEach(c => c.y += shift);
+
+  const width  = MARGIN * 2 + (maxRank + 1) * NODE_W + maxRank * HGAP;
+  const height = (maxY - minY) + MARGIN * 2;
+
+  return { cells, edges, width, height, rank, maxRank };
+}
+
+/* ---------------------------------------------------------------------------
+   SVG-AUFBAU (Bildschirm über CSS-Variablen, Export mit aufgelösten Farben)
+--------------------------------------------------------------------------- */
+const SCREEN_PAL = {
+  bg:        "transparent",
+  gridBg:    "color-mix(in srgb, var(--paper) 6%, transparent)",
+  boxFill:   "var(--panel)",
+  boxStroke: "color-mix(in srgb, var(--paper) 22%, transparent)",
+  innerGrid: "color-mix(in srgb, var(--paper) 12%, transparent)",
+  edge:      "var(--paper-faint)",
+  crit:      "var(--accent2)",
+  text:      "var(--paper)",
+  label:     "var(--paper-faint)",
+  gold:      "var(--gold)"
+};
+function exportPal(){
+  const g = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const paper = g("--paper");
+  return {
+    bg:        g("--ink-soft"),
+    gridBg:    hexToRgba(paper, .06),
+    boxFill:   g("--panel"),
+    boxStroke: hexToRgba(paper, .22),
+    innerGrid: hexToRgba(paper, .12),
+    edge:      g("--paper-faint"),
+    crit:      g("--accent2"),
+    text:      paper,
+    label:     g("--paper-faint"),
+    gold:      g("--gold")
+  };
+}
+
+function edgePath(chain){
+  const pts = [];
+  chain.forEach((c, i) => {
+    if(c.type === "node"){
+      if(i === 0) pts.push([c.x + NODE_W, c.y]);            // Austritt rechts
+      else if(i === chain.length - 1) pts.push([c.x, c.y]); // Eintritt links
+      else pts.push([c.x + NODE_W/2, c.y]);
+    } else {
+      pts.push([c.x + NODE_W/2, c.y]);                      // Dummy-Spurmitte
+    }
+  });
+  let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for(let i = 1; i < pts.length; i++){
+    const [x0,y0] = pts[i-1], [x1,y1] = pts[i];
+    const dx = (x1 - x0) * 0.5;
+    d += ` C ${(x0+dx).toFixed(1)} ${y0.toFixed(1)}, ${(x1-dx).toFixed(1)} ${y1.toFixed(1)}, ${x1.toFixed(1)} ${y1.toFixed(1)}`;
+  }
+  return d;
+}
+
+function nodeSvg(cell, cpm){
+  const id = cell.id, p = cpm.byId[id];
+  const isCrit = cpm.crit.has(id);
+  const ph = phaseById(p.phaseId);
+  const headFill = ph ? hexToRgba(ph.color, 0.16) : "rgba(128,128,128,0.10)";
+  const barCol  = ph ? ph.color : "transparent";
+  const nr = nrOf(id);
+  const x = cell.x, y = cell.y - NODE_H/2;
+
+  const c0 = NODE_W/6, c1 = NODE_W/2, c2 = 5*NODE_W/6;
+  const rowTop1 = HEAD_H, rowTop2 = HEAD_H + ROW_H;
+  const lblY = 13, valY = 30;
+
+  const cls = "node" + (isCrit ? " crit" : "");
+  let s = `<g class="${cls}" data-id="${id}" transform="translate(${x.toFixed(1)},${y.toFixed(1)})">`;
+  s += `<rect class="node-box" x="0" y="0" width="${NODE_W}" height="${NODE_H}" rx="10"/>`;
+  // Kopfzeile
+  s += `<path class="node-head" d="M10 0 H${NODE_W-10} A10 10 0 0 1 ${NODE_W} 10 V${HEAD_H} H0 V10 A10 10 0 0 1 10 0 Z" fill="${headFill}"/>`;
+  if(ph) s += `<rect x="0" y="0" width="5" height="${HEAD_H}" fill="${barCol}" clip-path="url(#nodeClip)"/>`;
+  s += `<text class="nr" x="13" y="18">${nr}</text>`;
+  s += `<text class="title" x="${String(nr).length >= 2 ? 36 : 30}" y="18">${escapeXml(truncate(p.name || "(ohne Namen)", 22))}</text>`;
+  // Rasterlinien
+  s += `<line class="grid" x1="0" y1="${rowTop1}" x2="${NODE_W}" y2="${rowTop1}"/>`;
+  s += `<line class="grid" x1="0" y1="${rowTop2}" x2="${NODE_W}" y2="${rowTop2}"/>`;
+  s += `<line class="grid" x1="${NODE_W/3}" y1="${rowTop1}" x2="${NODE_W/3}" y2="${NODE_H}"/>`;
+  s += `<line class="grid" x1="${2*NODE_W/3}" y1="${rowTop1}" x2="${2*NODE_W/3}" y2="${NODE_H}"/>`;
+  const cell6 = (cx, ry, lbl, val, critVal) =>
+    `<text class="clbl" x="${cx}" y="${ry + lblY}">${lbl}</text>` +
+    `<text class="cval${critVal?' cv-crit':''}" x="${cx}" y="${ry + valY}">${val}</text>`;
+  // Zeile 1: FAZ | Dauer | FEZ
+  s += cell6(c0, rowTop1, "FAZ", fmtNum(cpm.FAZ[id]));
+  s += cell6(c1, rowTop1, "DAUER", fmtNum(p.duration));
+  s += cell6(c2, rowTop1, "FEZ", fmtNum(cpm.FEZ[id]));
+  // Zeile 2: SAZ | GP·FP | SEZ
+  s += cell6(c0, rowTop2, "SAZ", fmtNum(cpm.SAZ[id]));
+  s += `<text class="clbl" x="${c1}" y="${rowTop2 + lblY}">GP · FP</text>` +
+       `<text class="cval${isCrit?' cv-crit':''}" x="${c1}" y="${rowTop2 + valY}">${fmtNum(cpm.GP[id])} · ${fmtNum(cpm.FP[id])}</text>`;
+  s += cell6(c2, rowTop2, "SEZ", fmtNum(cpm.SEZ[id]));
+  s += `</g>`;
+  return s;
+}
+
+function buildSvg(cpm, layout, pal){
+  const { cells, edges, width, height } = layout;
+
+  const styleBlock = `
+    .np-bg{fill:${pal.bg}}
+    .grid-bg line{stroke:${pal.gridBg};stroke-width:1}
+    .edge{fill:none;stroke:${pal.edge};stroke-width:1.6;stroke-opacity:.7}
+    .edge.crit{stroke:${pal.crit};stroke-width:2.4;stroke-opacity:1}
+    .np-arrow{fill:${pal.edge}}
+    .np-arrow-crit{fill:${pal.crit}}
+    .node-box{fill:${pal.boxFill};stroke:${pal.boxStroke};stroke-width:1.3}
+    .node.crit .node-box{stroke:${pal.crit};stroke-width:2}
+    .node-head{stroke:none}
+    .nr{font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:12px;fill:${pal.gold};dominant-baseline:middle}
+    .node.crit .nr{fill:${pal.crit}}
+    .title{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:600;font-size:11.5px;fill:${pal.text};dominant-baseline:middle}
+    .grid{stroke:${pal.innerGrid};stroke-width:1}
+    .clbl{font-family:'Space Mono',ui-monospace,monospace;font-size:7.2px;letter-spacing:.08em;fill:${pal.label};text-anchor:middle}
+    .cval{font-family:'Space Mono',ui-monospace,monospace;font-weight:700;font-size:13px;fill:${pal.text};text-anchor:middle}
+    .cval.cv-crit{fill:${pal.crit}}
+    .node{cursor:pointer}
+    .node:hover .node-box{stroke:${pal.gold}}
+    .node.crit:hover .node-box{stroke:${pal.crit}}
+  `;
+
+  // dezentes Blueprint-Raster im Hintergrund
+  let bg = `<g class="grid-bg">`;
+  for(let gx = MARGIN; gx < width; gx += 28) bg += `<line x1="${gx}" y1="0" x2="${gx}" y2="${height}"/>`;
+  for(let gy = MARGIN; gy < height; gy += 28) bg += `<line x1="0" y1="${gy}" x2="${width}" y2="${gy}"/>`;
+  bg += `</g>`;
+
+  let edgeSvg = "";
+  // erst normale, kritische obenauf
+  edges.slice().sort((a,b)=> (a.critical?1:0) - (b.critical?1:0)).forEach(e => {
+    edgeSvg += `<path class="edge${e.critical?' crit':''}" d="${edgePath(e.chain)}" marker-end="url(#${e.critical?'arrowC':'arrow'})"/>`;
+  });
+
+  let nodeSvgStr = "";
+  Object.values(cells).filter(c => c.type === "node")
+    .sort((a,b)=> nrOf(a.id) - nrOf(b.id))
+    .forEach(c => nodeSvgStr += nodeSvg(c, cpm));
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${Math.ceil(width)} ${Math.ceil(height)}" width="${Math.ceil(width)}" height="${Math.ceil(height)}" font-family="sans-serif" role="img" aria-label="Netzplan-Diagramm">
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="np-arrow" d="M0 0 L10 5 L0 10 z"/></marker>
+<marker id="arrowC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path class="np-arrow-crit" d="M0 0 L10 5 L0 10 z"/></marker>
+<clipPath id="nodeClip"><rect x="0" y="0" width="${NODE_W}" height="${NODE_H}" rx="10"/></clipPath>
+<style>${styleBlock}</style>
+</defs>
+<rect class="np-bg" x="0" y="0" width="${Math.ceil(width)}" height="${Math.ceil(height)}"/>
+${bg}
+${edgeSvg}
+${nodeSvgStr}
+</svg>`;
+}
+
+/* ---------------------------------------------------------------------------
+   DIAGRAMM + KENNZAHLEN + LEGENDE
+--------------------------------------------------------------------------- */
+let diagTimer = null;
+function scheduleDiagram(){
+  schedulePersist();
+  clearTimeout(diagTimer);
+  diagTimer = setTimeout(renderDiagram, 220);
+}
+
+function setBanner(msg){
+  const b = $("#banner");
+  if(msg){ b.classList.add("show"); $("#bannerText").textContent = msg; }
+  else b.classList.remove("show");
+}
+
+function renderEmpty(text){
+  $("#canvas").innerHTML = `<div class="empty-state">
+    <span class="pi-big">π</span>
+    <b>Noch kein Netzplan</b>
+    <span>${escapeXml(text)}</span>
+  </div>`;
+  $("#stats").hidden = true;
+  $("#stats").innerHTML = "";
+  $("#legend").innerHTML = "";
+  lastLayout = null;
+}
+
+function renderDiagram(){
+  const cpm = computeCPM();
+  if(cpm.error === "empty"){ setBanner(""); renderEmpty("Lege Arbeitspakete an — der Plan berechnet sich automatisch."); return; }
+  if(cpm.error === "cycle"){
+    setBanner("Zyklische Abhängigkeit bei Vorgang " + cpm.nodes.join(", ") + ". Ein Netzplan muss schleifenfrei sein — entferne einen der beteiligten Vorgänger.");
+    renderEmpty("Löse zuerst die markierte Schleife in den Vorgängern auf.");
+    return;
+  }
+  setBanner("");
+
+  const layout = computeLayout(cpm);
+  lastLayout = { cpm, layout };
+  $("#canvas").innerHTML = buildSvg(cpm, layout, SCREEN_PAL);
+  applyZoom();
+
+  // Klick → Detail-Ansicht
+  $$("#canvas .node").forEach(g => {
+    g.addEventListener("click", () => openDetail(g.dataset.id, cpm));
+  });
+
+  renderStats(cpm);
+  renderLegend();
+}
+
+function renderStats(cpm){
+  const n = state.packages.length;
+  const critCount = cpm.crit.size;
+  const stats = $("#stats");
+  stats.hidden = false;
+  stats.innerHTML = `
+    <div class="stat"><div class="k">Projektdauer</div><div class="v gold">${fmtNum(cpm.projectEnd)} <small>ZE</small></div></div>
+    <div class="stat"><div class="k">Arbeitspakete</div><div class="v">${n}</div></div>
+    <div class="stat"><div class="k">Kritische Vorgänge</div><div class="v crit">${critCount}</div></div>
+    <div class="stat"><div class="k">Mit Puffer</div><div class="v">${n - critCount}</div></div>`;
+}
+
+function renderLegend(){
+  let html = `<div class="item"><span class="crit-line"></span> Kritischer Pfad (GP = 0)</div>
+              <div class="item"><span class="norm-line"></span> Abhängigkeit</div>`;
+  const used = state.phases.filter(ph => state.packages.some(p => p.phaseId === ph.id));
+  used.forEach(ph => {
+    html += `<div class="item"><span class="dot" style="background:${escapeXml(ph.color)}"></span> ${escapeXml(ph.name)}</div>`;
+  });
+  html += `<div class="item note">ZE = Zeiteinheiten</div>`;
+  $("#legend").innerHTML = html;
+}
+
+/* ---------------------------------------------------------------------------
+   DETAIL-ANSICHT
+--------------------------------------------------------------------------- */
+function openDetail(id, cpm){
+  const p = cpm.byId[id];
+  const isCrit = cpm.crit.has(id);
+  const ph = phaseById(p.phaseId);
+  const desc = (p.description || "").trim();
+  $("#modal").innerHTML = `
+    <div class="modal-head">
+      <span class="big-nr">${nrOf(id)}</span>
+      <div>
+        <h3>${escapeXml(p.name || "(ohne Namen)")}</h3>
+        ${ph ? `<div class="phase-pill"><span class="dot" style="background:${escapeXml(ph.color)}"></span>${escapeXml(ph.name)}</div>` : ""}
+        ${isCrit ? `<div class="crit-flag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="m13 2-3 7h6l-3 7"/></svg>
+          Kritischer Pfad</div>` : ""}
+      </div>
+      <button class="icon-btn modal-close" id="modalClose" aria-label="Details schließen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="kpi-grid">
+        <div class="kpi"><div class="k">FAZ</div><div class="v">${fmtNum(cpm.FAZ[id])}</div></div>
+        <div class="kpi"><div class="k">Dauer</div><div class="v">${fmtNum(p.duration)}</div></div>
+        <div class="kpi"><div class="k">FEZ</div><div class="v">${fmtNum(cpm.FEZ[id])}</div></div>
+        <div class="kpi"><div class="k">SAZ</div><div class="v">${fmtNum(cpm.SAZ[id])}</div></div>
+        <div class="kpi"><div class="k">SEZ</div><div class="v">${fmtNum(cpm.SEZ[id])}</div></div>
+        <div class="kpi ${isCrit?'is-crit':''}"><div class="k">Gesamtpuffer</div><div class="v">${fmtNum(cpm.GP[id])}</div></div>
+        <div class="kpi"><div class="k">Freier Puffer</div><div class="v">${fmtNum(cpm.FP[id])}</div></div>
+        <div class="kpi" style="grid-column:span 2"><div class="k">Vorgänger</div><div class="v" style="font-size:.95rem;line-height:1.5">${
+          p.predecessors.length ? p.predecessors.map(x=>nrOf(x)).join(", ") : "— keine —"
+        }</div></div>
+      </div>
+      <h4>Beschreibung</h4>
+      <div class="modal-desc ${desc?"":"empty"}">${desc ? escapeXml(desc) : "Keine Beschreibung hinterlegt — ergänze sie in der Tabelle über das Listen-Symbol."}</div>
+    </div>`;
+  $("#modalBack").classList.add("show");
+  const closeBtn = $("#modalClose");
+  closeBtn.addEventListener("click", closeModal);
+  closeBtn.focus();
+}
+function closeModal(){ $("#modalBack").classList.remove("show"); }
+
+/* ---------------------------------------------------------------------------
+   ZOOM
+--------------------------------------------------------------------------- */
+function applyZoom(){
+  const svg = $("#canvas svg");
+  if(!svg) return;
+  const vb = svg.getAttribute("viewBox").split(" ");
+  svg.setAttribute("width",  (parseFloat(vb[2]) * zoom).toFixed(0));
+  svg.setAttribute("height", (parseFloat(vb[3]) * zoom).toFixed(0));
+  $("#zoomVal").textContent = Math.round(zoom * 100) + "%";
+}
+function setZoom(z){ zoom = Math.min(2.5, Math.max(0.3, z)); applyZoom(); }
+function fitZoom(){
+  const svg = $("#canvas svg");
+  if(!svg) return;
+  const w = parseFloat(svg.getAttribute("viewBox").split(" ")[2]);
+  const shellW = $("#canvasShell").clientWidth - 24;
+  setZoom(Math.min(1, shellW / w));
+}
+
+/* ---------------------------------------------------------------------------
+   EXPORT / IMPORT
+--------------------------------------------------------------------------- */
+function exportSvg(){
+  if(!lastLayout){ showToast("Lege zuerst Arbeitspakete an"); return; }
+  const svg = buildSvg(lastLayout.cpm, lastLayout.layout, exportPal());
+  const blob = new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n` + svg], { type: "image/svg+xml" });
+  download(blob, "netzplan.svg");
+  showToast("SVG exportiert");
+}
+function exportJson(){
+  const data = {
+    meta: { app: "netzplan", version: 1, exported: new Date().toISOString() },
+    phases: state.phases,
+    packages: state.packages.map(p => ({
+      id: p.id, name: p.name, duration: p.duration,
+      predecessors: p.predecessors, description: p.description, phaseId: p.phaseId
+    }))
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  download(blob, "netzplan-daten.json");
+  showToast("JSON exportiert");
+}
+function importJson(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(!data || !Array.isArray(data.packages)) throw new Error("es fehlt die Liste „packages“.");
+      state.phases = Array.isArray(data.phases) ? data.phases.map(ph => ({
+        id: ph.id || uid(), name: ph.name || "Phase", color: ph.color || PHASE_PALETTE[0]
+      })) : [];
+      state.packages = data.packages.map(p => ({
+        id: p.id || uid(),
+        name: p.name || "",
+        duration: typeof p.duration === "number" ? p.duration : parseFloat(p.duration) || 0,
+        predecessors: Array.isArray(p.predecessors) ? p.predecessors.slice() : [],
+        description: p.description || "",
+        phaseId: p.phaseId || null
+      }));
+      renderPhases(); renderTable(); renderDiagram();
+      setTimeout(fitZoom, 60);
+      showToast("Projekt importiert");
+    }catch(err){
+      alert("Die Datei konnte nicht gelesen werden: " + err.message + "\nErwartet wird ein JSON-Export aus dieser App.");
+    }
+  };
+  reader.readAsText(file);
+}
+function download(blob, name){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = name; document.body.appendChild(a); a.click();
+  a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+/* ---------------------------------------------------------------------------
+   BEISPIELDATEN
+--------------------------------------------------------------------------- */
+function loadExample(){
+  const ph = { konzept: uid(), entw: uid(), test: uid(), rollout: uid() };
+  state.phases = [
+    { id: ph.konzept, name: "Konzept",      color: "#6d8fb5" },
+    { id: ph.entw,    name: "Entwicklung",  color: "#7f9c6d" },
+    { id: ph.test,    name: "Test & QA",    color: "#c0895f" },
+    { id: ph.rollout, name: "Rollout",      color: "#a97fb0" },
+  ];
+  const id = {}; for(let i=1;i<=10;i++) id[i]=uid();
+  const mk = (i, name, duration, preds, phaseId, description) => ({
+    id: id[i], name, duration, predecessors: preds.map(n=>id[n]), phaseId, description
+  });
+  state.packages = [
+    mk(1,"Anforderungsanalyse",3,[],ph.konzept,"Erhebung und Priorisierung aller fachlichen Anforderungen mit den Stakeholdern. Ergebnis: abgenommenes Lastenheft."),
+    mk(2,"Systemdesign",4,[1],ph.konzept,"Technische Architektur, Schnittstellen und Datenmodell. Grundlage für alle Entwicklungspakete."),
+    mk(3,"UI-/UX-Design",3,[1],ph.konzept,"Wireframes, Klickprototyp und Designsystem. Läuft parallel zum Systemdesign."),
+    mk(4,"Backend-Entwicklung",8,[2],ph.entw,"Implementierung der Geschäftslogik und APIs. Längstes Entwicklungspaket — meist kritisch."),
+    mk(5,"Frontend-Entwicklung",6,[2,3],ph.entw,"Umsetzung der Oberfläche auf Basis von Designsystem und API-Spezifikation."),
+    mk(6,"Datenbank & Migration",4,[2],ph.entw,"Schema, Indizes und Migrationsskripte für den Produktivbetrieb."),
+    mk(7,"Integration",3,[4,5,6],ph.entw,"Zusammenführen aller Komponenten, Konfiguration der Umgebungen."),
+    mk(8,"System- & Lasttest",4,[7],ph.test,"End-to-End-Tests, Performance- und Sicherheitsprüfung."),
+    mk(9,"Dokumentation",2,[7],ph.test,"Betriebs- und Benutzerhandbuch. Läuft parallel zum Test."),
+    mk(10,"Go-Live & Rollout",2,[8,9],ph.rollout,"Deployment in Produktion, Schulung und Übergabe an den Betrieb."),
+  ];
+  renderPhases(); renderTable(); renderDiagram();
+  setTimeout(fitZoom, 60);
+  showToast("Beispiel geladen");
+}
+
+/* ---------------------------------------------------------------------------
+   VERDRAHTUNG
+--------------------------------------------------------------------------- */
+$("#btnAddPhase").addEventListener("click", () => addPhase());
+$("#btnAddPkg").addEventListener("click", () => addPackage(null, true));
+$("#btnExample").addEventListener("click", loadExample);
+$("#btnExportSvg").addEventListener("click", exportSvg);
+$("#btnExportJson").addEventListener("click", exportJson);
+$("#btnImport").addEventListener("click", () => $("#fileInput").click());
+$("#fileInput").addEventListener("change", e => { if(e.target.files[0]) importJson(e.target.files[0]); e.target.value = ""; });
+$("#btnReset").addEventListener("click", () => {
+  if(state.packages.length === 0 && state.phases.length === 0){ showToast("Nichts zu löschen"); return; }
+  if(confirm("Alle Phasen und Arbeitspakete unwiderruflich löschen?")){
+    state.phases = []; state.packages = [];
+    localStorage.removeItem(STORE_KEY);
+    renderPhases(); renderTable();
+    setBanner("");
+    renderEmpty("Lege Arbeitspakete an oder lade das Beispiel.");
+    showToast("Zurückgesetzt");
+  }
+});
+$("#zoomIn").addEventListener("click", () => setZoom(zoom + 0.15));
+$("#zoomOut").addEventListener("click", () => setZoom(zoom - 0.15));
+$("#zoomFit").addEventListener("click", fitZoom);
+$("#canvasShell").addEventListener("wheel", e => {
+  if(e.ctrlKey){ e.preventDefault(); setZoom(zoom + (e.deltaY < 0 ? 0.1 : -0.1)); }
+}, { passive:false });
+$("#modalBack").addEventListener("click", e => { if(e.target.id === "modalBack") closeModal(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+
+/* ---------------------------------------------------------------------------
+   START
+--------------------------------------------------------------------------- */
+const hadData = restoreState();
+renderPhases();
+renderTable();
+if(hadData && state.packages.length){
+  renderDiagram();
+  setTimeout(fitZoom, 60);
+} else {
+  renderEmpty("Lege Arbeitspakete an oder lade das Beispiel — der Plan wird automatisch berechnet.");
+}
+
+/* ---------- Karten-Spotlight (Referenzwerte aus dem Designsystem) ---------- */
+document.querySelectorAll('.app-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect();
+    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  });
+});
+
+/* ---------- Scroll-Reveal (Referenzcode) ---------- */
+(function(){
+  const els = document.querySelectorAll('.reveal');
+  if(reduceMotion){ els.forEach(el => el.classList.add('in')); return; }
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
+    });
+  }, {threshold:.15});
+  els.forEach(el => obs.observe(el));
+})();
+
+/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
+(function(){
+  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
+  const cv = document.getElementById('digit-field');
+  const ctx = cv.getContext('2d');
+  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
+  let drops = [];
+
+  function resize(){
+    cv.width = innerWidth;
+    cv.height = innerHeight;
+    const cols = Math.floor(cv.width / 28);
+    drops = [];
+    for(let i=0;i<cols;i++){
+      drops.push({
+        x: i*28 + 14,
+        y: Math.random() * cv.height,
+        speed: 0.4 + Math.random() * 0.6,
+        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
+      });
+    }
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function draw(){
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.font = "13px 'Space Mono', monospace";
+    drops.forEach(d => {
+      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
+      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
+      ctx.fillText(d.char, d.x, d.y);
+      d.y += d.speed;
+      if(d.y > cv.height){
+        d.y = -20;
+        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
+      }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
