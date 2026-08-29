@@ -1,0 +1,17 @@
+name: Konsistenzprüfung
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # Kein Build, keine Abhängigkeiten — nur die Regeln aus tools/check.mjs.
+      - run: node tools/check.mjs
