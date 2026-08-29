@@ -9,107 +9,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/chrome.css">
+<script src="/assets/chrome.js"></script>
 
 <style>
-  :root{ /* DARK (Default) */
-    --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
-    --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
-    --gold:#d8b46a; --gold-bright:#f0cd84;
-    --field-base:rgba(10,14,20,0.12);
-    --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
-    --shadow:rgba(216,180,106,.55); --r:14px;
-  }
-  html[data-theme="light"]{
-    --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
-    --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
-    --gold:#a9802e; --gold-bright:#8c6618;
-    --field-base:rgba(246,243,234,0.14);
-    --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
-    --shadow:rgba(169,128,46,.32);
-  }
 
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
-  body{
-    background:var(--ink);
-    color:var(--paper);
-    font-family:'Space Grotesk', sans-serif;
-    font-weight:400;
-    line-height:1.6;
-    min-height:100vh;
-    position:relative;
-    overflow-x:hidden;
-    transition:background .4s ease, color .4s ease;
-  }
 
   /* ---------- Ambient layers ---------- */
-  #digit-field{
-    position:fixed; inset:0; z-index:0; pointer-events:none;
-    opacity:.5;
-  }
-  .grain{
-    position:fixed; inset:0; z-index:1; pointer-events:none;
-    opacity:.035;
-    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    mix-blend-mode:overlay;
-  }
-  html[data-theme="light"] .grain{ opacity:.02; }
 
   .wrap{ position:relative; z-index:2; }
-
-  /* ---------- Header ---------- */
-  header{
-    position:fixed; top:0; left:0; right:0; z-index:50;
-    height:72px; display:flex; align-items:center;
-    background:linear-gradient(to bottom, var(--header-a), var(--header-b));
-    backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-  }
-  .header-inner{
-    max-width:1180px; margin:0 auto; padding:0 28px;
-    width:100%; display:flex; align-items:center; justify-content:space-between;
-  }
-  .brand{
-    display:flex; align-items:baseline; gap:6px; text-decoration:none;
-    font-family:'Fraunces', serif;
-  }
-  .brand .pi{ color:var(--gold); font-size:26px; font-style:italic; line-height:1; }
-  .brand .num{ font-family:'Space Mono', monospace; font-size:16px; color:var(--paper); letter-spacing:.02em; }
-  .brand .me{ font-family:'Space Mono', monospace; font-size:16px; color:var(--paper-faint); }
-
-  .header-actions{ display:flex; align-items:center; gap:16px; }
-
-  .theme-toggle{
-    width:40px; height:40px; border-radius:100px;
-    border:1px solid var(--line); background:transparent;
-    color:var(--paper); cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    transition:border-color .3s ease, color .3s ease, transform .3s cubic-bezier(.2,.8,.2,1);
-  }
-  .theme-toggle:hover{ border-color:var(--gold); color:var(--gold); transform:translateY(-2px); }
-  .theme-toggle:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
-  .theme-toggle svg{ width:18px; height:18px; }
-
-  /* ---------- App head ---------- */
-  .app-head{
-    max-width:1180px; margin:0 auto; padding:150px 28px 50px;
-    text-align:center;
-  }
-  .eyebrow{
-    font-family:'Space Mono', monospace; font-size:12px;
-    letter-spacing:.32em; text-transform:uppercase;
-    color:var(--gold); display:block; margin-bottom:18px;
-  }
-  .app-head h1{
-    font-family:'Fraunces', serif; font-weight:300;
-    font-size:clamp(2.2rem, 6vw, 4rem);
-    letter-spacing:-.02em; line-height:.98;
-    color:var(--paper); margin-bottom:16px;
-  }
-  .app-head h1 em{ font-style:italic; color:var(--gold-bright); font-weight:400; }
-  .app-head p{
-    color:var(--paper-dim); font-size:1rem; max-width:480px;
-    margin:0 auto;
-  }
 
   /* ---------- Main layout ---------- */
   main{
@@ -139,7 +49,7 @@
   /* Timer card */
   .timer-card{
     position:relative;
-    background:linear-gradient(165deg, var(--panel), var(--ink-soft));
+    background:linear-gradient(160deg, var(--panel), var(--ink-soft));
     border:1px solid var(--line); border-radius:calc(var(--r) * 2);
     padding:64px 32px 52px;
     display:flex; flex-direction:column; align-items:center;
@@ -270,33 +180,13 @@
   .switch input:focus-visible + .track{ outline:2px solid var(--gold); outline-offset:2px; }
   .sound-row span{ color:var(--paper-dim); font-size:.9rem; }
 
-  /* Footer */
-  footer{
-    position:relative; z-index:2;
-    border-top:1px solid var(--line);
-    padding:32px 28px; text-align:center;
-  }
-  footer p{
-    font-family:'Space Mono', monospace; font-size:11px;
-    letter-spacing:.1em; color:var(--paper-faint);
-  }
-  footer a{ color:var(--paper-faint); text-decoration:none; border-bottom:1px solid var(--line); transition:color .3s ease, border-color .3s ease; }
-  footer a:hover{ color:var(--gold); border-color:var(--gold); }
-
-  /* Reveal */
-  .reveal{ opacity:0; transform:translateY(26px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.8,.2,1); }
-  .reveal.in{ opacity:1; transform:translateY(0); }
-
   /* Reduced motion */
   @media (prefers-reduced-motion:reduce){
     *{ transition-duration:.001ms !important; animation-duration:.001ms !important; }
-    .reveal{ opacity:1; transform:none; }
     .timer-card.running .ring-wrap{ animation:none; }
-    #digit-field{ display:none; }
   }
 
   @media (max-width:560px){
-    .app-head{ padding:140px 20px 40px; }
     main{ padding:0 20px 90px; }
     .settings-grid{ grid-template-columns:1fr; }
     .timer-card{ padding:48px 20px 40px; }
@@ -311,24 +201,29 @@
 <div class="grain" aria-hidden="true"></div>
 
 <div class="wrap">
-  <header>
-    <div class="header-inner">
-      <a href="/" class="brand" aria-label="Zur 31415.me Startseite">
-        <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
+<header>
+  <div class="header-inner">
+    <a href="/" class="brand" aria-label="31415.me Startseite">
+      <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
+    </a>
+    <div class="header-right">
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Alle Werkzeuge</span>
       </a>
-      <div class="header-actions">
-        <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten" type="button">
-          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></svg>
-        </button>
-      </div>
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln" type="button">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      </button>
     </div>
-  </header>
+  </div>
+</header>
 
-  <section class="app-head reveal">
-    <span class="eyebrow">Werkzeug · Zeitmanagement</span>
-    <h1>Bleib <em>fokussiert</em>,<br>eine Runde nach der anderen.</h1>
-    <p>Klassischer Pomodoro-Rhythmus: Fokus, kurze Pause, lange Pause. Frei einstellbar, läuft komplett lokal in deinem Browser.</p>
-  </section>
+<div class="app-head reveal">
+  <span class="eyebrow">Werkzeug · Zeitmanagement</span>
+  <h1>Bleib <em>fokussiert</em>, eine Runde nach der anderen.</h1>
+  <p class="lede">Klassischer Pomodoro-Rhythmus: Fokus, kurze Pause, lange Pause. Frei einstellbar, läuft komplett lokal in deinem Browser.</p>
+</div>
 
   <main>
     <div class="phase-row reveal">
@@ -401,116 +296,19 @@
     </div>
   </main>
 
-  <footer>
-    <p><a href="/">31415.me</a> — kleine Werkzeuge, gut gemacht. Läuft nur in deinem Browser, nichts wird gespeichert oder gesendet.</p>
-  </footer>
+<footer>
+  <div class="footer-inner">
+    <p>Teil von <a href="/">31415.me</a> — läuft vollständig lokal in deinem Browser.</p>
+    <p>Deine Einstellungen und die Theme-Wahl werden nur lokal gespeichert — nichts verlässt dieses Gerät.</p>
+  </div>
+</footer>
 </div>
 
 <script>
 (function(){
   "use strict";
 
-  /* ---------- Theme ---------- */
-  const root = document.documentElement;
-  const themeToggle = document.getElementById('themeToggle');
-  const themeIcon = document.getElementById('themeIcon');
-  const metaTheme = document.querySelector('meta[name="theme-color"]');
-
-  const sunPath = '<circle cx="12" cy="12" r="4.2"></circle><path d="M12 2.5v2.4M12 19.1v2.4M4.4 4.4l1.7 1.7M17.9 17.9l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.4 19.6l1.7-1.7M17.9 6.1l1.7-1.7"></path>';
-  const moonPath = '<path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"></path>';
-
-  function applyTheme(t){
-    if(t === 'light'){ root.setAttribute('data-theme','light'); }
-    else { root.removeAttribute('data-theme'); }
-    themeIcon.innerHTML = t === 'light' ? sunPath : moonPath;
-    metaTheme.setAttribute('content', t === 'light' ? '#f6f3ea' : '#0a0e14');
-  }
-
-  let stored;
-  try{ stored = localStorage.getItem('theme'); }catch(e){ stored = null; }
-  const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-  let currentTheme = stored || (prefersLight ? 'light' : 'dark');
-  applyTheme(currentTheme);
-
-  themeToggle.addEventListener('click', function(){
-    currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-    applyTheme(currentTheme);
-    try{ localStorage.setItem('theme', currentTheme); }catch(e){}
-  });
-
-  /* ---------- Reveal on scroll ---------- */
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const revealEls = document.querySelectorAll('.reveal');
-  if(reduceMotion){
-    revealEls.forEach(function(el){ el.classList.add('in'); });
-  } else if('IntersectionObserver' in window){
-    const obs = new IntersectionObserver(function(entries){
-      entries.forEach(function(entry){
-        if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
-      });
-    }, { threshold: 0.15 });
-    revealEls.forEach(function(el){ obs.observe(el); });
-  } else {
-    revealEls.forEach(function(el){ el.classList.add('in'); });
-  }
-
-  /* ---------- Digit rain ---------- */
-  const canvas = document.getElementById('digit-field');
-  const ctx = canvas ? canvas.getContext('2d') : null;
-  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
-
-  let drops = [];
-  function sizeCanvas(){
-    if(!canvas) return;
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-
-  function initDrops(){
-    if(!canvas) return;
-    const count = Math.max(14, Math.floor(window.innerWidth / 90));
-    drops = [];
-    for(let i = 0; i < count; i++){
-      drops.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height * -1,
-        speed: 0.35 + Math.random() * 0.6,
-        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)],
-        size: 13 + Math.random() * 9
-      });
-    }
-  }
-
-  function drawDigits(){
-    if(!canvas || !ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drops.forEach(function(d){
-      const fade = Math.min(1, d.y / canvas.height);
-      ctx.font = d.size + 'px "Space Mono", monospace';
-      ctx.fillStyle = 'rgba(216,180,106,' + (0.08 + fade * 0.32) + ')';
-      ctx.fillText(d.char, d.x, d.y);
-      d.y += d.speed;
-      if(d.y > canvas.height + 20){
-        d.y = -20;
-        d.x = Math.random() * canvas.width;
-        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
-      }
-    });
-    rafId = requestAnimationFrame(drawDigits);
-  }
-
-  let rafId = null;
-  if(canvas && !reduceMotion){
-    sizeCanvas();
-    initDrops();
-    drawDigits();
-    window.addEventListener('resize', function(){
-      sizeCanvas();
-      initDrops();
-    });
-  } else if(canvas){
-    canvas.style.display = 'none';
-  }
 
   /* ---------- Spotlight on card ---------- */
   const timerCard = document.getElementById('timerCard');

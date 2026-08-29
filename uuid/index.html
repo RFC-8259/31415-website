@@ -9,85 +9,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/chrome.css">
+<script src="/assets/chrome.js"></script>
 <style>
-:root{ /* DARK (Default) */
-  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
-  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
-  --gold:#d8b46a; --gold-bright:#f0cd84;
-  --field-base:rgba(10,14,20,0.12);
-  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
-  --shadow:rgba(216,180,106,.55); --r:14px;
-}
-html[data-theme="light"]{
-  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
-  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
-  --gold:#a9802e; --gold-bright:#8c6618;
-  --field-base:rgba(246,243,234,0.14);
-  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
-  --shadow:rgba(169,128,46,.32);
-}
 
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-body{
-  background:var(--ink); color:var(--paper);
-  font-family:'Space Grotesk',sans-serif; font-weight:400; line-height:1.6;
-  min-height:100vh; position:relative; overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-  transition:background .4s cubic-bezier(.2,.8,.2,1), color .4s cubic-bezier(.2,.8,.2,1);
-}
-
-#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
-.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-html[data-theme="light"] .grain{opacity:.02;}
 
 a{color:inherit;text-decoration:none;}
 .container{max-width:1180px;margin:0 auto;padding:0 28px;position:relative;z-index:2;}
 @media (max-width:640px){.container{padding:0 20px;}}
-
-/* HEADER */
-header{
-  position:fixed;top:0;left:0;right:0;height:72px;z-index:50;
-  display:flex;align-items:center;
-  background:linear-gradient(to bottom,var(--header-a),var(--header-b));
-  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-}
-header .container{display:flex;align-items:center;justify-content:space-between;width:100%;}
-.brand{display:flex;align-items:center;gap:.45rem;font-size:1.1rem;}
-.brand .pi{font-family:'Fraunces',serif;font-weight:500;color:var(--gold);font-size:1.7rem;line-height:1;}
-.brand .num{font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.02em;color:var(--paper);}
-.brand .dotme{font-family:'Space Mono',monospace;color:var(--paper-faint);}
-.brand:focus-visible{outline:2px solid var(--gold);outline-offset:4px;border-radius:4px;}
-
-.theme-toggle{
-  width:42px;height:42px;border-radius:100px;border:1px solid var(--line);
-  background:transparent;color:var(--paper);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
-}
-.theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
-.theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.theme-toggle svg{width:18px;height:18px;}
-.icon-sun{display:none;}
-html[data-theme="light"] .icon-moon{display:none;}
-html[data-theme="light"] .icon-sun{display:block;}
-
-/* APP HEAD */
-.app-head{padding:150px 0 56px;}
-.eyebrow{
-  font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.28em;
-  font-size:.72rem;color:var(--gold);margin:0 0 18px;
-}
-h1{
-  font-family:'Fraunces',serif;font-weight:300;letter-spacing:-.02em;line-height:.96;
-  font-size:clamp(2.2rem,6vw,3.6rem);margin:0 0 18px;color:var(--paper);
-}
-h1 em{font-style:italic;font-weight:400;color:var(--gold-bright);}
-.app-head p{
-  max-width:560px;color:var(--paper-dim);font-size:1.02rem;margin:0;
-}
 
 /* WORKBENCH */
 .workbench{padding-bottom:120px;}
@@ -225,31 +156,10 @@ h1 em{font-style:italic;font-weight:400;color:var(--gold-bright);}
 .empty-state .pi-big{font-family:'Fraunces',serif; font-style:italic; font-size:2.6rem; color:var(--gold); opacity:.5; margin-bottom:6px;}
 .empty-state p{margin:0; max-width:320px; font-size:.95rem;}
 
-.toast{
-  position:fixed; bottom:28px; left:50%; transform:translate(-50%,20px);
-  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif;
-  font-weight:600; font-size:.88rem; padding:13px 24px; border-radius:100px;
-  box-shadow:0 16px 32px -8px var(--shadow); opacity:0; pointer-events:none; z-index:100;
-  transition:opacity .35s cubic-bezier(.2,.8,.2,1), transform .35s cubic-bezier(.2,.8,.2,1);
-}
-.toast.show{opacity:1; transform:translate(-50%,0);}
-
-footer{padding:50px 0 70px; border-top:1px solid var(--line); margin-top:0;}
-footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
-footer p{margin:0; font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); letter-spacing:.05em;}
-footer a{color:var(--paper-faint); transition:color .3s cubic-bezier(.2,.8,.2,1);}
-footer a:hover{color:var(--gold);}
-
-.reveal{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
-.reveal.in{opacity:1; transform:translateY(0);}
-
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important; animation:none !important;}
-  .reveal{opacity:1; transform:none;}
-  #digit-field{display:none;}
 }
 @media (max-width:640px){
-  .app-head{padding:120px 0 40px;}
   .controls-card, .output-card{padding:20px;}
 }
 </style>
@@ -260,26 +170,30 @@ footer a:hover{color:var(--gold);}
 <div class="grain" aria-hidden="true"></div>
 
 <header>
-  <div class="container">
-    <a href="/" class="brand" aria-label="Zur 31415.me Startseite">
-      <span class="pi">π</span><span class="num">31415</span><span class="dotme">.me</span>
+  <div class="header-inner">
+    <a href="/" class="brand" aria-label="31415.me Startseite">
+      <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
     </a>
-    <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln">
-      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
-      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
-    </button>
+    <div class="header-right">
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Alle Werkzeuge</span>
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln" type="button">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      </button>
+    </div>
   </div>
 </header>
 
-<main>
-  <section class="app-head">
-    <div class="container">
-      <p class="eyebrow reveal">Werkzeug · UUID</p>
-      <h1 class="reveal"><em>UUIDs</em> erzeugen</h1>
-      <p class="reveal">Version 1, 4 oder 7 — einzeln oder gleich hundert auf einmal. Läuft komplett in deinem Browser, nichts verlässt dein Gerät.</p>
-    </div>
-  </section>
+<div class="app-head reveal">
+  <span class="eyebrow">Werkzeug · UUID</span>
+  <h1><em>UUIDs</em> erzeugen</h1>
+  <p class="lede">Version 1, 4 oder 7 — einzeln oder gleich hundert auf einmal. Läuft komplett in deinem Browser, nichts verlässt dein Gerät.</p>
+</div>
 
+<main>
   <section class="workbench">
     <div class="container">
       <div class="layout">
@@ -353,7 +267,7 @@ footer a:hover{color:var(--gold);}
 </main>
 
 <footer>
-  <div class="container">
+  <div class="footer-inner">
     <p>Teil von <a href="/">31415.me</a> — läuft vollständig lokal in deinem Browser.</p>
     <p>Keine Daten verlassen dieses Gerät.</p>
   </div>
@@ -362,75 +276,6 @@ footer a:hover{color:var(--gold);}
 <div class="toast" id="toast">Kopiert</div>
 
 <script>
-/* ---------- Theme ---------- */
-(function(){
-  const root = document.documentElement;
-  const stored = localStorage.getItem('theme');
-  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-  if(stored){ root.setAttribute('data-theme', stored); }
-  else if(prefersLight){ root.setAttribute('data-theme','light'); }
-
-  function updateMeta(){
-    const isLight = root.getAttribute('data-theme') === 'light';
-    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
-  }
-  updateMeta();
-
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-    const next = current === 'light' ? 'dark' : 'light';
-    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
-    localStorage.setItem('theme', next);
-    updateMeta();
-  });
-})();
-
-/* ---------- Reduced motion ---------- */
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ---------- Pi digit rain ---------- */
-(function(){
-  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
-  const cv = document.getElementById('digit-field');
-  const ctx = cv.getContext('2d');
-  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
-  let drops = [];
-
-  function resize(){
-    cv.width = innerWidth;
-    cv.height = innerHeight;
-    const cols = Math.floor(cv.width / 28);
-    drops = [];
-    for(let i=0;i<cols;i++){
-      drops.push({
-        x: i*28 + 14,
-        y: Math.random() * cv.height,
-        speed: 0.4 + Math.random() * 0.6,
-        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
-      });
-    }
-  }
-  addEventListener('resize', resize);
-  resize();
-
-  function draw(){
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.font = "13px 'Space Mono', monospace";
-    drops.forEach(d => {
-      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
-      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
-      ctx.fillText(d.char, d.x, d.y);
-      d.y += d.speed;
-      if(d.y > cv.height){
-        d.y = -20;
-        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
-      }
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
 /* ---------- Spotlight on cards ---------- */
 document.querySelectorAll('.controls-card, .output-card').forEach(card => {
   card.addEventListener('mousemove', e => {
@@ -439,18 +284,6 @@ document.querySelectorAll('.controls-card, .output-card').forEach(card => {
     card.style.setProperty('--my', `${e.clientY - rect.top}px`);
   });
 });
-
-/* ---------- Scroll reveal ---------- */
-(function(){
-  const els = document.querySelectorAll('.reveal');
-  if(reduceMotion){ els.forEach(el => el.classList.add('in')); return; }
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
-    });
-  }, {threshold:.15});
-  els.forEach(el => obs.observe(el));
-})();
 
 /* ---------- UUID generation ---------- */
 function randomBytes(n){
