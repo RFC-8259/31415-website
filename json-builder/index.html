@@ -9,97 +9,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/chrome.css">
+<script src="/assets/chrome.js"></script>
 <style>
-:root{ /* DARK (Default) */
-  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
-  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
-  --gold:#d8b46a; --gold-bright:#f0cd84;
-  --field-base:rgba(10,14,20,0.12);
-  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
-  --shadow:rgba(216,180,106,.55); --r:14px;
-}
-html[data-theme="light"]{
-  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
-  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
-  --gold:#a9802e; --gold-bright:#8c6618;
-  --field-base:rgba(246,243,234,0.14);
-  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
-  --shadow:rgba(169,128,46,.32);
-}
 
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-body{
-  background:var(--ink); color:var(--paper);
-  font-family:'Space Grotesk',sans-serif; font-weight:400; line-height:1.6;
-  -webkit-font-smoothing:antialiased; min-height:100vh; position:relative; overflow-x:hidden;
-}
 a{color:inherit;}
 
 /* ---------- ambient layers ---------- */
-#digit-field{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;}
-.grain{
-  position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.035; mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-html[data-theme="light"] .grain{opacity:.02;}
 
 .wrap{position:relative; z-index:2;}
 .container{max-width:1180px; margin:0 auto; padding:0 28px;}
 @media (max-width:640px){ .container{padding:0 20px;} }
 
 /* ---------- header ---------- */
-header{
-  position:fixed; top:0; left:0; right:0; height:72px; z-index:50;
-  display:flex; align-items:center;
-  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
-  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-}
-header .container{display:flex; align-items:center; justify-content:space-between; width:100%;}
-.brand{display:flex; align-items:center; gap:2px; text-decoration:none; font-family:'Space Mono',monospace; font-size:18px; letter-spacing:.02em;}
-.brand .pi{font-family:'Fraunces',serif; font-style:italic; font-size:26px; color:var(--gold); margin-right:4px; line-height:1;}
-.brand .num{color:var(--paper);}
-.brand .me{color:var(--paper-faint);}
-
-.theme-toggle{
-  display:flex; align-items:center; justify-content:center; width:40px; height:40px;
-  border-radius:100px; border:1px solid var(--line); background:transparent; color:var(--paper);
-  cursor:pointer; transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
-}
-.theme-toggle:hover, .theme-toggle:focus-visible{border-color:var(--gold); color:var(--gold);}
-.theme-toggle svg{width:18px; height:18px;}
 
 :focus-visible{outline:2px solid var(--gold); outline-offset:3px; border-radius:4px;}
 
-/* ---------- app head ---------- */
-.app-head{padding:150px 0 50px;}
-.eyebrow{
-  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.28em; text-transform:uppercase;
-  color:var(--gold); display:flex; align-items:center; gap:10px; margin-bottom:18px;
-}
-.eyebrow::before{content:''; width:18px; height:1px; background:var(--gold);}
-h1{
-  font-family:'Fraunces',serif; font-weight:300; letter-spacing:-.02em; line-height:.96;
-  font-size:clamp(1.9rem,5vw,3.2rem); margin:0 0 16px; color:var(--paper);
-}
-h1 em{font-style:italic; color:var(--gold);}
-.app-desc{font-size:16px; color:var(--paper-dim); max-width:640px; margin:0;}
-
 /* ---------- footer ---------- */
-footer{padding:60px 0 50px; border-top:1px solid var(--line); margin-top:60px;}
-footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;}
-footer p{font-family:'Space Mono',monospace; font-size:12px; color:var(--paper-faint); margin:0;}
-footer a{color:var(--paper-faint); text-decoration:none; border-bottom:1px solid transparent; transition:border-color .3s, color .3s;}
-footer a:hover{color:var(--gold); border-color:var(--gold);}
 
 @media (prefers-reduced-motion:reduce){
   *{transition-duration:.001ms !important; animation-duration:.001ms !important;}
 }
-
-/* ================= APP ================= */
-
-.reveal{opacity:0; transform:translateY(26px); transition:opacity .5s cubic-bezier(.2,.8,.2,1), transform .5s cubic-bezier(.2,.8,.2,1);}
-.reveal.in{opacity:1; transform:translateY(0);}
 
 /* mode switch (Quelle: manuell / import) */
 .source-tabs{display:flex; gap:10px; margin-bottom:28px; flex-wrap:wrap;}
@@ -112,7 +44,7 @@ footer a:hover{color:var(--gold); border-color:var(--gold);}
 .tab-btn.active{background:var(--gold); border-color:var(--gold); color:var(--ink); font-weight:600;}
 
 .panel{
-  background:linear-gradient(165deg, var(--panel), var(--ink-soft));
+  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
   border:1px solid var(--line); border-radius:var(--r); padding:28px; margin-bottom:24px;
   position:relative;
 }
@@ -245,14 +177,6 @@ pre#jsonOutput{
 
 .app-section{padding:14px 0 60px;}
 
-.toast{
-  position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); z-index:100;
-  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif; font-weight:600;
-  font-size:14px; padding:12px 24px; border-radius:100px; box-shadow:0 10px 30px var(--shadow);
-  opacity:0; pointer-events:none; transition:all .35s cubic-bezier(.2,.8,.2,1);
-}
-.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-
 /* --- tree editor (nested structures) --- */
 .tree-banner{
   display:flex; align-items:flex-start; gap:10px; background:rgba(216,180,106,0.07);
@@ -310,24 +234,31 @@ pre#jsonOutput{
 <div class="grain" aria-hidden="true"></div>
 
 <div class="wrap">
-  <header>
-    <div class="container">
-      <a href="/" class="brand" aria-label="Zur Startseite von 31415.me">
-        <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
+<header>
+  <div class="header-inner">
+    <a href="/" class="brand" aria-label="31415.me Startseite">
+      <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
+    </a>
+    <div class="header-right">
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Alle Werkzeuge</span>
       </a>
-      <button class="theme-toggle" id="themeToggle" aria-label="Theme umschalten" type="button">
-        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln" type="button">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
       </button>
     </div>
-  </header>
+  </div>
+</header>
+
+<div class="app-head reveal">
+  <span class="eyebrow">Werkzeug · JSON</span>
+  <h1>JSON <em>Datensatz</em>-Generator</h1>
+  <p class="lede">Felder selbst anlegen oder ein Beispiel-JSON einlesen — dann Werte wie in einer Tabelle eintragen und als JSON exportieren.</p>
+</div>
 
   <main class="container">
-    <div class="app-head">
-      <div class="eyebrow">JSON-Werkzeug</div>
-      <h1>JSON <em>Datensatz</em>-Generator</h1>
-      <p class="app-desc">Felder selbst anlegen oder ein Beispiel-JSON einlesen — dann Werte wie in einer Tabelle eintragen und als JSON exportieren.</p>
-    </div>
-
     <!-- APP CONTENT FOLLOWS -->
     <section class="app-section">
 
@@ -418,78 +349,15 @@ pre#jsonOutput{
     </section>
   </main>
 
-  <footer>
-    <div class="container">
-      <p>31415.me — digitales Taschenmesser</p>
-      <p><a href="/">&larr; Alle Werkzeuge</a></p>
-    </div>
-  </footer>
+<footer>
+  <div class="footer-inner">
+    <p>Teil von <a href="/">31415.me</a> — läuft vollständig lokal in deinem Browser.</p>
+    <p>Nur deine Theme-Wahl wird lokal gespeichert, sonst verlässt nichts dieses Gerät.</p>
+  </div>
+</footer>
 </div>
 
 <script>
-/* ---------- theme ---------- */
-(function(){
-  const root=document.documentElement;
-  const saved=localStorage.getItem('theme');
-  const sysLight=window.matchMedia('(prefers-color-scheme: light)').matches;
-  const initial=saved || (sysLight?'light':'dark');
-  root.setAttribute('data-theme', initial);
-  updateMeta(initial);
-  document.getElementById('themeToggle').addEventListener('click', function(){
-    const cur=root.getAttribute('data-theme')==='light'?'dark':'light';
-    root.setAttribute('data-theme', cur);
-    localStorage.setItem('theme', cur);
-    updateMeta(cur);
-  });
-  function updateMeta(t){
-    document.querySelector('meta[name="theme-color"]').setAttribute('content', t==='light' ? '#f6f3ea' : '#0a0e14');
-  }
-})();
-
-/* ---------- pi digit rain ---------- */
-(function(){
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const canvas = document.getElementById('digit-field');
-  if(reduce){ canvas.style.display='none'; return; }
-  const ctx = canvas.getContext('2d');
-  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
-  let drops = [];
-  function resize(){
-    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-    const cols = Math.floor(canvas.width / 28);
-    drops = Array.from({length: cols}, (_, i) => ({
-      x: i*28 + 14, y: Math.random()*canvas.height, speed: 0.4 + Math.random()*0.6,
-      char: PI_DIGITS[Math.floor(Math.random()*PI_DIGITS.length)]
-    }));
-  }
-  window.addEventListener('resize', resize);
-  resize();
-  function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.font = "13px 'Space Mono', monospace";
-    drops.forEach(d=>{
-      const grad_alpha = 0.05 + (d.y/canvas.height)*0.35;
-      ctx.fillStyle = `rgba(216,180,106,${grad_alpha})`;
-      ctx.fillText(d.char, d.x, d.y);
-      d.y += d.speed;
-      if(d.y > canvas.height){ d.y = -20; d.char = PI_DIGITS[Math.floor(Math.random()*PI_DIGITS.length)]; }
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
-/* ---------- scroll reveal ---------- */
-(function(){
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const els = document.querySelectorAll('.reveal');
-  if(reduce){ els.forEach(e=>e.classList.add('in')); return; }
-  const obs = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); } });
-  }, {threshold:.12});
-  els.forEach(e=>obs.observe(e));
-})();
-
 /* ================= JSON BUILDER APP ================= */
 (function(){
   'use strict';

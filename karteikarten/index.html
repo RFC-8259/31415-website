@@ -7,85 +7,24 @@
 <title>Karten — 31415.me</title>
 <meta name="description" content="Lernkarten mit Spaced Repetition (SM-2). Läuft vollständig lokal in deinem Browser.">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/chrome.css">
+<script src="/assets/chrome.js"></script>
 <style>
-:root{ /* DARK (Default) */
-  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
-  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
-  --gold:#d8b46a; --gold-bright:#f0cd84;
-  --field-base:rgba(10,14,20,0.12);
-  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
-  --shadow:rgba(216,180,106,.55); --r:14px;
-  --accent2:#c9705a; --accent2-bright:#e2907a;
+:root{--accent2:#c9705a; --accent2-bright:#e2907a;
   /* Bewertungsfarben (bestätigte Ausnahme für die vier Lern-Buttons) */
   --rate-again:#c9705a; --rate-hard:#d59550; --rate-good:#8fbd8a; --rate-easy:#7dabd0;
 }
-html[data-theme="light"]{
-  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
-  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
-  --gold:#a9802e; --gold-bright:#8c6618;
-  --field-base:rgba(246,243,234,0.14);
-  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
-  --shadow:rgba(169,128,46,.32);
-  --accent2:#a8452f; --accent2-bright:#8c3521;
+html[data-theme="light"]{--accent2:#a8452f; --accent2-bright:#8c3521;
   --rate-again:#a8452f; --rate-hard:#9c651c; --rate-good:#48763f; --rate-easy:#38638c;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{
-  background:var(--ink); color:var(--paper);
-  font-family:'Space Grotesk',sans-serif; font-weight:400; line-height:1.6;
-  min-height:100vh; overflow-x:hidden;
-  transition:background .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
-}
-
-#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
-
-.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-html[data-theme="light"] .grain{opacity:.02;}
 
 .container{max-width:1180px;margin:0 auto;padding:0 28px;}
 
-/* ---------- Header ---------- */
-header{
-  position:fixed;top:0;left:0;right:0;height:72px;z-index:50;
-  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
-  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-}
-header .container{height:72px;display:flex;align-items:center;justify-content:space-between;}
-.brand{display:flex;align-items:baseline;gap:8px;text-decoration:none;}
-.brand .pi{font-family:'Fraunces',serif;font-size:26px;font-weight:400;color:var(--gold);line-height:1;}
-.brand .num{font-family:'Space Mono',monospace;font-size:1rem;font-weight:700;color:var(--paper);letter-spacing:.06em;}
-.brand .tld{font-family:'Space Mono',monospace;font-size:1rem;color:var(--paper-faint);}
-.header-right{display:flex;align-items:center;gap:14px;}
-
-.theme-toggle{
-  width:40px;height:40px;border-radius:100px;display:flex;align-items:center;justify-content:center;
-  background:transparent;border:1px solid var(--line);color:var(--paper);cursor:pointer;
-  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
-}
-.theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
-.theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.theme-toggle svg{width:18px;height:18px;}
-.icon-sun{display:none;}
-html[data-theme="light"] .icon-moon{display:none;}
-html[data-theme="light"] .icon-sun{display:block;}
-
 /* ---------- App-Kopf ---------- */
 main{position:relative;z-index:2;}
-.app-head{padding:150px 0 56px;}
-.eyebrow{
-  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:18px;
-}
-.app-head h1{
-  font-family:'Fraunces',serif;font-weight:300;font-size:clamp(2.2rem,6vw,3.6rem);
-  letter-spacing:-.02em;line-height:.96;margin-bottom:16px;
-}
-.app-head h1 em{font-style:italic;font-weight:400;color:var(--gold);}
-.app-head .lede{color:var(--paper-dim);max-width:56ch;font-weight:300;}
 
 /* ---------- Gemeinsame Bausteine ---------- */
 .btn-primary{
@@ -213,15 +152,6 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 .help-body .k{font-family:'Space Mono',monospace;font-size:.82em;color:var(--gold);letter-spacing:.03em;}
 
 /* ---------- Deckansicht ---------- */
-.back-link{
-  display:inline-flex;align-items:center;gap:8px;color:var(--paper);text-decoration:none;
-  font-family:'Space Mono',monospace;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;
-  background:none;border:none;cursor:pointer;padding:0;margin-bottom:26px;
-  transition:color .3s cubic-bezier(.2,.8,.2,1);
-}
-.back-link .arr{display:inline-block;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
-.back-link:hover .arr{transform:translateX(6px);}
-.back-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 .deck-title-input{
   font-family:'Fraunces',serif;font-weight:300;font-size:clamp(1.7rem,4.5vw,2.6rem);
@@ -340,31 +270,9 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 .view{padding-bottom:130px;}
 [hidden]{display:none !important;}
 
-/* Scroll-Reveal (6f) */
-.reveal{opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
-.reveal.in{opacity:1; transform:translateY(0);}
-
-/* Toast (6g) */
-.toast{
-  position:fixed; bottom:28px; left:50%; transform:translate(-50%,20px);
-  background:var(--gold); color:var(--ink); font-family:'Space Grotesk',sans-serif;
-  font-weight:600; font-size:.88rem; padding:13px 24px; border-radius:100px;
-  box-shadow:0 16px 32px -8px var(--shadow); opacity:0; pointer-events:none; z-index:100;
-  transition:opacity .35s cubic-bezier(.2,.8,.2,1), transform .35s cubic-bezier(.2,.8,.2,1);
-}
-.toast.show{opacity:1; transform:translate(-50%,0);}
-
-/* ---------- Footer ---------- */
-footer{padding:50px 0 70px; border-top:1px solid var(--line); margin-top:0; position:relative; z-index:2;}
-footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
-footer p{margin:0; font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); letter-spacing:.05em;}
-footer a{color:var(--paper-faint); transition:color .3s cubic-bezier(.2,.8,.2,1);}
-footer a:hover{color:var(--gold);}
-
 /* ---------- Mobil ---------- */
 @media (max-width:720px){
   .container{padding:0 20px;}
-  .app-head{padding:120px 0 40px;}
   .view{padding-bottom:90px;}
   .card-form .fields{grid-template-columns:1fr;}
   .row{flex-wrap:wrap;}
@@ -382,9 +290,18 @@ footer a:hover{color:var(--gold);}
 /* ---------- Reduced Motion ---------- */
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important; animation:none !important;}
-  .reveal{opacity:1; transform:none;}
-  #digit-field{display:none;}
 }
+.btn-back{
+  display:inline-flex;align-items:center;gap:8px;color:var(--paper);text-decoration:none;
+  font-family:'Space Mono',monospace;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;
+  background:none;border:none;cursor:pointer;padding:0;margin-bottom:26px;
+  transition:color .3s cubic-bezier(.2,.8,.2,1);
+}
+.btn-back:hover{color:var(--gold);}
+.btn-back .arr{display:inline-block;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+.btn-back:hover .arr{transform:translateX(-4px);}
+.btn-back:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
 </style>
 </head>
 <body>
@@ -392,12 +309,16 @@ footer a:hover{color:var(--gold);}
 <div class="grain" aria-hidden="true"></div>
 
 <header>
-  <div class="container">
-    <a class="brand" href="/" aria-label="Zurück zur Startseite von 31415.me">
-      <span class="pi">π</span><span class="num">31415</span><span class="tld">.me</span>
+  <div class="header-inner">
+    <a href="/" class="brand" aria-label="31415.me Startseite">
+      <span class="pi">π</span><span class="num">31415</span><span class="me">.me</span>
     </a>
     <div class="header-right">
-      <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln">
+      <a href="/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <span>Alle Werkzeuge</span>
+      </a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln" type="button">
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
       </button>
@@ -405,14 +326,14 @@ footer a:hover{color:var(--gold);}
   </div>
 </header>
 
+<div class="app-head reveal">
+  <span class="eyebrow">Werkzeug · Lernen</span>
+  <h1>Karten, die <em>wiederkommen.</em></h1>
+  <p class="lede">Lernkarten mit Spaced Repetition nach dem SM-2-Verfahren: Jede Antwort bestimmt, wann eine Karte wieder auftaucht. Decks bleiben in deinem Browser gespeichert und lassen sich jederzeit importieren und exportieren.</p>
+</div>
+
 <main>
   <div class="container">
-
-    <section class="app-head reveal">
-      <p class="eyebrow">Werkzeug · Lernen</p>
-      <h1>Karten, die <em>wiederkommen.</em></h1>
-      <p class="lede">Lernkarten mit Spaced Repetition nach dem SM-2-Verfahren: Jede Antwort bestimmt, wann eine Karte wieder auftaucht. Decks bleiben in deinem Browser gespeichert und lassen sich jederzeit importieren und exportieren.</p>
-    </section>
 
     <!-- ============ Ansicht: Decks ============ -->
     <section id="view-home" class="view reveal">
@@ -481,7 +402,7 @@ footer a:hover{color:var(--gold);}
 
     <!-- ============ Ansicht: Deck bearbeiten ============ -->
     <section id="view-deck" class="view" hidden>
-      <button class="back-link" id="btnBackHome"><span class="arr">←</span> Alle Decks</button>
+      <button class="btn-back" id="btnBackHome"><span class="arr">←</span> Alle Decks</button>
       <label class="mono-label" for="deckTitle">Deckname</label>
       <input type="text" class="deck-title-input" id="deckTitle" aria-label="Deckname bearbeiten">
       <p class="deck-meta" id="deckMeta"></p>
@@ -525,7 +446,7 @@ footer a:hover{color:var(--gold);}
     <!-- ============ Ansicht: Lernen ============ -->
     <section id="view-study" class="view" hidden>
       <div class="study-top">
-        <button class="back-link" id="btnBackDeck" style="margin-bottom:0"><span class="arr">←</span> Zum Deck</button>
+        <button class="btn-back" id="btnBackDeck" style="margin-bottom:0"><span class="arr">←</span> Zum Deck</button>
         <p class="study-counts" id="studyCounts"></p>
       </div>
       <div class="study-stats" id="studyStats"></div>
@@ -572,36 +493,13 @@ footer a:hover{color:var(--gold);}
 <div class="toast" id="toast">Kopiert</div>
 
 <footer>
-  <div class="container">
+  <div class="footer-inner">
     <p>Teil von <a href="/">31415.me</a> — dein Lernstand lebt in diesem Browser.</p>
     <p>Decks, Lernstand, Tagesziel und Theme-Wahl werden nur lokal gespeichert — nichts verlässt dieses Gerät.</p>
   </div>
 </footer>
 
 <script>
-/* ---------- Theme (verbindlicher Referenzcode — nicht verändern) ---------- */
-(function(){
-  const root = document.documentElement;
-  const stored = localStorage.getItem('theme');
-  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-  if(stored){ root.setAttribute('data-theme', stored); }
-  else if(prefersLight){ root.setAttribute('data-theme','light'); }
-
-  function updateMeta(){
-    const isLight = root.getAttribute('data-theme') === 'light';
-    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
-  }
-  updateMeta();
-
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-    const next = current === 'light' ? 'dark' : 'light';
-    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
-    localStorage.setItem('theme', next);
-    updateMeta();
-  });
-})();
-
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ================================================================
@@ -1245,7 +1143,7 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
   document.addEventListener('keydown', e => {
     if(currentView !== 'study' || !session) return;
     if(e.target.closest('input, textarea')) return;
-    if((e.key === ' ' || e.key === 'Enter') && !e.target.closest('.back-link')){
+    if((e.key === ' ' || e.key === 'Enter') && !e.target.closest('.btn-back')){
       if(!session.revealed){ e.preventDefault(); reveal(); return; }
       if(session.mode === 'free'){ e.preventDefault(); freeNext(); return; }
     }
@@ -1273,60 +1171,6 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
   bindSpotlight();
 })();
 
-/* ---------- Scroll-Reveal (6f) ---------- */
-(function(){
-  const els = document.querySelectorAll('.reveal');
-  if(reduceMotion){ els.forEach(el => el.classList.add('in')); return; }
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
-    });
-  }, {threshold:.15});
-  els.forEach(el => obs.observe(el));
-})();
-
-/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
-(function(){
-  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
-  const cv = document.getElementById('digit-field');
-  const ctx = cv.getContext('2d');
-  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
-  let drops = [];
-
-  function resize(){
-    cv.width = innerWidth;
-    cv.height = innerHeight;
-    const cols = Math.floor(cv.width / 28);
-    drops = [];
-    for(let i=0;i<cols;i++){
-      drops.push({
-        x: i*28 + 14,
-        y: Math.random() * cv.height,
-        speed: 0.4 + Math.random() * 0.6,
-        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
-      });
-    }
-  }
-  addEventListener('resize', resize);
-  resize();
-
-  function draw(){
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.font = "13px 'Space Mono', monospace";
-    drops.forEach(d => {
-      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
-      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
-      ctx.fillText(d.char, d.x, d.y);
-      d.y += d.speed;
-      if(d.y > cv.height){
-        d.y = -20;
-        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
-      }
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
 </script>
 </body>
 </html>

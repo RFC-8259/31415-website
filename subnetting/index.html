@@ -9,108 +9,18 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/chrome.css">
+<script src="/assets/chrome.js"></script>
 <style>
-:root{ /* DARK (Default) */
-  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
-  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
-  --gold:#d8b46a; --gold-bright:#f0cd84;
-  --field-base:rgba(10,14,20,0.12);
-  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
-  --shadow:rgba(216,180,106,.55); --r:14px;
-}
-html[data-theme="light"]{
-  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
-  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
-  --gold:#a9802e; --gold-bright:#8c6618;
-  --field-base:rgba(246,243,234,0.14);
-  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
-  --shadow:rgba(169,128,46,.32);
-}
 
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
-body{
-  background:var(--ink);
-  color:var(--paper);
-  font-family:'Space Grotesk',sans-serif;
-  font-weight:400;
-  line-height:1.6;
-  min-height:100vh;
-  position:relative;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-}
 ::selection{background:var(--gold);color:var(--ink);}
-
-#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
-
-.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-html[data-theme="light"] .grain{opacity:.02;}
 
 a{color:inherit;text-decoration:none;}
 
 .wrap{max-width:1180px;margin:0 auto;padding:0 28px;position:relative;z-index:2;}
 @media(max-width:640px){.wrap{padding:0 20px;}}
-
-/* ---------- Header ---------- */
-header{
-  position:fixed;top:0;left:0;right:0;z-index:50;
-  height:72px;display:flex;align-items:center;
-  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-}
-.header-inner{
-  max-width:1180px;margin:0 auto;width:100%;
-  padding:0 28px;display:flex;align-items:center;justify-content:space-between;
-}
-@media(max-width:640px){.header-inner{padding:0 20px;}}
-
-.brand{display:flex;align-items:baseline;gap:.32em;font-size:1rem;}
-.brand .pi{font-family:'Fraunces',serif;font-size:1.5rem;color:var(--gold);line-height:1;}
-.brand .num{font-family:'Space Mono',monospace;font-weight:700;color:var(--paper);letter-spacing:.02em;}
-.brand .me{font-family:'Space Mono',monospace;color:var(--paper-faint);}
-
-.header-right{display:flex;align-items:center;gap:18px;}
-.back-link{
-  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--paper-dim);display:flex;align-items:center;gap:6px;
-  transition:color .3s cubic-bezier(.2,.8,.2,1);
-  border-radius:4px;
-}
-.back-link:hover{color:var(--gold);}
-.back-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.back-link svg{width:13px;height:13px;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
-.back-link:hover svg{transform:translateX(6px);}
-
-.theme-toggle{
-  width:40px;height:40px;border-radius:100px;border:1px solid var(--line);
-  background:transparent;color:var(--paper-dim);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
-}
-.theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
-.theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.theme-toggle svg{width:17px;height:17px;}
-.icon-sun{display:none;}
-html[data-theme="light"] .icon-moon{display:none;}
-html[data-theme="light"] .icon-sun{display:block;}
-
-/* ---------- App head ---------- */
-.app-head{padding:150px 0 56px;}
-@media(max-width:640px){.app-head{padding:120px 0 40px;}}
-.eyebrow{
-  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
-  color:var(--gold);display:block;margin-bottom:18px;
-}
-h1{
-  font-family:'Fraunces',serif;font-weight:300;font-size:clamp(2.2rem,6vw,3.6rem);
-  letter-spacing:-.02em;line-height:.98;margin:0 0 16px;color:var(--paper);
-}
-h1 em{font-style:italic;color:var(--gold-bright);font-weight:400;}
-.lede{font-size:1.05rem;color:var(--paper-dim);max-width:580px;margin:0;}
 
 /* ---------- Mode switch ---------- */
 .mode-switch{
@@ -271,31 +181,10 @@ html[data-theme="light"] .vlsm-item input{background:var(--panel);}
 .vlsm-table tr:last-child td{border-bottom:none;}
 .vlsm-table td:first-child{font-family:'Space Grotesk',sans-serif;color:var(--paper-dim);}
 
-/* ---------- Toast ---------- */
-.toast{
-  position:fixed;bottom:28px;left:50%;
-  background:var(--gold);color:var(--ink);font-family:'Space Grotesk',sans-serif;
-  font-weight:600;font-size:.88rem;padding:13px 24px;border-radius:100px;
-  box-shadow:0 16px 32px -8px var(--shadow);opacity:0;pointer-events:none;z-index:100;
-  transform:translate(-50%, 20px);
-  transition:opacity .35s cubic-bezier(.2,.8,.2,1), transform .35s cubic-bezier(.2,.8,.2,1);
-}
-.toast.show{transform:translate(-50%, 0);opacity:1;}
-
 /* ---------- Footer ---------- */
-footer{padding:50px 0 70px; border-top:1px solid var(--line); margin-top:0;}
-footer .container{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;}
-footer p{margin:0; font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); letter-spacing:.05em;}
-footer a{color:var(--paper-faint); transition:color .3s cubic-bezier(.2,.8,.2,1);}
-footer a:hover{color:var(--gold);}
-
-.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
-.reveal.in{opacity:1;transform:translateY(0);}
 
 @media(prefers-reduced-motion:reduce){
   *{transition:none !important; animation:none !important;}
-  .reveal{opacity:1; transform:none;}
-  #digit-field{display:none;}
 }
 </style>
 </head>
@@ -311,7 +200,7 @@ footer a:hover{color:var(--gold);}
     <div class="header-right">
       <a href="/" class="back-link">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Alle Werkzeuge
+        <span>Alle Werkzeuge</span>
       </a>
       <button class="theme-toggle" id="themeToggle" aria-label="Theme wechseln" type="button">
         <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12.4A9 9 0 1 1 11.6 3 7 7 0 0 0 21 12.4Z"/></svg>
@@ -321,13 +210,13 @@ footer a:hover{color:var(--gold);}
   </div>
 </header>
 
-<main class="wrap">
-  <div class="app-head reveal">
-    <span class="eyebrow">Wekzeug · Netzwerk</span>
-    <h1>Subnetting-<em>Rechner</em></h1>
-    <p class="lede">IP-Netze analysieren, die passende Maske aus deinem Bedarf ableiten oder ein Netz per VLSM in mehrere Subnetze schneiden.</p>
-  </div>
+<div class="app-head reveal">
+  <span class="eyebrow">Werkzeug · Netzwerk</span>
+  <h1>Subnetting-<em>Rechner</em></h1>
+  <p class="lede">IP-Netze analysieren, die passende Maske aus deinem Bedarf ableiten oder ein Netz per VLSM in mehrere Subnetze schneiden.</p>
+</div>
 
+<main class="wrap">
   <div class="mode-switch reveal" role="group" aria-label="Modus wählen">
     <button class="mode-btn active" data-mode="cidr" type="button">CIDR-Analyse</button>
     <button class="mode-btn" data-mode="need" type="button">Hosts → Maske</button>
@@ -432,39 +321,13 @@ footer a:hover{color:var(--gold);}
 <div class="toast" id="toast"></div>
 
 <footer>
-  <div class="wrap container">
+  <div class="footer-inner">
     <p>Teil von <a href="/">31415.me</a> — läuft vollständig lokal in deinem Browser.</p>
     <p>Nur deine Theme-Wahl wird lokal gespeichert, sonst verlässt nichts dieses Gerät.</p>
   </div>
 </footer>
 
 <script>
-/* ---------- Theme (verbindlicher Referenzcode — nicht verändern) ---------- */
-(function(){
-  const root = document.documentElement;
-  const stored = localStorage.getItem('theme');
-  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-  if(stored){ root.setAttribute('data-theme', stored); }
-  else if(prefersLight){ root.setAttribute('data-theme','light'); }
-
-  function updateMeta(){
-    const isLight = root.getAttribute('data-theme') === 'light';
-    document.querySelector('meta[name="theme-color"]').setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
-  }
-  updateMeta();
-
-  document.getElementById('themeToggle').addEventListener('click', () => {
-    const current = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-    const next = current === 'light' ? 'dark' : 'light';
-    if(next === 'dark'){ root.removeAttribute('data-theme'); } else { root.setAttribute('data-theme','light'); }
-    localStorage.setItem('theme', next);
-    updateMeta();
-  });
-})();
-
-/* ---------- Reduced motion ---------- */
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
 /* ---------- Toast ---------- */
 let toastTimer;
 function showToast(msg){
@@ -920,60 +783,6 @@ document.querySelectorAll('.controls-card, .output-card').forEach(card => {
   });
 });
 
-/* ---------- Pi digit rain (verbindlicher Referenzcode — nicht verändern) ---------- */
-(function(){
-  if(reduceMotion){ document.getElementById('digit-field').style.display = 'none'; return; }
-  const cv = document.getElementById('digit-field');
-  const ctx = cv.getContext('2d');
-  const PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
-  let drops = [];
-
-  function resize(){
-    cv.width = innerWidth;
-    cv.height = innerHeight;
-    const cols = Math.floor(cv.width / 28);
-    drops = [];
-    for(let i=0;i<cols;i++){
-      drops.push({
-        x: i*28 + 14,
-        y: Math.random() * cv.height,
-        speed: 0.4 + Math.random() * 0.6,
-        char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
-      });
-    }
-  }
-  addEventListener('resize', resize);
-  resize();
-
-  function draw(){
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    ctx.font = "13px 'Space Mono', monospace";
-    drops.forEach(d => {
-      const gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
-      ctx.fillStyle = `rgba(216,180,106,${gradAlpha})`;
-      ctx.fillText(d.char, d.x, d.y);
-      d.y += d.speed;
-      if(d.y > cv.height){
-        d.y = -20;
-        d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
-      }
-    });
-    requestAnimationFrame(draw);
-  }
-  draw();
-})();
-
-/* ---------- Scroll reveal ---------- */
-(function(){
-  const els = document.querySelectorAll('.reveal');
-  if(reduceMotion){ els.forEach(el => el.classList.add('in')); return; }
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting){ entry.target.classList.add('in'); obs.unobserve(entry.target); }
-    });
-  }, {threshold:.15});
-  els.forEach(el => obs.observe(el));
-})();
 </script>
 </body>
 </html>
