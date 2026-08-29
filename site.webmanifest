@@ -1,0 +1,14 @@
+{
+  "name": "31415.me — Ein digitales Taschenmesser",
+  "short_name": "31415.me",
+  "description": "Kleine, durchdachte Web-Werkzeuge für Alltag und Arbeit. Jedes tut genau eine Sache – und sie gut.",
+  "lang": "de",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0e14",
+  "theme_color": "#0a0e14",
+  "icons": [
+    { "src": "/assets/favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" }
+  ]
+}

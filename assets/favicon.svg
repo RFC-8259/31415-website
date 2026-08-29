@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="31415.me">
+  <rect width="64" height="64" rx="14" fill="#0a0e14"/>
+  <!-- π, gezeichnet statt gesetzt: unabhängig von installierten Schriften -->
+  <g fill="#d8b46a">
+    <rect x="12" y="19" width="40" height="7" rx="3.5"/>
+    <rect x="20" y="24" width="7" height="24" rx="3.5"/>
+    <path d="M37 24h7v18a3 3 0 0 0 3 3h3v5h-4a9 9 0 0 1-9-9z"/>
+  </g>
+</svg>

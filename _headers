@@ -1,0 +1,36 @@
+# ==============================================================================
+# Cloudflare Pages — Antwort-Header
+# ------------------------------------------------------------------------------
+# Wird beim Deploy automatisch übernommen; die Datei selbst wird nicht
+# ausgeliefert. Reihenfolge zählt: der erste passende Block gewinnt pro Header,
+# spätere Blöcke ergänzen. Doku: https://developers.cloudflare.com/pages/configuration/headers/
+# ==============================================================================
+
+/*
+  # Kein MIME-Raten — verhindert, dass Text als Skript interpretiert wird.
+  X-Content-Type-Options: nosniff
+  # Keine Einbettung in fremde Seiten (Clickjacking).
+  X-Frame-Options: DENY
+  # Referrer nur an eigene Herkunft in voller Länge.
+  Referrer-Policy: strict-origin-when-cross-origin
+  # Keine der Werkzeugseiten braucht Gerätezugriff.
+  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), display-capture=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
+  # HTTPS erzwingen. Vor "includeSubDomains; preload" prüfen, ob wirklich jede
+  # Subdomain dauerhaft per HTTPS erreichbar ist — die Angabe ist bindend.
+  Strict-Transport-Security: max-age=31536000
+  # Alles kommt von hier; einzige Ausnahme sind die Google-Fonts.
+  # 'unsafe-inline' ist nötig, solange Seiten-CSS und -JS inline im Dokument
+  # stehen — siehe README.md, Abschnitt "Bekannte Abstriche".
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; worker-src 'self' blob:; upgrade-insecure-requests
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+
+# chrome.css/chrome.js tragen keinen Hash im Namen. Darum weiterhin bei jedem
+# Aufruf revalidieren (ETag), sonst sieht ein wiederkehrender Besucher neues
+# HTML mit altem CSS. Lange Cache-Zeiten erst mit versionierten Dateinamen.
+/assets/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/site.webmanifest
+  Content-Type: application/manifest+json; charset=utf-8
+  Cache-Control: public, max-age=3600
