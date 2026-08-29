@@ -2,21 +2,32 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0a0e14">
 <title>Mail-Befehl — 31415.me</title>
+<meta name="description" content="PowerShell-Befehl für den E-Mail-Versand per SMTP zusammenklicken — inklusive Microsoft-365-Vorlage.">
+<link rel="canonical" href="https://31415.me/powershell-mail/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/site.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="31415.me">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://31415.me/powershell-mail/">
+<meta property="og:title" content="Mail-Befehl — 31415.me">
+<meta property="og:description" content="PowerShell-Befehl für den E-Mail-Versand per SMTP zusammenklicken — inklusive Microsoft-365-Vorlage.">
+<meta name="twitter:card" content="summary">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
 <style>
 
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
 
-.container{max-width:1180px; margin:0 auto; padding:0 28px; position:relative; z-index:2;}
-@media (max-width:640px){ .container{padding:0 20px;} }
+.container{position:relative;z-index:2;}
 
 main{ padding-bottom:130px; position:relative; z-index:2; }
 @media (max-width:640px){ main{ padding-bottom:90px; } }
@@ -171,6 +182,7 @@ pre.cmd-output .kw{ color:var(--gold-bright); }
 </style>
 </head>
 <body>
+<a class="skip-link" href="#content">Zum Inhalt springen</a>
 <canvas id="digit-field" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
 
@@ -198,7 +210,7 @@ pre.cmd-output .kw{ color:var(--gold-bright); }
   <p class="lede">Fülle die Felder aus — der fertige <code>Send-MailMessage</code>-Befehl entsteht live, fix zum Kopieren.</p>
 </div>
 
-<main>
+<main id="content">
   <div class="container layout">
     <!-- Eingabebereich -->
     <div class="controls-col">
@@ -496,15 +508,6 @@ document.getElementById('providerCustom').addEventListener('click', () => {
   document.getElementById('m365Hint').style.display = 'none';
 });
 
-/* ---------- Kopieren ---------- */
-function showToast(msg){
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
-}
-
 document.getElementById('copyBtn').addEventListener('click', async () => {
   const raw = document.getElementById('cmdOutput').dataset.raw || '';
   try{
@@ -531,15 +534,6 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   setActiveProvider('providerCustom');
   document.getElementById('m365Hint').style.display = 'none';
   render();
-});
-
-/* ---------- Gold-Spotlight ---------- */
-document.querySelectorAll('.controls-card, .output-card').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect();
-    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
-  });
 });
 
 </script>

@@ -2,33 +2,40 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0a0e14">
 <title>Decide — 31415.me</title>
 <meta name="description" content="Sieben Wege, eine Entscheidung zu treffen: Münze, Würfel, Zufallszahl, Liste mischen, Mehrfachauswahl, Turnier und das klassische Ja/Nein.">
+<link rel="canonical" href="https://31415.me/decide/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/site.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="31415.me">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://31415.me/decide/">
+<meta property="og:title" content="Decide — 31415.me">
+<meta property="og:description" content="Sieben Wege, eine Entscheidung zu treffen: Münze, Würfel, Zufallszahl, Liste mischen, Mehrfachauswahl, Turnier und das klassische Ja/Nein.">
+<meta name="twitter:card" content="summary">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
 <style>
 
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
 
-a{color:inherit;text-decoration:none;}
-::selection{background:var(--gold);color:var(--ink);}
 
 ::-webkit-scrollbar{width:10px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--line);border-radius:10px;}
 
-button{font-family:inherit;cursor:pointer;}
 
 /* ---------- ambient layers ---------- */
 
-.container{max-width:1180px;margin:0 auto;padding:0 28px;position:relative;z-index:2;}
-@media (max-width:640px){ .container{padding:0 20px;} }
+.container{position:relative;z-index:2;}
 
 /* ---------- header ---------- */
 
@@ -227,6 +234,7 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
 </style>
 </head>
 <body>
+<a class="skip-link" href="#content">Zum Inhalt springen</a>
 
 <canvas id="digit-field" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
@@ -255,7 +263,7 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
   <p class="lede">Wenn das Abwägen nicht weiterhilft, hilft der Zufall. Acht kleine Entscheider für alle Lagen — von der einfachen Münze bis zum Turnier. Alles bleibt in deinem Browser.</p>
 </div>
 
-<main>
+<main id="content">
   <section class="grid container">
 
     <!-- 1. Ja / Nein -->
@@ -458,16 +466,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-/* ============ Card spotlight ============ */
-(function(){
-  document.querySelectorAll('[data-card]').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect();
-      card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      card.style.setProperty('--my', `${e.clientY - r.top}px`);
-    });
-  });
-})();
 
 /* ============ Helpers ============ */
 function rint(min, max){ min = Math.ceil(min); max = Math.floor(max); return Math.floor(Math.random()*(max-min+1))+min; }
@@ -481,14 +479,6 @@ function parseLines(textarea){
 }
 function settle(el){
   el.classList.remove('settle'); void el.offsetWidth; el.classList.add('settle');
-}
-let toastTimer;
-function showToast(msg){
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
 }
 
 /* ============ 1. Ja/Nein ============ */
