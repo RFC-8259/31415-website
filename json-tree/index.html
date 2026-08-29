@@ -2,13 +2,26 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0a0e14">
-<title>Json Tree — 31415.me</title>
+<title>JSON Tree — 31415.me</title>
 <meta name="description" content="JSON einlesen, validieren und in einer aufklappbaren Baumansicht erkunden. Sucht, kopiert, formatiert oder verkürzt — rein im Browser, ohne Server.">
+<link rel="canonical" href="https://31415.me/json-tree/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/site.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="31415.me">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://31415.me/json-tree/">
+<meta property="og:title" content="JSON Tree — 31415.me">
+<meta property="og:description" content="JSON einlesen, validieren und in einer aufklappbaren Baumansicht erkunden. Sucht, kopiert, formatiert oder verkürzt — rein im Browser, ohne Server.">
+<meta name="twitter:card" content="summary">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
 <style>
@@ -17,12 +30,8 @@
 html[data-theme="light"]{--t-str:#5d7a4a; --t-num:#3d7b94; --t-bool:#a14c3e; --t-null:#8f8a7d; --t-key:var(--paper);
 }
 
-*{box-sizing:border-box;}
-html{scroll-behavior:smooth;}
 
-a{color:inherit;}
-.wrap{max-width:1180px; margin:0 auto; padding:0 28px; position:relative; z-index:2;}
-@media (max-width:640px){ .wrap{padding:0 20px;} }
+.wrap{position:relative;z-index:2;}
 
 /* Header */
 nav.top{display:flex; align-items:center; gap:18px;}
@@ -171,6 +180,7 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#content">Zum Inhalt springen</a>
 <canvas id="digit-field" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
 
@@ -198,7 +208,7 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
   <p class="lede">Füge JSON ein — einzeilig oder formatiert. Du bekommst eine aufklappbare Baumansicht, in der sofort klar ist, was wozu gehört.</p>
 </div>
 
-<main>
+<main id="content">
   <div class="wrap">
     <div class="editor-card reveal">
       <textarea id="input" placeholder='Hier JSON einfügen, z. B. {"name":"Ada","aktiv":true,"tags":["math","code"]}' spellcheck="false" aria-label="JSON-Eingabe"></textarea>
@@ -264,14 +274,6 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 <div class="toast" id="toast">Kopiert</div>
 
 <script>
-/* ---------- Toast ---------- */
-function showToast(text){
-  const t = document.getElementById('toast');
-  t.textContent = text;
-  t.classList.add('show');
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 1800);
-}
 
 /* ---------- JSON Baum: State ---------- */
 const input = document.getElementById('input');
@@ -638,15 +640,6 @@ let searchDebounce = null;
 searchInput.addEventListener('input', () => {
   clearTimeout(searchDebounce);
   searchDebounce = setTimeout(triggerSearch, 150);
-});
-
-/* ---------- Spotlight auf Karten ---------- */
-document.querySelectorAll('.editor-card, .tree-card').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect();
-    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
-  });
 });
 
 </script>

@@ -2,12 +2,26 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0a0e14">
 <title>Tischrunde — 31415.me</title>
+<meta name="description" content="Texas Hold&#x27;em gegen deine Freunde: setzen, bluffen und den Pot abräumen. Ohne Server, ohne Einsatz.">
+<link rel="canonical" href="https://31415.me/poker/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/site.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="31415.me">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://31415.me/poker/">
+<meta property="og:title" content="Tischrunde — 31415.me">
+<meta property="og:description" content="Texas Hold&#x27;em gegen deine Freunde: setzen, bluffen und den Pot abräumen. Ohne Server, ohne Einsatz.">
+<meta name="twitter:card" content="summary">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
 <style>
@@ -18,21 +32,13 @@ html[data-theme="light"]{--suit-red:#a8453a; --suit-black:#1d2329;
   --felt-a:#e9e4d3; --felt-b:#dcd5bf;
 }
 
-*{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
-a{color:inherit;text-decoration:none;}
-button{font-family:inherit;cursor:pointer;}
-::selection{background:var(--gold);color:var(--ink);}
 
 /* Fokus */
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:4px;}
 
 /* ---------- Korn ---------- */
 
-.wrap{position:relative;z-index:2;}
 
-.container{max-width:1180px;margin:0 auto;padding:0 28px;}
-@media(max-width:640px){.container{padding:0 20px;}}
 
 /* ---------- Buttons ---------- */
 .btn{
@@ -135,11 +141,12 @@ input::placeholder{color:var(--paper-faint);}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#content">Zum Inhalt springen</a>
 
 <canvas id="digit-field" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
 
-<div class="wrap">
+<div class="layer">
 
 <header>
   <div class="header-inner">
@@ -165,7 +172,7 @@ input::placeholder{color:var(--paper-faint);}
   <p class="lede">Texas Hold’em ohne Server: Alle Geräte berechnen aus einem gemeinsamen Code dieselben Karten. Ihr sagt euch eure Züge laut und tippt sie auf eurem eigenen Gerät mit.</p>
 </div>
 
-<main class="container">
+<main id="content" class="container">
   <!-- SCREENS -->
   <section id="screen-setup" class="screen active">
     <div class="card reveal" style="max-width:640px;">
@@ -309,16 +316,6 @@ input::placeholder{color:var(--paper-faint);}
 </div>
 
 <script>
-/* ============ CARD SPOTLIGHT ============ */
-document.addEventListener('mousemove', (e)=>{
-  document.querySelectorAll('.card').forEach(card=>{
-    const r = card.getBoundingClientRect();
-    if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){
-      card.style.setProperty('--mx', (e.clientX-r.left)+'px');
-      card.style.setProperty('--my', (e.clientY-r.top)+'px');
-    }
-  });
-});
 
 /* ============ KARTEN-ENGINE (deterministisch) ============ */
 const SUITS = ['♠','♥','♦','♣'];

@@ -2,12 +2,26 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0a0e14">
 <title>Netzplan — 31415.me</title>
+<meta name="description" content="Vorgänge verknüpfen, Puffer und den kritischen Pfad berechnen — Projekte übersichtlich planen, komplett im Browser.">
+<link rel="canonical" href="https://31415.me/netzplan/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/site.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="31415.me">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://31415.me/netzplan/">
+<meta property="og:title" content="Netzplan — 31415.me">
+<meta property="og:description" content="Vorgänge verknüpfen, Puffer und den kritischen Pfad berechnen — Projekte übersichtlich planen, komplett im Browser.">
+<meta name="twitter:card" content="summary">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
 <style>
@@ -18,14 +32,11 @@ html[data-theme="light"]{--accent2:#b04a33; --accent2-bright:#8f3a27;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
-.container{max-width:1180px;margin:0 auto;padding:0 28px}
 
 /* ---------- App-Kopf ---------- */
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
 
 /* ---------- Buttons ---------- */
-button{font-family:inherit}
 .btn-primary{
   font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.92rem;
   background:var(--gold);color:var(--ink);border:none;border-radius:100px;
@@ -325,6 +336,7 @@ main{padding-bottom:70px}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#content">Zum Inhalt springen</a>
 
 <canvas id="digit-field" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
@@ -353,7 +365,7 @@ main{padding-bottom:70px}
   <p class="lede">Arbeitspakete erfassen, Abhängigkeiten setzen — Vorwärts- und Rückwärtsterminierung, Puffer und der <em style="font-style:normal;color:var(--accent2)">kritische Pfad</em> berechnen sich von selbst. Dein Projekt bleibt automatisch in diesem Browser gespeichert.</p>
 </div>
 
-<main class="container">
+<main id="content" class="container">
 
   <div class="toolbar">
     <button class="btn-ghost" id="btnExample">
@@ -504,14 +516,6 @@ const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 /* ---------------------------------------------------------------------------
    TOAST (Referenzcode)
 --------------------------------------------------------------------------- */
-let toastTimer;
-function showToast(msg){
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
-}
 
 /* ---------------------------------------------------------------------------
    PERSISTENZ (Autosave in localStorage)
@@ -1444,15 +1448,6 @@ if(hadData && state.packages.length){
 } else {
   renderEmpty("Lege Arbeitspakete an oder lade das Beispiel — der Plan wird automatisch berechnet.");
 }
-
-/* ---------- Karten-Spotlight (Referenzwerte aus dem Designsystem) ---------- */
-document.querySelectorAll('.app-card').forEach(card => {
-  card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect();
-    card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-    card.style.setProperty('--my', `${e.clientY - rect.top}px`);
-  });
-});
 
 </script>
 </body>

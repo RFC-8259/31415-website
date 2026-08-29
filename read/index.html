@@ -2,12 +2,26 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0a0e14">
 <title>Lesefluss — 31415.me</title>
+<meta name="description" content="Wort für Wort im eigenen Takt: Texte spürbar schneller lesen, ohne zu hetzen. Läuft komplett im Browser.">
+<link rel="canonical" href="https://31415.me/read/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/site.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="31415.me">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://31415.me/read/">
+<meta property="og:title" content="Lesefluss — 31415.me">
+<meta property="og:description" content="Wort für Wort im eigenen Takt: Texte spürbar schneller lesen, ohne zu hetzen. Läuft komplett im Browser.">
+<meta name="twitter:card" content="summary">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
 <style>
@@ -18,7 +32,6 @@ html[data-theme="light"]{--focal:#c14e26;
 
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
-a{color:inherit}
 
 /* ---------- Signatur: Korn-Overlay ---------- */
 
@@ -279,6 +292,7 @@ details.science[open] summary{margin-bottom:12px}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#content">Zum Inhalt springen</a>
 
 <canvas id="digit-field" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
@@ -310,7 +324,7 @@ details.science[open] summary{margin-bottom:12px}
 <div class="app">
 <div class="container">
 
-  <main>
+  <main id="content">
 
     <div class="tabs" role="tablist">
       <span class="tab-ind" id="tabInd"></span>
@@ -528,14 +542,6 @@ details.science[open] summary{margin-bottom:12px}
 (function(){
 
   // ---------- toast ----------
-  let toastTimer;
-  function showToast(msg){
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
-  }
 
   // ---------- persistence ----------
   const store={

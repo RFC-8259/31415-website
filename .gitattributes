@@ -1,0 +1,9 @@
+# Im Repository liegt alles mit LF. Ohne diese Zeile landeten bisher je nach
+# Editor CRLF- und LF-Dateien nebeneinander im selben Baum.
+* text=auto eol=lf
+
+# Nicht als Text behandeln.
+*.png binary
+*.jpg binary
+*.woff2 binary
+*.ico binary

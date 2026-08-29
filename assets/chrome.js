@@ -1,42 +1,100 @@
 /* ==========================================================================
    31415.me — gemeinsames Seiten-Verhalten
    --------------------------------------------------------------------------
-   Theme-Umschalter, Pi-Ziffernregen und das Einblenden beim Scrollen.
-   Wird von jeder Werkzeugseite im <head> eingebunden; das Skript setzt das
-   Theme sofort (kein Aufblitzen) und hängt sich erst bei DOM-Bereitschaft
-   an Schalter, Canvas und Beobachter.
+   Einzige Quelle für Theme-Umschaltung, Pi-Ziffernregen, Scroll-Einblendung,
+   Toast und den Karten-Spotlight. Jede Seite bindet diese Datei im <head>
+   ein; das Theme wird sofort gesetzt (kein Aufblitzen), alles Weitere hängt
+   sich bei DOM-Bereitschaft ein.
+
+   Was Seiten hiervon nutzen können — nichts davon selbst nachbauen:
+   • showToast(text[, dauerMs])   Kurzmeldung unten mittig.
+   • revealScan()                 Nachgeladene .reveal-Elemente einblenden.
+   • Spotlight                    Karten mit einer Klasse aus SPOTLIGHT_SELECTOR
+                                  (oder data-spotlight) bekommen --mx/--my.
    ========================================================================== */
 (function(){
   'use strict';
 
   var root = document.documentElement;
-  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var mqReduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  var mqLight  = window.matchMedia('(prefers-color-scheme: light)');
+  var reduceMotion = mqReduce.matches;
 
-  /* ---------- Theme ---------- */
-  var stored = null;
-  try{ stored = localStorage.getItem('theme'); }catch(e){ stored = null; }
-  var prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-  if(stored === 'light' || (!stored && prefersLight)){ root.setAttribute('data-theme','light'); }
-  else{ root.removeAttribute('data-theme'); }
+  var THEME_COLOR = {dark:'#0a0e14', light:'#f6f3ea'};
 
-  function updateMeta(){
+  /* Karten, die den Goldschimmer unter dem Zeiger tragen. Neue Kartenklassen
+     hier eintragen, statt in der Seite einen eigenen Listener zu schreiben. */
+  var SPOTLIGHT_SELECTOR = [
+    '.card', '.app-card', '.deck-card', '.panel', '.timer-card',
+    '.controls-card', '.output-card', '.editor-card', '.tree-card',
+    '[data-card]', '[data-spotlight]'
+  ].join(',');
+
+  /* ---------- Theme ----------
+     Ohne eigene Wahl folgt die Seite dem Betriebssystem; eine Wahl über den
+     Schalter gewinnt und bleibt in localStorage. */
+  function storedTheme(){
+    try{ return localStorage.getItem('theme'); }catch(e){ return null; }
+  }
+  function applyTheme(theme){
+    theme = (theme === 'light') ? 'light' : 'dark';
+    root.setAttribute('data-theme', theme);
     var meta = document.querySelector('meta[name="theme-color"]');
-    if(!meta) return;
-    var isLight = root.getAttribute('data-theme') === 'light';
-    meta.setAttribute('content', isLight ? '#f6f3ea' : '#0a0e14');
+    if(meta){ meta.setAttribute('content', THEME_COLOR[theme]); }
   }
 
+  /* Läuft sofort — noch vor dem ersten Anstrich. */
+  applyTheme(storedTheme() || (mqLight.matches ? 'light' : 'dark'));
+
   function initTheme(){
-    updateMeta();
+    applyTheme(root.getAttribute('data-theme'));
+
+    var onSystemChange = function(e){
+      if(!storedTheme()){ applyTheme(e.matches ? 'light' : 'dark'); }
+    };
+    if(mqLight.addEventListener){ mqLight.addEventListener('change', onSystemChange); }
+    else if(mqLight.addListener){ mqLight.addListener(onSystemChange); }
+
     var toggle = document.getElementById('themeToggle');
     if(!toggle) return;
     toggle.addEventListener('click', function(){
       var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-      if(next === 'dark'){ root.removeAttribute('data-theme'); }
-      else{ root.setAttribute('data-theme','light'); }
+      applyTheme(next);
       try{ localStorage.setItem('theme', next); }catch(e){}
-      updateMeta();
     });
+  }
+
+  /* ---------- Toast ---------- */
+  var toastTimer = null;
+  function showToast(text, duration){
+    var t = document.getElementById('toast');
+    if(!t){
+      t = document.createElement('div');
+      t.id = 'toast';
+      t.className = 'toast';
+      t.setAttribute('role','status');
+      t.setAttribute('aria-live','polite');
+      document.body.appendChild(t);
+    }
+    t.textContent = text;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, duration || 1800);
+  }
+  window.showToast = showToast;
+
+  /* ---------- Karten-Spotlight ----------
+     Ein delegierter Listener für die ganze Seite: das kostet unabhängig von
+     der Kartenzahl gleich viel und erfasst auch später eingefügte Karten. */
+  function initSpotlight(){
+    if(reduceMotion) return;
+    document.addEventListener('pointermove', function(e){
+      var el = e.target && e.target.closest ? e.target.closest(SPOTLIGHT_SELECTOR) : null;
+      if(!el) return;
+      var r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, {passive:true});
   }
 
   /* ---------- Pi-Ziffernregen ---------- */
@@ -108,10 +166,19 @@
     new MutationObserver(scan).observe(document.body, {childList:true, subtree:true});
   }
 
+  /* ---------- Jahreszahl im Footer ---------- */
+  function initYear(){
+    document.querySelectorAll('[data-year]').forEach(function(el){
+      el.textContent = new Date().getFullYear();
+    });
+  }
+
   function init(){
     initTheme();
+    initSpotlight();
     initDigitField();
     initReveal();
+    initYear();
   }
 
   if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', init); }

@@ -2,11 +2,26 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0a0e14">
 <title>Karten — 31415.me</title>
 <meta name="description" content="Lernkarten mit Spaced Repetition (SM-2). Läuft vollständig lokal in deinem Browser.">
+<link rel="canonical" href="https://31415.me/karteikarten/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/site.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="31415.me">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://31415.me/karteikarten/">
+<meta property="og:title" content="Karten — 31415.me">
+<meta property="og:description" content="Lernkarten mit Spaced Repetition (SM-2). Läuft vollständig lokal in deinem Browser.">
+<meta name="twitter:card" content="summary">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
 <style>
@@ -19,9 +34,7 @@ html[data-theme="light"]{--accent2:#a8452f; --accent2-bright:#8c3521;
 }
 
 *{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;}
 
-.container{max-width:1180px;margin:0 auto;padding:0 28px;}
 
 /* ---------- App-Kopf ---------- */
 main{position:relative;z-index:2;}
@@ -305,6 +318,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 </style>
 </head>
 <body>
+<a class="skip-link" href="#content">Zum Inhalt springen</a>
 <canvas id="digit-field" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
 
@@ -332,7 +346,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
   <p class="lede">Lernkarten mit Spaced Repetition nach dem SM-2-Verfahren: Jede Antwort bestimmt, wann eine Karte wieder auftaucht. Decks bleiben in deinem Browser gespeichert und lassen sich jederzeit importieren und exportieren.</p>
 </div>
 
-<main>
+<main id="content">
   <div class="container">
 
     <!-- ============ Ansicht: Decks ============ -->
@@ -602,14 +616,6 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
   function clearErrors(){ document.querySelectorAll('.error-line').forEach(el => el.classList.remove('show')); }
 
   /* Toast (6g) */
-  let toastTimer;
-  function showToast(msg){
-    const toast = document.getElementById('toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
-  }
 
   /* ---------- SM-2 ---------- */
   function applyRating(c, g, now){
@@ -736,7 +742,6 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
       el.querySelector('[data-act="open"]').addEventListener('click', () => openDeck(deck.id));
       grid.appendChild(el);
     });
-    bindSpotlight();
   }
 
   function openDeck(id){
@@ -1152,23 +1157,9 @@ const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').match
     }
   });
 
-  /* ---------- Spotlight (6c) ---------- */
-  function bindSpotlight(){
-    document.querySelectorAll('.deck-card, .panel').forEach(card => {
-      if(card.dataset.spot) return;
-      card.dataset.spot = '1';
-      card.addEventListener('mousemove', e => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-        card.style.setProperty('--my', `${e.clientY - rect.top}px`);
-      });
-    });
-  }
-
   /* ---------- Start ---------- */
   load();
   renderHome();
-  bindSpotlight();
 })();
 
 </script>

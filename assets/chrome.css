@@ -1,11 +1,18 @@
 /* ==========================================================================
    31415.me — gemeinsames Seiten-Chrome
    --------------------------------------------------------------------------
-   Design-Grundlage aller Werkzeugseiten: Farbtokens, Grundlayout, Header mit
-   Rücksprung zur Werkzeugübersicht, Seitenkopf und Footer.
-   Referenzlayout: /subnetting/ — Änderungen hier gelten für alle Seiten.
-   Seiten-CSS ergänzt darunter ausschließlich eigene Bausteine.
+   Einzige Quelle für Farbtokens, Grundlayout, Header, Seitenkopf, Footer,
+   Toast und die Scroll-Einblendung. Jede Seite bindet diese Datei ein und
+   ergänzt darunter im eigenen <style> ausschließlich seitenspezifische
+   Bausteine — nichts, was hier schon steht.
+
+   Regeln (siehe README.md → "Architektur"):
+   • Farben und Radien immer über die Tokens unten, nie als Literal.
+   • Layout-Breite über .wrap bzw. .container (Aliasse, gleiches Verhalten).
+   • Interaktive Karten bekommen eine der Klassen aus der Spotlight-Liste in
+     assets/chrome.js — dann setzt das Skript --mx/--my von allein.
    ========================================================================== */
+
 
 /* ---------- Tokens: Dark (Default) ---------- */
 :root{
@@ -14,6 +21,7 @@
   --gold:#d8b46a; --gold-bright:#f0cd84;
   --field-base:rgba(10,14,20,0.12);
   --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
+  --header-a2:rgba(10,14,20,0.95); --header-b2:rgba(10,14,20,0.6);
   --shadow:rgba(216,180,106,.55); --r:14px;
 }
 /* ---------- Tokens: Light ---------- */
@@ -23,16 +31,18 @@ html[data-theme="light"]{
   --gold:#a9802e; --gold-bright:#8c6618;
   --field-base:rgba(246,243,234,0.14);
   --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
+  --header-a2:rgba(246,243,234,0.96); --header-b2:rgba(246,243,234,0.7);
   --shadow:rgba(169,128,46,.32);
 }
 
 /* ---------- Grundlayout ---------- */
 *{box-sizing:border-box;}
 html,body{margin:0;padding:0;}
+html{scroll-behavior:smooth;}
 body{
   background:var(--ink);
   color:var(--paper);
-  font-family:'Space Grotesk',sans-serif;
+  font-family:'Space Grotesk',system-ui,sans-serif;
   font-weight:400;
   line-height:1.6;
   min-height:100vh;
@@ -44,6 +54,31 @@ body{
 }
 ::selection{background:var(--gold);color:var(--ink);}
 a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;}
+
+/* Einheitlicher Tastaturfokus — Seiten-CSS darf ihn verfeinern, nicht entfernen. */
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+  outline:2px solid var(--gold);outline-offset:2px;
+}
+
+/* Inhaltsbreite. .wrap und .container sind Aliasse; historisch gewachsen,
+   damit beide Schreibweisen in den Seiten weiter funktionieren. Wer nur
+   Inhalte über die Hintergrundschichten heben will, nimmt .layer — sonst
+   käme die Polsterung ein zweites Mal obendrauf. */
+.wrap,.container{max-width:1180px;margin:0 auto;padding:0 28px;}
+@media(max-width:640px){.wrap,.container{padding:0 20px;}}
+.layer{position:relative;z-index:2;}
+
+/* Sprungmarke zum Inhalt — erste fokussierbare Stelle jeder Seite. */
+.skip-link{
+  position:fixed;top:12px;left:12px;z-index:200;
+  transform:translateY(-160%);
+  background:var(--gold);color:var(--ink);
+  font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:11px 18px;border-radius:100px;
+  transition:transform .25s cubic-bezier(.2,.8,.2,1);
+}
+.skip-link:focus-visible{transform:translateY(0);outline-offset:3px;}
 
 #digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
 
@@ -53,18 +88,20 @@ a{color:inherit;text-decoration:none;}
 html[data-theme="light"] .grain{opacity:.02;}
 
 /* ---------- Header ---------- */
+/* Die Leiste selbst legt weder Höhe noch Flow fest — so trägt sie sowohl das
+   .header-inner der Werkzeugseiten als auch die .bar der Startseite. */
 header{
   position:fixed;top:0;left:0;right:0;z-index:50;
-  height:72px;display:flex;align-items:center;
   background:linear-gradient(to bottom, var(--header-a), var(--header-b));
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
+  transition:background .4s ease;
 }
-.header-inner{
-  max-width:1180px;margin:0 auto;width:100%;
+.header-inner,.bar{
+  max-width:1180px;margin:0 auto;width:100%;height:72px;
   padding:0 28px;display:flex;align-items:center;justify-content:space-between;
 }
-@media(max-width:640px){.header-inner{padding:0 20px;}}
+@media(max-width:640px){.header-inner,.bar{padding:0 20px;}}
 
 .brand{display:flex;align-items:baseline;gap:.32em;font-size:1rem;}
 .brand .pi{font-family:'Fraunces',serif;font-size:1.5rem;color:var(--gold);line-height:1;}
@@ -139,6 +176,7 @@ footer a:hover{color:var(--gold);}
 .reveal.in{opacity:1;transform:translateY(0);}
 
 @media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto;}
   *{transition:none !important; animation:none !important;}
   .reveal{opacity:1; transform:none;}
   #digit-field{display:none;}

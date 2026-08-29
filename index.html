@@ -2,45 +2,34 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a0e14">
 <title>31415 · Ein digitales Taschenmesser</title>
 <meta name="description" content="Eine wachsende Sammlung kleiner, durchdachter Web-Werkzeuge für Alltag und Arbeit. Jedes tut genau eine Sache – und sie gut.">
-<meta name="theme-color" content="#0a0e14">
+<link rel="canonical" href="https://31415.me/">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="/site.webmanifest">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="31415.me">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://31415.me/">
+<meta property="og:title" content="31415 · Ein digitales Taschenmesser">
+<meta property="og:description" content="Eine wachsende Sammlung kleiner, durchdachter Web-Werkzeuge für Alltag und Arbeit. Jedes tut genau eine Sache – und sie gut.">
+<meta name="twitter:card" content="summary">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/assets/chrome.css">
+<script src="/assets/chrome.js"></script>
 <style>
-  :root{
-    --ink:#0a0e14;--ink-soft:#111722;--panel:#141b27;--line:rgba(214,201,170,0.12);
-    --paper:#f4efe2;--paper-dim:#b9b2a1;--paper-faint:#6f6c63;
-    --gold:#d8b46a;--gold-bright:#f0cd84;
-    --field-base:rgba(10,14,20,0.12);
-    --header-a:rgba(10,14,20,0.85);--header-b:rgba(10,14,20,0);
-    --header-a2:rgba(10,14,20,0.95);--header-b2:rgba(10,14,20,0.6);
-    --shadow:rgba(216,180,106,.55);--r:14px;
-  }
-  html[data-theme="light"]{
-    --ink:#f6f3ea;--ink-soft:#fffefb;--panel:#fffefb;--line:rgba(60,52,33,0.14);
-    --paper:#1d2329;--paper-dim:#5a564c;--paper-faint:#8f8a7d;
-    --gold:#a9802e;--gold-bright:#8c6618;
-    --field-base:rgba(246,243,234,0.14);
-    --header-a:rgba(246,243,234,0.88);--header-b:rgba(246,243,234,0);
-    --header-a2:rgba(246,243,234,0.96);--header-b2:rgba(246,243,234,0.7);
-    --shadow:rgba(169,128,46,.32);
-  }
   *{margin:0;padding:0;box-sizing:border-box}
-  html{scroll-behavior:smooth}
   html,body{overflow-x:hidden;width:100%;max-width:100vw}
-  body{background:var(--ink);color:var(--paper);font-family:'Space Grotesk',system-ui,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;transition:background .5s ease,color .5s ease;position:relative}
-  ::selection{background:var(--gold);color:var(--ink)}
-  a{color:inherit;text-decoration:none}
-  #digit-field{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.5}
   html[data-theme="light"] #digit-field{opacity:.6}
-  .grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-  html[data-theme="light"] .grain{opacity:.02}
-  .wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:0 28px}
-  header{position:fixed;top:0;left:0;right:0;z-index:50;backdrop-filter:blur(12px);background:linear-gradient(180deg,var(--header-a),var(--header-b));transition:background .4s ease}
-  .bar{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .wrap{position:relative;z-index:2}
+  header.dense{background:linear-gradient(180deg,var(--header-a2),var(--header-b2))}
   .mark{display:flex;align-items:center;gap:12px;font-family:'Space Mono',monospace;font-size:15px;letter-spacing:.04em}
   .mark .glyph{font-family:'Fraunces',serif;font-size:26px;color:var(--gold);line-height:1;transform:translateY(1px)}
   .mark .dim{color:var(--paper-faint)}
@@ -55,9 +44,6 @@
   .theme-btn:hover{border-color:var(--gold);color:var(--gold-bright)}
   .theme-btn:active{transform:scale(.92)}
   .theme-btn svg{width:18px;height:18px}
-  .theme-btn .sun{display:none}
-  html[data-theme="light"] .theme-btn .sun{display:block}
-  html[data-theme="light"] .theme-btn .moon{display:none}
   .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:72px;position:relative;width:100%}
   .eyebrow{font-family:'Space Mono',monospace;font-size:12.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:30px;display:flex;align-items:center;gap:14px;opacity:0;animation:rise .9s .2s forwards}
   .eyebrow::before{content:'';width:42px;height:1px;background:var(--gold);opacity:.6}
@@ -101,8 +87,6 @@
   .card.soon{opacity:.6}
   .card.soon:hover{transform:none;border-color:var(--line);box-shadow:none}
   .card.soon .go{color:var(--paper-faint)}
-  .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.8,.2,1),transform .8s cubic-bezier(.2,.8,.2,1)}
-  .reveal.in{opacity:1;transform:none}
   .pi-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:42px 0;overflow:hidden;position:relative}
   .pi-strip .track{font-family:'Space Mono',monospace;font-size:clamp(1.4rem,3.4vw,2.4rem);color:var(--paper-faint);white-space:nowrap;display:inline-block;animation:marquee 60s linear infinite;letter-spacing:.06em}
   .pi-strip .track b{color:var(--gold)}
@@ -118,12 +102,13 @@
   @keyframes drip{0%{transform:translateY(-14px)}100%{transform:translateY(46px)}}
   @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
   @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}.eyebrow,h1.display .l1,h1.display .l2,.lede,.hero-cta,.scroll-hint{opacity:1}}
-  @media(max-width:640px){.wrap{padding:0 20px}section.block{padding:90px 0}.grid{grid-template-columns:1fr}.foot-grid{flex-direction:column;align-items:flex-start}.foot-meta{text-align:left}.nav-right{gap:14px}}
+  @media(max-width:640px){section.block{padding:90px 0}.grid{grid-template-columns:1fr}.foot-grid{flex-direction:column;align-items:flex-start}.foot-meta{text-align:left}.nav-right{gap:14px}}
 </style>
 </head>
 <body>
-<canvas id="digit-field"></canvas>
-<div class="grain"></div>
+<a class="skip-link" href="#content">Zum Inhalt springen</a>
+<canvas id="digit-field" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
 <header>
   <div class="wrap bar">
     <div class="mark"><span class="glyph">&#960;</span>31415<span class="dim">.me</span></div>
@@ -132,14 +117,14 @@
         <a href="#tools">Werkzeuge</a>
         <a href="#about">Idee</a>
       </nav>
-      <button class="theme-btn" id="theme-toggle" aria-label="Helligkeit umschalten" title="Heller / dunkler">
-        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <button class="theme-btn" id="themeToggle" aria-label="Helligkeit umschalten" title="Heller / dunkler">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
       </button>
     </div>
   </div>
 </header>
-<main>
+<main id="content">
   <section class="hero">
     <div class="wrap">
       <div class="eyebrow">Ein digitales Taschenmesser</div>
@@ -168,7 +153,7 @@
       <div class="cat">
         <div class="cat-head reveal"><span class="cat-name">Entscheiden &amp; Zufall</span><span class="cat-rule"></span><span class="cat-count">01</span></div>
         <div class="grid">
-          <a href="/decide" class="card reveal">
+          <a href="/decide/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>
             <h3>Decision Maker</h3>
             <p>Optionen eingeben, gewichten, entscheiden lassen. Schluss mit dem Hin und Her.</p>
@@ -180,13 +165,13 @@
       <div class="cat">
         <div class="cat-head reveal"><span class="cat-name">Text &amp; Lesen</span><span class="cat-rule"></span><span class="cat-count">02</span></div>
         <div class="grid">
-          <a href="/read" class="card reveal">
+          <a href="/read/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/><path d="M18 17l3 2-3 2"/></svg>
             <h3>Fast Reader</h3>
             <p>Wort f&uuml;r Wort im eigenen Takt. Lies Texte sp&uuml;rbar schneller, ohne zu hetzen.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/markdown" class="card reveal">
+          <a href="/markdown/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h7"/><path d="M16 6l3 0M19 4v4"/></svg>
             <h3>Markdown Formatter</h3>
             <p>Markdown s&auml;ubern, formatieren und als Vorschau pr&uuml;fen und herunterladen.</p>
@@ -198,25 +183,25 @@
       <div class="cat">
         <div class="cat-head reveal"><span class="cat-name">Netzwerk &amp; IT</span><span class="cat-rule"></span><span class="cat-count">03</span></div>
         <div class="grid">
-          <a href="/subnetting" class="card reveal">
+          <a href="/subnetting/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="8.5" y="14" width="7" height="7" rx="1.5"/><path d="M6.5 10v2.5M17.5 10v2.5M6.5 12.5h11M12 12.5V14"/></svg>
             <h3>Subnetting</h3>
             <p>CIDR, Netzmaske, Host-Bereiche und Broadcast auf einen Blick berechnen.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/uuid" class="card reveal">
+          <a href="/uuid/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l-1 7H8z"/><path d="M8 11l-1 9M16 11l1 9M9 20h6"/></svg>
             <h3>UUID Generator</h3>
             <p>v4, v1 & v7-UUIDs einzeln oder im Batch erzeugen und direkt kopieren.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/hash" class="card reveal">
+          <a href="/hash/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></svg>
             <h3>Hash-Rechner</h3>
             <p>MD5, SHA-1 und SHA-256 f&uuml;r Text und Dateien lokal berechnen.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/json-builder" class="card reveal">
+          <a href="/json-builder/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" opacity="0.3"/>
               <path d="M8 8c-1.5 0-2.5 1-2.5 2.5v1.5c0 1-1 1.5-2 1.5 1 0 2 .5 2 1.5v1.5c0 1.5 1 2.5 2.5 2.5M16 8c1.5 0 2.5 1 2.5 2.5v1.5c0 1 1 1.5 2 1.5-1 0-2 .5-2 1.5v1.5c0 1.5-1 2.5-2.5 2.5"/>
@@ -225,17 +210,17 @@
             <p>Strukturierte Daten schnell modellieren, validieren und als sauberen Code exportieren.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/json-tree" class="card reveal">
+          <a href="/json-tree/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="5" cy="6" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="18" r="2"/>
               <circle cx="17" cy="6" r="2"/><circle cx="17" cy="18" r="2"/>
               <path d="M7 6h4M7 18h4M11 6v12M11 9h4M11 15h4"/>
             </svg>
-            <h3>Json Tree</h3>
+            <h3>JSON Tree</h3>
             <p>JSON einlesen, validieren und in einer aufklappbaren Baumansicht erkunden.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/powershell-mail" class="card reveal">
+          <a href="/powershell-mail/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
               <path d="M14 2v6h6"/>
@@ -246,7 +231,7 @@
             <p>PowerShell-Befehl f&uuml;r den E-Mail-Versand (SMTP) generieren.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/base" class="card reveal">
+          <a href="/base/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="9"/>
               <circle cx="12" cy="12" r="3"/>
@@ -264,7 +249,7 @@
         <div class="cat-head reveal"><span class="cat-name">Planen &amp; Organisieren</span><span class="cat-rule"></span><span class="cat-count">04</span></div>
         <div class="grid">
 
-          <a href="/pomodoro" class="card reveal">
+          <a href="/pomodoro/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="13" r="8"/>
               <path d="M12 9v4l2.5 2.5"/>
@@ -275,7 +260,7 @@
             <p>Fokussiert arbeiten, rechtzeitig pausieren. Der klassische 25-Minuten-Takt für deine Produktivit&auml;t.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/karteikarten" class="card reveal">
+          <a href="/karteikarten/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M6 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" opacity="0.3"/>
               <path d="M9 3v18M13 9h4M13 13h4"/>
@@ -284,7 +269,7 @@
             <p>Lernkarten erstellen, per Spaced Repetition wiederholen und Wissen nachhaltig verankern.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/netzplan" class="card reveal">
+          <a href="/netzplan/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 6h4v4H5zM10.5 14h4v4h-4zM15 5h4v4h-4z" opacity="0.3"/>
               <path d="M9 8h4.5M12 10v3M14.5 16h1.5a2 2 0 0 0 2-2v-3.5"/>
@@ -300,7 +285,7 @@
       <div class="cat">
         <div class="cat-head reveal"><span class="cat-name">Spiele &amp; Zeitvertreib</span><span class="cat-rule"></span><span class="cat-count">05</span></div>
         <div class="grid">
-          <a href="/casino" class="card reveal">
+          <a href="/casino/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 6.5A1.5 1.5 0 0 1 6.5 5h7A1.5 1.5 0 0 1 15 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 5 17.5z"/>
               <path d="M9 11.5A1.5 1.5 0 0 1 10.5 10h7A1.5 1.5 0 0 1 19 11.5v7a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 9 18.5z"/>
@@ -309,7 +294,7 @@
             <p>Klassische Gl&uuml;cksspiele komplett clientseitig. Teste dein Gl&uuml;ck ohne Risiko.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/kniffel" class="card reveal">
+          <a href="/kniffel/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="14" width="6" height="6" rx="1.2"/>
               <circle cx="6" cy="17" r="1" fill="currentColor" stroke="none"/>
@@ -325,7 +310,7 @@
             <p>F&uuml;nf W&uuml;rfel, ein Block. Der zeitlose Klassiker direkt im Browser spielen.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/poker" class="card reveal">
+          <a href="/poker/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <rect x="2.5" y="8" width="5" height="8" rx="1"/>
               <path d="M5 12h.01" stroke-width="2"/>
@@ -338,7 +323,7 @@
             <p>Texas Hold'em gegen deine Freunde. Setzen, bluffen und den Pot abr&auml;umen.</p>
             <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
           </a>
-          <a href="/lenia" class="card reveal">
+          <a href="/lenia/" class="card reveal">
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="8" opacity="0.3"/>
               <path d="M12 8c1.5 0 3 1 3 3s-1 2.5-2.5 2.5S10 12.5 10 11s1-2 2-2"/>
@@ -372,81 +357,46 @@
     <div class="foot-meta">
       Gebaut mit Sorgfalt &middot; Gehostet auf Cloudflare Pages<br>
       <a href="#tools">Werkzeuge</a> &middot; <a href="#about">Idee</a><br>
-      &copy; <span id="yr"></span> &mdash; &#960; endet nie.
+      &copy; <span data-year></span> &mdash; &#960; endet nie.
     </div>
   </div>
 </footer>
 <script>
+/* Nur Startseiten-Eigenes. Theme, Ziffernregen, Einblenden, Karten-Spotlight
+   und die Jahreszahl kommen aus /assets/chrome.js. */
 (function(){
-  var root=document.documentElement,stored;
-  try{stored=localStorage.getItem('theme');}catch(e){}
-  var media=window.matchMedia('(prefers-color-scheme: light)');
-  function apply(t){
-    root.setAttribute('data-theme',t);
-    var meta=document.querySelector('meta[name=theme-color]');
-    if(meta)meta.setAttribute('content',t==='light'?'#f6f3ea':'#0a0e14');
+  'use strict';
+
+  /* Laufband mit den Nachkommastellen — jede 17. Ziffer in Gold. */
+  var track = document.getElementById('pi-track');
+  if(track){
+    var digits = "3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964";
+    var segment = '<span>' + digits.replace(/(\d)/g, function(d, _, i){
+      return (i % 17 === 0) ? '<b>' + d + '</b>' : d;
+    }) + '&nbsp;&nbsp;&#960;&nbsp;&nbsp;</span>';
+    track.innerHTML = segment + segment;
   }
-  apply(stored||(media.matches?'light':'dark'));
-  media.addEventListener('change',function(e){var s;try{s=localStorage.getItem('theme');}catch(_){}if(!s)apply(e.matches?'light':'dark');});
-  document.getElementById('theme-toggle').addEventListener('click',function(){
-    var next=root.getAttribute('data-theme')==='light'?'dark':'light';
-    apply(next);try{localStorage.setItem('theme',next);}catch(e){}
+
+  /* Gestaffeltes Einblenden; das Beobachten übernimmt chrome.js. */
+  document.querySelectorAll('.reveal').forEach(function(el, i){
+    el.style.transitionDelay = (i % 4 * 0.06) + 's';
   });
-  document.getElementById('yr').textContent=new Date().getFullYear();
-  var piDigits="3.14159265358979323846264338327950288419716939937510582097494459230781640628620899862803482534211706798214808651328230664709384460955058223172535940812848111745028410270193852110555964462294895493038196";
-  var t=document.getElementById('pi-track');
-  var seg='<span>'+piDigits.replace(/(\d)/g,function(d,_,i){return (i%17===0)?'<b>'+d+'</b>':d})+'&nbsp;&nbsp;&#960;&nbsp;&nbsp;</span>';
-  t.innerHTML=seg+seg;
-  document.querySelectorAll('.card').forEach(function(c){
-    c.addEventListener('pointermove',function(e){var r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');});
-  });
-  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});},{threshold:.12});
-  document.querySelectorAll('.reveal').forEach(function(el,i){el.style.transitionDelay=(i%4*0.06)+'s';io.observe(el);});
-  var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var cv=document.getElementById('digit-field');
-  if(reduce){
-    cv.style.display='none';
-  } else {
-    var ctx=cv.getContext('2d');
-    var PI_DIGITS="31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
-    var drops=[];
-    function resize(){
-      cv.width=innerWidth;cv.height=innerHeight;
-      var cols=Math.floor(cv.width/28);
-      drops=[];
-      for(var i=0;i<cols;i++){
-        drops.push({
-          x:i*28+14,
-          y:Math.random()*cv.height,
-          speed:0.4+Math.random()*0.6,
-          char:PI_DIGITS[Math.floor(Math.random()*PI_DIGITS.length)]
-        });
-      }
-    }
-    addEventListener('resize',resize);
-    resize();
-    function draw(){
-      ctx.clearRect(0,0,cv.width,cv.height);
-      ctx.font="13px 'Space Mono', monospace";
-      drops.forEach(function(d){
-        var gradAlpha=0.05+(d.y/cv.height)*0.35;
-        ctx.fillStyle='rgba(216,180,106,'+gradAlpha+')';
-        ctx.fillText(d.char,d.x,d.y);
-        d.y+=d.speed;
-        if(d.y>cv.height){
-          d.y=-20;
-          d.char=PI_DIGITS[Math.floor(Math.random()*PI_DIGITS.length)];
-        }
-      });
-      requestAnimationFrame(draw);
-    }
-    draw();
+
+  /* Kopfleiste wird beim Scrollen dichter. Der Zustand steckt in einer Klasse,
+     damit die Farben in der CSS-Datei bleiben und pro Ereignis nichts gerechnet
+     werden muss. */
+  var header = document.querySelector('header');
+  var ticking = false;
+  function sync(){
+    header.classList.toggle('dense', window.scrollY > 40);
+    ticking = false;
   }
-  var hd=document.querySelector('header');
-  addEventListener('scroll',function(){
-    var s=getComputedStyle(root);
-    hd.style.background=scrollY>40?'linear-gradient(180deg,'+s.getPropertyValue('--header-a2')+','+s.getPropertyValue('--header-b2')+')':'linear-gradient(180deg,'+s.getPropertyValue('--header-a')+','+s.getPropertyValue('--header-b')+')';
-  });
+  window.addEventListener('scroll', function(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(sync);
+  }, {passive:true});
+  sync();
 })();
 </script>
 </body>
