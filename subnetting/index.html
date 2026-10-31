@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -34,21 +34,20 @@
 .mode-switch{
   display:inline-flex;gap:4px;padding:5px;border-radius:100px;
   background:var(--ink-soft);border:1px solid var(--line);margin-bottom:48px;
-  flex-wrap:wrap;
+  max-width:100%;overflow-x:auto;scrollbar-width:none;
 }
 .mode-btn{
-  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+  font-family:inherit;font-size:.8125rem;
   padding:11px 20px;border-radius:100px;border:none;background:transparent;color:var(--paper-dim);
   cursor:pointer;transition:background .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
-  white-space:nowrap;
-}
+  white-space:nowrap;font-variant-numeric:tabular-nums}
 .mode-btn:hover{color:var(--paper);}
-.mode-btn.active{background:var(--gold);color:var(--ink);font-weight:700;}
+.mode-btn.active{background:var(--paper);color:var(--ink);font-weight:700;}
 .mode-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 /* ---------- Work area ---------- */
 .workspace{padding-bottom:130px;}
-@media(max-width:640px){.workspace{padding-bottom:90px;}}
+@media(max-width:640px){.workspace{padding-bottom:90px;}.mode-switch{display:flex;width:100%}.mode-btn{flex:1;padding:11px 10px}}
 
 .panel{display:none;}
 .panel.active{display:block;}
@@ -57,14 +56,14 @@
 @media(max-width:880px){.grid{grid-template-columns:1fr;}}
 
 .card{
-  position:relative;background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  position:relative;background:var(--ink-soft);
   border:1px solid var(--line);border-radius:var(--r);padding:32px;
   --mx:50%; --my:50%;
   overflow:hidden;
 }
 .card::before{
   content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
-  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  background:none;
   opacity:0;transition:opacity .4s cubic-bezier(.2,.8,.2,1);
 }
 .card:hover::before{opacity:.14;}
@@ -78,19 +77,18 @@
 .field{margin-bottom:20px;}
 .field:last-child{margin-bottom:0;}
 .field label{
-  display:block;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--paper-faint);margin-bottom:8px;
-}
+  display:block;font-family:inherit;font-size:.8125rem;
+  color:var(--paper-faint);margin-bottom:8px;font-variant-numeric:tabular-nums}
 .field input, .field select{
   width:100%;background:var(--ink-soft);border:1px solid var(--line);border-radius:8px;
-  padding:13px 14px;color:var(--paper);font-family:'Space Mono',monospace;font-size:.92rem;
+  padding:13px 14px;color:var(--paper);font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:.92rem;
   transition:border-color .3s cubic-bezier(.2,.8,.2,1);
 }
 html[data-theme="light"] .field input, html[data-theme="light"] .field select{background:var(--panel);}
 .field input::placeholder{color:var(--paper-faint);}
 .field input:focus, .field select:focus{outline:none;border-color:var(--gold);}
 .field select{cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:.92rem;}
-.field .hint{font-size:.78rem;color:var(--paper-faint);margin-top:6px;font-family:'Space Grotesk',sans-serif;}
+.field .hint{font-size:.8125rem;color:var(--paper-faint);margin-top:6px;font-family:'Space Grotesk',sans-serif;}
 
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:480px){.row2{grid-template-columns:1fr;}}
@@ -112,7 +110,7 @@ html[data-theme="light"] .field input, html[data-theme="light"] .field select{ba
 .error-box{
   display:none;margin-top:18px;padding:14px 16px;border-radius:8px;
   border:1px solid var(--line);background:var(--ink-soft);color:var(--gold-bright);
-  font-family:'Space Mono',monospace;font-size:.82rem;line-height:1.5;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:.82rem;line-height:1.5;
 }
 .error-box.show{display:block;}
 
@@ -129,13 +127,11 @@ html[data-theme="light"] .field input, html[data-theme="light"] .field select{ba
 .result-table tr:last-child{border-bottom:none;}
 .result-table td{padding:11px 0;font-size:.88rem;}
 .result-table td:first-child{
-  font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--paper-faint);width:42%;vertical-align:top;padding-top:13px;
-}
+  font-family:inherit;font-size:.8125rem;
+  color:var(--paper-faint);width:42%;vertical-align:top;padding-top:13px;font-variant-numeric:tabular-nums}
 .result-table td:last-child{
-  font-family:'Space Mono',monospace;color:var(--paper);font-size:.95rem;text-align:right;
-  word-break:break-all;
-}
+  font-family:inherit;color:var(--paper);font-size:.95rem;text-align:right;
+  word-break:break-all;font-variant-numeric:tabular-nums}
 .result-table td:last-child .copy-inline{
   background:none;border:none;color:var(--paper-faint);cursor:pointer;padding:0 0 0 8px;
   vertical-align:middle;transition:color .3s cubic-bezier(.2,.8,.2,1);border-radius:4px;
@@ -146,10 +142,10 @@ html[data-theme="light"] .field input, html[data-theme="light"] .field select{ba
 
 .binary-block{
   margin-top:20px;padding-top:20px;border-top:1px solid var(--line);
-  font-family:'Space Mono',monospace;font-size:.78rem;color:var(--paper-dim);
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:.8125rem;color:var(--paper-dim);
   line-height:2;word-break:break-all;
 }
-.binary-block .b-label{display:block;color:var(--paper-faint);letter-spacing:.1em;text-transform:uppercase;font-size:.64rem;margin-bottom:6px;}
+.binary-block .b-label{display:block;color:var(--paper-faint);font-size:.8125rem;margin-bottom:6px;}
 .binary-block .net-bits{color:var(--gold-bright);}
 .binary-block .host-bits{color:var(--paper-dim);}
 
@@ -166,7 +162,7 @@ html[data-theme="light"] .field input, html[data-theme="light"] .field select{ba
 }
 html[data-theme="light"] .vlsm-item input{background:var(--panel);}
 .vlsm-item input:focus{outline:none;border-color:var(--gold);}
-.vlsm-item input[type="number"]{font-family:'Space Mono',monospace;}
+.vlsm-item input[type="number"]{font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;}
 .vlsm-remove{
   width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:transparent;
   color:var(--paper-faint);cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -179,13 +175,11 @@ html[data-theme="light"] .vlsm-item input{background:var(--panel);}
 .vlsm-table-wrap{overflow-x:auto;}
 .vlsm-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:600px;}
 .vlsm-table th{
-  font-family:'Space Mono',monospace;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--paper-faint);text-align:left;padding:0 10px 12px;border-bottom:1px solid var(--line);
-}
+  font-family:inherit;font-size:.8125rem;
+  color:var(--paper-faint);text-align:left;padding:0 10px 12px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
 .vlsm-table td{
-  font-family:'Space Mono',monospace;padding:11px 10px;color:var(--paper);
-  border-bottom:1px solid var(--line);white-space:nowrap;
-}
+  font-family:inherit;padding:11px 10px;color:var(--paper);
+  border-bottom:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
 .vlsm-table tr:last-child td{border-bottom:none;}
 .vlsm-table td:first-child{font-family:'Space Grotesk',sans-serif;color:var(--paper-dim);}
 
@@ -198,8 +192,6 @@ html[data-theme="light"] .vlsm-item input{background:var(--panel);}
 </head>
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <header>
   <div class="header-inner">
@@ -220,8 +212,7 @@ html[data-theme="light"] .vlsm-item input{background:var(--panel);}
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Werkzeug · Netzwerk</span>
-  <h1>Subnetting-<em>Rechner</em></h1>
+  <h1>Subnetting-Rechner</h1>
   <p class="lede">IP-Netze analysieren, die passende Maske aus deinem Bedarf ableiten oder ein Netz per VLSM in mehrere Subnetze schneiden.</p>
 </div>
 

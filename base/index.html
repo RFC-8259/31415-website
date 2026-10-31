@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -42,11 +42,10 @@ nav{display:flex; align-items:center; gap:20px;}
 }
 .tabs::-webkit-scrollbar{display:none;}
 .tab-btn{
-  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+  font-family:inherit; font-size:.8125rem;  
   background:none; border:none; color:var(--paper-faint); padding:14px 18px 16px;
   cursor:pointer; position:relative; white-space:nowrap;
-  transition:color .3s cubic-bezier(.2,.8,.2,1);
-}
+  transition:color .3s cubic-bezier(.2,.8,.2,1);font-variant-numeric:tabular-nums}
 .tab-btn::after{
   content:""; position:absolute; left:18px; right:18px; bottom:-1px; height:2px;
   background:var(--gold); opacity:0; transform:scaleX(0); transform-origin:left;
@@ -61,13 +60,13 @@ nav{display:flex; align-items:center; gap:20px;}
 
 /* ---- Cards ---- */
 .card{
-  position:relative; background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  position:relative; background:var(--ink-soft);
   border:1px solid var(--line); border-radius:var(--r); padding:32px;
   margin-bottom:24px; overflow:hidden; --mx:50%; --my:50%;
 }
 .card::before{
   content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
-  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  background:none;
   opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
 }
 .card:hover::before{opacity:.14;}
@@ -78,15 +77,14 @@ nav{display:flex; align-items:center; gap:20px;}
 @media (max-width:880px){ .card-row{grid-template-columns:1fr;} }
 
 .field-label{
-  font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.18em; text-transform:uppercase;
+  font-family:inherit; font-size:.8125rem;  
   color:var(--paper-faint); display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:10px;
-}
+  margin-bottom:10px;font-variant-numeric:tabular-nums}
 .field-label .hint{color:var(--paper-faint); font-weight:400; text-transform:none; letter-spacing:0;}
 
 textarea, input[type="text"]{
   width:100%; background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
-  color:var(--paper); font-family:'Space Mono',monospace; font-size:.92rem; padding:14px 16px;
+  color:var(--paper); font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.92rem; padding:14px 16px;
   resize:vertical; transition:border-color .3s cubic-bezier(.2,.8,.2,1);
 }
 textarea{min-height:160px; line-height:1.55;}
@@ -94,7 +92,7 @@ textarea:focus, input[type="text"]:focus{border-color:var(--gold); outline:none;
 textarea::placeholder, input::placeholder{color:var(--paper-faint); font-family:'Space Grotesk',sans-serif;}
 
 .err-msg{
-  font-family:'Space Mono',monospace; font-size:.78rem; color:var(--gold-bright);
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.8125rem; color:var(--gold-bright);
   margin-top:8px; display:none; line-height:1.5;
 }
 .err-msg.show{display:block;}
@@ -134,20 +132,18 @@ button{font-family:'Space Grotesk',sans-serif; cursor:pointer;}
 .dropzone strong{color:var(--paper-dim); font-weight:500;}
 .dropzone input[type="file"]{display:none;}
 .file-chip{
-  display:none; align-items:center; gap:10px; font-family:'Space Mono',monospace; font-size:.78rem;
+  display:none; align-items:center; gap:10px; font-family:inherit; font-size:.8125rem;
   color:var(--paper-dim); background:var(--ink-soft); border:1px solid var(--line);
-  border-radius:100px; padding:6px 14px; margin-bottom:16px; width:fit-content;
-}
+  border-radius:100px; padding:6px 14px; margin-bottom:16px; width:fit-content;font-variant-numeric:tabular-nums}
 .file-chip.show{display:flex;}
 .file-chip button{background:none; border:none; color:var(--paper-faint); font-size:1rem; line-height:1; padding:0;}
 .file-chip button:hover{color:var(--gold);}
 
 .mode-switch{display:flex; gap:8px; margin-bottom:20px;}
 .mode-btn{
-  font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase;
+  font-family:inherit; font-size:.8125rem;  
   padding:8px 16px; border-radius:100px; border:1px solid var(--line); background:transparent;
-  color:var(--paper-faint); transition:all .3s cubic-bezier(.2,.8,.2,1);
-}
+  color:var(--paper-faint); transition:all .3s cubic-bezier(.2,.8,.2,1);font-variant-numeric:tabular-nums}
 .mode-btn.active{border-color:var(--gold); color:var(--gold); background:var(--field-base);}
 
 /* ---- Alphabet variant chips ---- */
@@ -158,12 +154,11 @@ button{font-family:'Space Grotesk',sans-serif; cursor:pointer;}
   font-size:.88rem; color:var(--paper-dim); line-height:1.7;
 }
 .info-card h3{
-  font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.16em; text-transform:uppercase;
-  color:var(--gold); margin:0 0 12px;
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--gold); margin:0 0 12px;font-variant-numeric:tabular-nums}
 .info-card p{margin:0 0 10px;}
 .info-card p:last-child{margin-bottom:0;}
-.info-card code{font-family:'Space Mono',monospace; color:var(--paper); background:var(--field-base); padding:2px 6px; border-radius:4px; font-size:.85em;}
+.info-card code{font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; color:var(--paper); background:var(--field-base); padding:2px 6px; border-radius:4px; font-size:.85em;}
 
 /* ---- TOTP ---- */
 .totp-layout{display:grid; grid-template-columns:1fr; gap:24px;}
@@ -176,26 +171,24 @@ button{font-family:'Space Grotesk',sans-serif; cursor:pointer;}
 .ring-fg{fill:none; stroke:var(--gold); stroke-width:4; stroke-linecap:round; transition:stroke-dashoffset .3s linear;}
 .ring-num{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-family:'Space Mono',monospace; font-size:1.4rem; color:var(--paper);
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:1.4rem; color:var(--paper);
 }
 .totp-code{
-  font-family:'Space Mono',monospace; font-size:clamp(2.4rem,8vw,3.6rem); letter-spacing:.12em;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:clamp(2.4rem,8vw,3.6rem); letter-spacing:.12em;
   color:var(--gold-bright); font-weight:700; cursor:pointer; user-select:all;
   transition:opacity .2s ease;
 }
 .totp-code:hover{opacity:.85;}
 .totp-meta{
-  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--paper-faint); text-align:center;
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--paper-faint); text-align:center;font-variant-numeric:tabular-nums}
 .totp-placeholder{color:var(--paper-faint); font-family:'Space Grotesk',sans-serif; font-size:.95rem; text-align:center;}
 
 .adv-toggle{
-  font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
+  font-family:inherit; font-size:.8125rem;  
   color:var(--paper-faint); background:none; border:none; cursor:pointer; padding:0;
   display:flex; align-items:center; gap:6px; margin-top:18px;
-  transition:color .3s cubic-bezier(.2,.8,.2,1);
-}
+  transition:color .3s cubic-bezier(.2,.8,.2,1);font-variant-numeric:tabular-nums}
 .adv-toggle:hover{color:var(--gold);}
 .adv-toggle svg{width:11px; height:11px; transition:transform .3s cubic-bezier(.2,.8,.2,1);}
 .adv-toggle.open svg{transform:rotate(180deg);}
@@ -206,7 +199,7 @@ button{font-family:'Space Grotesk',sans-serif; cursor:pointer;}
 .adv-grid label{display:block;}
 select{
   width:100%; background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
-  color:var(--paper); font-family:'Space Mono',monospace; font-size:.85rem; padding:10px 12px;
+  color:var(--paper); font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.85rem; padding:10px 12px;
 }
 select:focus{border-color:var(--gold); outline:none;}
 
@@ -218,8 +211,6 @@ select:focus{border-color:var(--gold); outline:none;}
 </head>
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <header>
   <div class="header-inner">
@@ -240,8 +231,7 @@ select:focus{border-color:var(--gold); outline:none;}
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Werkzeug · Kodierung</span>
-  <h1>Base-<em>Konverter</em></h1>
+  <h1>Base-Konverter</h1>
   <p class="lede">Base64, Base64URL und Base32 in beide Richtungen — plus ein TOTP-Checker, mit dem du Authenticator-Secrets direkt im Browser kontrollierst. Nichts verlässt dein Gerät.</p>
 </div>
 

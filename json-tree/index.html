@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -61,9 +61,8 @@ main{padding-bottom:130px;}
   color:var(--paper-faint); pointer-events:none;
 }
 .search-count{
-  font-family:'Space Mono', monospace; font-size:.68rem; color:var(--paper-faint);
-  white-space:nowrap; padding:0 4px;
-}
+  font-family:inherit; font-size:.8125rem; color:var(--paper-faint);
+  white-space:nowrap; padding:0 4px;font-variant-numeric:tabular-nums}
 
 .btn-row{display:flex; flex-wrap:wrap; gap:8px;}
 button.action{
@@ -86,13 +85,13 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 
 .editor-card, .tree-card{
   position:relative; overflow:hidden;
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   border:1px solid var(--line); border-radius:var(--r);
   --mx:50%; --my:50%;
 }
 .editor-card::before, .tree-card::before{
   content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
-  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  background:none;
   opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
 }
 .editor-card:hover::before, .tree-card:hover::before{opacity:.14;}
@@ -101,7 +100,7 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 .editor-card textarea{
   position:relative; z-index:1; display:block; width:100%; min-height:160px; max-height:340px;
   resize:vertical; padding:18px 20px; background:transparent; border:none; color:var(--paper);
-  font-family:'Space Mono', monospace; font-size:.85rem; line-height:1.6; outline:none;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.85rem; line-height:1.6; outline:none;
 }
 .editor-card textarea::placeholder{color:var(--paper-faint);}
 .editor-card textarea:focus-visible{outline:2px solid var(--gold); outline-offset:-2px;}
@@ -109,8 +108,7 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 .status-line{
   position:relative; z-index:1; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
   padding:12px 20px; border-top:1px solid var(--line);
-  font-family:'Space Mono', monospace; font-size:.74rem;
-}
+  font-family:inherit; font-size:.8125rem;font-variant-numeric:tabular-nums}
 .status-line .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
 .status-line.ok .dot{background:var(--t-str);}
 .status-line.err .dot{background:var(--t-bool);}
@@ -122,14 +120,14 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 .tree-card{padding:8px 4px;}
 .tree-scroll{
   position:relative; z-index:1; padding:18px 16px; max-height:none; overflow:auto;
-  font-family:'Space Mono', monospace; font-size:.85rem; line-height:1.7;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.85rem; line-height:1.7;
 }
 .empty-state{
   position:relative; z-index:1; padding:60px 24px; text-align:center; color:var(--paper-faint);
 }
 .empty-state svg{width:38px; height:38px; color:var(--paper-faint); margin-bottom:14px;}
 .empty-state p{margin:0; font-size:.92rem;}
-.empty-state .hint{font-family:'Space Mono', monospace; font-size:.7rem; letter-spacing:.08em; margin-top:8px; color:var(--paper-faint);}
+.empty-state .hint{font-family:inherit; font-size:.8125rem;  margin-top:8px; color:var(--paper-faint);font-variant-numeric:tabular-nums}
 
 /* Tree */
 .node{position:relative;}
@@ -139,7 +137,7 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 }
 .node-row.collapsible{cursor:pointer;}
 .node-row.collapsible:hover{background:var(--field-base);}
-.node-row.match{background:rgba(216,180,106,0.14); border-radius:4px;}
+.node-row.match{background:rgba(232,182,76,0.14); border-radius:4px;}
 .toggle{
   flex-shrink:0; width:16px; height:16px; margin-top:1px; display:flex; align-items:center; justify-content:center;
   color:var(--gold); transition:transform .2s cubic-bezier(.2,.8,.2,1);
@@ -155,14 +153,14 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 .t-boolean{color:var(--t-bool);}
 .t-null{color:var(--t-null); font-style:italic;}
 .count-badge{
-  color:var(--paper-faint); font-size:.78rem; margin-left:6px;
+  color:var(--paper-faint); font-size:.8125rem; margin-left:6px;
 }
 .children{margin-left:18px; border-left:1px solid var(--line); padding-left:10px;}
 .children.collapsed{display:none;}
 .summary{color:var(--paper-faint); font-style:italic; cursor:pointer;}
 .summary:hover{color:var(--gold);}
 .embedded-badge{
-  color:var(--gold); font-style:italic; font-size:.78rem;
+  color:var(--gold); font-style:italic; font-size:.8125rem;
   border:1px solid var(--line); border-radius:100px; padding:1px 9px; margin-left:2px;
 }
 .node-row.embedded:hover{background:var(--field-base);}
@@ -181,8 +179,6 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 </head>
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <header>
   <div class="header-inner">
@@ -203,8 +199,7 @@ button.action.active{border-color:var(--gold); color:var(--gold);}
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Werkzeug · JSON</span>
-  <h1>JSON <em>Tree</em></h1>
+  <h1>JSON Tree</h1>
   <p class="lede">Füge JSON ein — einzeilig oder formatiert. Du bekommst eine aufklappbare Baumansicht, in der sofort klar ist, was wozu gehört.</p>
 </div>
 

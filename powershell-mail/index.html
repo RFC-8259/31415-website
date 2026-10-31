@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -36,13 +36,13 @@ main{ padding-bottom:130px; position:relative; z-index:2; }
 @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
 
 .controls-card, .output-card{
-  position:relative; background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  position:relative; background:var(--ink-soft);
   border:1px solid var(--line); border-radius:var(--r); padding:32px;
   --mx:50%; --my:50%; overflow:hidden;
 }
 .controls-card::before, .output-card::before{
   content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
-  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  background:none;
   opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
 }
 .controls-card:hover::before, .output-card:hover::before{ opacity:.14; }
@@ -50,9 +50,8 @@ main{ padding-bottom:130px; position:relative; z-index:2; }
 .controls-card + .controls-card{ margin-top:28px; }
 
 .section-title{
-  font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.18em; text-transform:uppercase;
-  color:var(--paper-faint); margin:0 0 22px; display:flex; align-items:center; gap:10px;
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--paper-faint); margin:0 0 22px; display:flex; align-items:center; gap:10px;font-variant-numeric:tabular-nums}
 .section-title .idx{ color:var(--gold); }
 
 .provider-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:22px; }
@@ -65,7 +64,7 @@ main{ padding-bottom:130px; position:relative; z-index:2; }
 }
 .provider-btn:hover{ border-color:var(--gold); color:var(--gold); }
 .provider-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
-.provider-btn.active{ border-color:var(--gold); color:var(--gold); background:rgba(216,180,106,0.08); }
+.provider-btn.active{ border-color:var(--gold); color:var(--gold); background:rgba(232,182,76,0.08); }
 .provider-btn .dot{ width:7px; height:7px; border-radius:50%; background:var(--gold); flex-shrink:0; opacity:0; transition:opacity .3s cubic-bezier(.2,.8,.2,1); }
 .provider-btn.active .dot{ opacity:1; }
 
@@ -75,9 +74,8 @@ main{ padding-bottom:130px; position:relative; z-index:2; }
 @media (max-width:480px){ .field-row{ grid-template-columns:1fr; } }
 
 label{
-  display:block; font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.12em;
-  text-transform:uppercase; color:var(--paper-faint); margin-bottom:8px;
-}
+  display:block; font-family:inherit; font-size:.8125rem; 
+   color:var(--paper-faint); margin-bottom:8px;font-variant-numeric:tabular-nums}
 label .opt{ color:var(--paper-faint); font-style:italic; text-transform:none; letter-spacing:0; }
 
 input[type=text], input[type=number], textarea, select{
@@ -90,10 +88,10 @@ input:focus-visible, textarea:focus-visible, select:focus-visible{
   border-color:var(--gold);
 }
 textarea{ min-height:90px; resize:vertical; font-family:'Space Grotesk',sans-serif; }
-.mono-input{ font-family:'Space Mono',monospace; }
+.mono-input{ font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; }
 select{ cursor:pointer; }
 
-.hint{ font-size:.78rem; color:var(--paper-faint); margin-top:6px; line-height:1.5; }
+.hint{ font-size:.8125rem; color:var(--paper-faint); margin-top:6px; line-height:1.5; }
 
 /* Checkbox — eigenes Quadrat, kein natives Styling */
 .opt-row{ display:flex; align-items:flex-start; gap:10px; cursor:pointer; user-select:none; }
@@ -122,15 +120,14 @@ select{ cursor:pointer; }
   font-size:.85rem; text-transform:none; letter-spacing:0; cursor:pointer;
   transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
 }
-.radio-pill input:checked + label{ border-color:var(--gold); color:var(--gold); background:rgba(216,180,106,0.08); }
+.radio-pill input:checked + label{ border-color:var(--gold); color:var(--gold); background:rgba(232,182,76,0.08); }
 .radio-pill input:focus-visible + label{ outline:2px solid var(--gold); outline-offset:2px; }
 
 details.advanced{ border-top:1px solid var(--line); margin-top:26px; padding-top:20px; }
 details.advanced summary{
-  cursor:pointer; list-style:none; font-family:'Space Mono',monospace; font-size:.72rem;
-  letter-spacing:.16em; text-transform:uppercase; color:var(--gold); display:flex;
-  align-items:center; gap:8px; outline:none;
-}
+  cursor:pointer; list-style:none; font-family:inherit; font-size:.8125rem;
+    color:var(--gold); display:flex;
+  align-items:center; gap:8px; outline:none;font-variant-numeric:tabular-nums}
 details.advanced summary:focus-visible{ outline:2px solid var(--gold); outline-offset:3px; border-radius:4px; }
 details.advanced summary::-webkit-details-marker{ display:none; }
 details.advanced summary .chev{
@@ -144,7 +141,7 @@ details.advanced .advanced-body{ margin-top:22px; display:flex; flex-direction:c
 
 pre.cmd-output{
   background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:18px 16px;
-  font-family:'Space Mono',monospace; font-size:.78rem; line-height:1.7; color:var(--paper-dim);
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.8125rem; line-height:1.7; color:var(--paper-dim);
   white-space:pre-wrap; word-break:break-word; margin:0 0 18px; max-height:420px; overflow-y:auto;
 }
 pre.cmd-output .kw{ color:var(--gold-bright); }
@@ -171,10 +168,10 @@ pre.cmd-output .kw{ color:var(--gold-bright); }
 
 .warn{
   display:flex; gap:10px; align-items:flex-start; margin-top:18px; padding:13px 14px;
-  background:rgba(216,180,106,0.07); border:1px solid var(--line); border-radius:10px;
-  font-size:.8rem; color:var(--paper-dim); line-height:1.55;
+  background:rgba(232,182,76,0.07); border:1px solid var(--line); border-radius:10px;
+  font-size:.8125rem; color:var(--paper-dim); line-height:1.55;
 }
-.warn .ic{ color:var(--gold); flex-shrink:0; font-family:'Space Mono',monospace; }
+.warn .ic{ color:var(--gold); flex-shrink:0; font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; }
 
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important; animation:none !important;}
@@ -183,8 +180,6 @@ pre.cmd-output .kw{ color:var(--gold-bright); }
 </head>
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <header>
   <div class="header-inner">
@@ -205,8 +200,7 @@ pre.cmd-output .kw{ color:var(--gold-bright); }
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Werkzeug · PowerShell</span>
-  <h1>Mail-<em>Befehl</em> bauen</h1>
+  <h1>Mail-Befehl bauen</h1>
   <p class="lede">Fülle die Felder aus — der fertige <code>Send-MailMessage</code>-Befehl entsteht live, fix zum Kopieren.</p>
 </div>
 
@@ -215,7 +209,7 @@ pre.cmd-output .kw{ color:var(--gold-bright); }
     <!-- Eingabebereich -->
     <div class="controls-col">
       <div class="controls-card">
-        <p class="section-title"><span class="idx">01</span> Grunddaten</p>
+        <p class="section-title">Grunddaten</p>
 
         <div class="provider-row" role="group" aria-label="Anbieter-Vorauswahl">
           <button type="button" class="provider-btn" id="providerM365" data-provider="m365">
@@ -277,7 +271,7 @@ pre.cmd-output .kw{ color:var(--gold-bright); }
       </div>
 
       <div class="controls-card">
-        <p class="section-title"><span class="idx">02</span> Anmeldung</p>
+        <p class="section-title">Anmeldung</p>
         <div class="field">
           <label for="username">Benutzername (-Credential)</label>
           <input type="text" id="username" class="mono-input" placeholder="benutzer@example.de" autocomplete="off">
@@ -351,7 +345,7 @@ pre.cmd-output .kw{ color:var(--gold-bright); }
     <!-- Ausgabe -->
     <div class="output-col">
       <div class="output-card">
-        <p class="section-title"><span class="idx">03</span> Fertiger Befehl</p>
+        <p class="section-title">Fertiger Befehl</p>
         <pre class="cmd-output" id="cmdOutput" aria-live="polite"></pre>
         <button class="btn-primary" id="copyBtn">Kopieren</button>
         <button class="btn-ghost" id="resetBtn">Zurücksetzen</button>

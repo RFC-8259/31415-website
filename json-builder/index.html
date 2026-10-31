@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -48,19 +48,18 @@
   cursor:pointer; transition:all .3s cubic-bezier(.2,.8,.2,1);
 }
 .tab-btn:hover{border-color:var(--gold); color:var(--paper);}
-.tab-btn.active{background:var(--gold); border-color:var(--gold); color:var(--ink); font-weight:600;}
+.tab-btn.active{background:var(--paper); border-color:var(--gold); color:var(--ink); font-weight:600;}
 
 .panel{
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   border:1px solid var(--line); border-radius:var(--r); padding:28px; margin-bottom:24px;
   position:relative;
 }
 @media (max-width:640px){ .panel{padding:20px;} }
 
 .panel-title{
-  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
-  color:var(--paper-faint); margin:0 0 18px;
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--paper-faint); margin:0 0 18px;font-variant-numeric:tabular-nums}
 
 /* --- manual field builder --- */
 .field-row{
@@ -76,7 +75,7 @@ input[type=text], input[type=number], select, textarea{
 input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus{
   border-color:var(--gold); outline:none;
 }
-.mono-input{font-family:'Space Mono',monospace; font-size:13px;}
+.mono-input{font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:13px;}
 select{cursor:pointer; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23d8b46a'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 12px center; padding-right:30px;}
 
 .icon-btn{
@@ -94,18 +93,17 @@ select{cursor:pointer; appearance:none; background-image:url("data:image/svg+xml
   background:transparent; border:1px dashed var(--line); border-radius:8px; padding:10px 16px;
   cursor:pointer; transition:all .25s cubic-bezier(.2,.8,.2,1); width:100%; justify-content:center;
 }
-.add-field-btn:hover{border-color:var(--gold); background:rgba(216,180,106,0.06);}
+.add-field-btn:hover{border-color:var(--gold); background:rgba(232,182,76,0.06);}
 
 /* --- import box --- */
 textarea#jsonInput{
-  width:100%; min-height:160px; resize:vertical; font-family:'Space Mono',monospace; font-size:13px;
+  width:100%; min-height:160px; resize:vertical; font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:13px;
   line-height:1.5;
 }
 .import-row{display:flex; gap:12px; margin-top:14px; flex-wrap:wrap;}
 .import-status{
-  font-family:'Space Mono',monospace; font-size:12px; color:var(--paper-faint); margin-top:12px;
-  display:flex; align-items:center; gap:8px; min-height:18px;
-}
+  font-family:inherit; font-size:.8125rem; color:var(--paper-faint); margin-top:12px;
+  display:flex; align-items:center; gap:8px; min-height:18px;font-variant-numeric:tabular-nums}
 .import-status.ok{color:var(--gold);}
 .import-status.err{color:#d88a6a;}
 
@@ -125,49 +123,45 @@ textarea#jsonInput{
 .editor-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:22px;}
 .mode-switch{display:flex; gap:8px; background:var(--ink-soft); border:1px solid var(--line); border-radius:100px; padding:4px;}
 .mode-switch button{
-  font-family:'Space Mono',monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+  font-family:inherit; font-size:.8125rem;  
   border:none; background:transparent; color:var(--paper-faint); padding:8px 16px; border-radius:100px;
-  cursor:pointer; transition:all .25s cubic-bezier(.2,.8,.2,1);
-}
-.mode-switch button.active{background:var(--gold); color:var(--ink);}
+  cursor:pointer; transition:all .25s cubic-bezier(.2,.8,.2,1);font-variant-numeric:tabular-nums}
+.mode-switch button.active{background:var(--paper); color:var(--ink);}
 
 /* --- single record form --- */
 .record-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px;}
 .record-field label{
-  display:block; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--paper-faint); margin-bottom:8px;
-}
+  display:block; font-family:inherit; font-size:.8125rem;  
+  color:var(--paper-faint); margin-bottom:8px;font-variant-numeric:tabular-nums}
 .record-field label .type-hint{color:var(--gold); margin-left:6px; text-transform:none; letter-spacing:0;}
 
 /* --- table mode --- */
 .table-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r);}
 table.data-table{width:100%; border-collapse:collapse; min-width:560px;}
 table.data-table th{
-  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  font-family:inherit; font-size:.8125rem;  
   color:var(--paper-faint); text-align:left; padding:12px 14px; border-bottom:1px solid var(--line);
-  background:var(--ink-soft); white-space:nowrap;
-}
+  background:var(--ink-soft); white-space:nowrap;font-variant-numeric:tabular-nums}
 table.data-table th .type-hint{color:var(--gold); margin-left:5px; text-transform:none;}
 table.data-table td{padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:middle;}
 table.data-table td input, table.data-table td select{border-radius:6px; padding:8px 10px; font-size:13px;}
 table.data-table tr:last-child td{border-bottom:none;}
 table.data-table td.row-actions{width:44px; text-align:center;}
-table.data-table tbody tr:hover{background:rgba(216,180,106,0.04);}
+table.data-table tbody tr:hover{background:rgba(232,182,76,0.04);}
 
 .add-row-btn{margin-top:14px;}
 
 /* --- complex field notice --- */
 .complex-note{
-  font-family:'Space Mono',monospace; font-size:11px; color:var(--paper-faint); margin-top:6px;
-  display:flex; gap:6px; align-items:flex-start;
-}
+  font-family:inherit; font-size:.8125rem; color:var(--paper-faint); margin-top:6px;
+  display:flex; gap:6px; align-items:flex-start;font-variant-numeric:tabular-nums}
 .complex-note svg{width:13px; height:13px; flex-shrink:0; margin-top:2px; color:var(--gold);}
 
 /* --- output --- */
 .output-head{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px;}
 pre#jsonOutput{
   background:var(--ink-soft); border:1px solid var(--line); border-radius:var(--r); padding:20px;
-  font-family:'Space Mono',monospace; font-size:13px; line-height:1.6; color:var(--paper);
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:13px; line-height:1.6; color:var(--paper);
   overflow-x:auto; max-height:480px; margin:0; white-space:pre;
 }
 .output-actions{display:flex; gap:10px; flex-wrap:wrap;}
@@ -177,16 +171,15 @@ pre#jsonOutput{
 }
 
 .section-label{
-  font-family:'Space Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
-  color:var(--gold); margin:0 0 14px; display:flex; align-items:center; gap:10px;
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--gold); margin:0 0 14px; display:flex; align-items:center; gap:10px;font-variant-numeric:tabular-nums}
 .section-label::before{content:''; width:14px; height:1px; background:var(--gold);}
 
 .app-section{padding:14px 0 60px;}
 
 /* --- tree editor (nested structures) --- */
 .tree-banner{
-  display:flex; align-items:flex-start; gap:10px; background:rgba(216,180,106,0.07);
+  display:flex; align-items:flex-start; gap:10px; background:rgba(232,182,76,0.07);
   border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin-bottom:22px;
   font-size:13px; color:var(--paper-dim); line-height:1.55;
 }
@@ -204,19 +197,18 @@ pre#jsonOutput{
 
 .tree-key{
   display:flex; align-items:center; gap:8px; min-width:0;
-  font-family:'Space Mono',monospace; font-size:13px;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:13px;
 }
 .tree-key .indent{flex-shrink:0; display:inline-flex;}
 .tree-key .branch{
   width:14px; height:14px; flex-shrink:0; color:var(--paper-faint); opacity:.5;
 }
 .tree-key .key-name{color:var(--paper); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.tree-key .key-idx{color:var(--gold); font-size:11px;}
+.tree-key .key-idx{color:var(--gold); font-size:.8125rem;}
 .tree-key .type-hint{
-  font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.05em; text-transform:uppercase;
+  font-family:inherit; font-size:.8125rem;  
   color:var(--paper-faint); background:var(--ink-soft); border:1px solid var(--line); border-radius:5px;
-  padding:2px 6px; flex-shrink:0; margin-left:4px;
-}
+  padding:2px 6px; flex-shrink:0; margin-left:4px;font-variant-numeric:tabular-nums}
 
 .tree-node-label{
   font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:500; color:var(--paper-dim);
@@ -230,16 +222,13 @@ pre#jsonOutput{
 .tree-value-cell textarea{min-height:54px; resize:vertical;}
 
 .tree-scope-note{
-  font-family:'Space Mono',monospace; font-size:11px; color:var(--paper-faint);
-  margin:4px 0 12px; padding-left:2px;
-}
+  font-family:inherit; font-size:.8125rem; color:var(--paper-faint);
+  margin:4px 0 12px; padding-left:2px;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
 
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <div class="layer">
 <header>
@@ -261,8 +250,7 @@ pre#jsonOutput{
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Werkzeug · JSON</span>
-  <h1>JSON <em>Datensatz</em>-Generator</h1>
+  <h1>JSON Datensatz-Generator</h1>
   <p class="lede">Felder selbst anlegen oder ein Beispiel-JSON einlesen — dann Werte wie in einer Tabelle eintragen und als JSON exportieren.</p>
 </div>
 
@@ -271,7 +259,7 @@ pre#jsonOutput{
     <section class="app-section">
 
       <div class="panel reveal">
-        <p class="panel-title">01 — Felder festlegen</p>
+        <p class="panel-title">Felder festlegen</p>
         <div class="source-tabs" role="tablist" aria-label="Quelle der Felder">
           <button class="tab-btn active" id="tabManual" role="tab" aria-selected="true" type="button">Felder selbst anlegen</button>
           <button class="tab-btn" id="tabImport" role="tab" aria-selected="false" type="button">JSON-Beispiel einlesen</button>
@@ -304,7 +292,7 @@ pre#jsonOutput{
 
       <div class="panel reveal" id="editorPanel" style="display:none;">
         <div class="editor-head">
-          <p class="panel-title" style="margin:0;">02 — Daten eintragen</p>
+          <p class="panel-title" style="margin:0;">Daten eintragen</p>
           <div class="mode-switch" id="modeSwitchWrap" role="tablist" aria-label="Editor-Modus">
             <button id="modeSingle" class="active" role="tab" aria-selected="true" type="button">Einzeln</button>
             <button id="modeTable" role="tab" aria-selected="false" type="button">Tabelle</button>
@@ -335,7 +323,7 @@ pre#jsonOutput{
 
       <div class="panel reveal" id="outputPanel" style="display:none;">
         <div class="output-head">
-          <p class="panel-title" style="margin:0;">03 — JSON-Ergebnis</p>
+          <p class="panel-title" style="margin:0;">JSON-Ergebnis</p>
           <div class="output-actions">
             <button class="btn btn-ghost" id="copyBtn" type="button">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>

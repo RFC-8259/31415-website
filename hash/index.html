@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -46,10 +46,9 @@ main{ padding-bottom:110px; }
   border-bottom:1px solid var(--line); padding-bottom:0;
 }
 .tab-btn{
-  font-family:'Space Mono',monospace; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+  font-family:inherit; font-size:.8125rem;  
   background:transparent; border:none; color:var(--paper-faint); padding:12px 18px;
-  border-bottom:2px solid transparent; transition:color .3s, border-color .3s;
-}
+  border-bottom:2px solid transparent; transition:color .3s, border-color .3s;font-variant-numeric:tabular-nums}
 .tab-btn:hover{ color:var(--paper); }
 .tab-btn.active{ color:var(--gold); border-bottom-color:var(--gold); }
 .tab-btn:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
@@ -60,27 +59,26 @@ main{ padding-bottom:110px; }
 .panel.active{ display:block; }
 
 .card{
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   border:1px solid var(--line); border-radius:var(--r);
   padding:32px; position:relative; overflow:hidden;
   transition:transform .4s cubic-bezier(.2,.8,.2,1), box-shadow .4s cubic-bezier(.2,.8,.2,1);
 }
 .card::before{
   content:''; position:absolute; inset:0; pointer-events:none; opacity:0;
-  background:radial-gradient(circle 260px at var(--mx,50%) var(--my,50%), var(--shadow), transparent 70%);
+  background:none;
   transition:opacity .4s; mix-blend-mode:overlay;
 }
 .card:hover::before{ opacity:.5; }
 @media (max-width:640px){ .card{ padding:22px; } }
 
 .field-label{
-  font-family:'Space Mono',monospace; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
-  color:var(--paper-faint); display:block; margin-bottom:10px;
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--paper-faint); display:block; margin-bottom:10px;font-variant-numeric:tabular-nums}
 
 textarea, input[type="text"], input[type="password"]{
   width:100%; background:var(--ink-soft); border:1px solid var(--line); border-radius:10px;
-  color:var(--paper); font-family:'Space Mono',monospace; font-size:.92rem; padding:14px 16px;
+  color:var(--paper); font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.92rem; padding:14px 16px;
   transition:border-color .3s; resize:vertical;
 }
 html[data-theme="light"] textarea, html[data-theme="light"] input[type="text"], html[data-theme="light"] input[type="password"]{
@@ -100,9 +98,8 @@ textarea::placeholder, input::placeholder{ color:var(--paper-faint); }
   width:18px; height:18px; accent-color:var(--gold); cursor:pointer;
 }
 .check-item label{
-  font-family:'Space Mono',monospace; font-size:.82rem; letter-spacing:.04em; color:var(--paper-dim);
-  cursor:pointer;
-}
+  font-family:inherit; font-size:.82rem;  color:var(--paper-dim);
+  cursor:pointer;font-variant-numeric:tabular-nums}
 
 .btn{
   font-family:'Space Grotesk',sans-serif; font-weight:500; font-size:.92rem;
@@ -129,11 +126,10 @@ textarea::placeholder, input::placeholder{ color:var(--paper-faint); }
 }
 html[data-theme="light"] .result-row{ background:var(--ink-soft); }
 .result-algo{
-  font-family:'Space Mono',monospace; font-size:.74rem; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--gold); min-width:78px; flex-shrink:0;
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--gold); min-width:78px; flex-shrink:0;font-variant-numeric:tabular-nums}
 .result-hash{
-  font-family:'Space Mono',monospace; font-size:.84rem; color:var(--paper); word-break:break-all; flex:1;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.84rem; color:var(--paper); word-break:break-all; flex:1;
   min-width:200px;
 }
 .copy-btn{
@@ -151,11 +147,11 @@ html[data-theme="light"] .result-row{ background:var(--ink-soft); }
   text-align:center; transition:border-color .3s, background .3s; cursor:pointer;
   position:relative;
 }
-.dropzone:hover, .dropzone.dragover{ border-color:var(--gold); background:rgba(216,180,106,0.04); }
+.dropzone:hover, .dropzone.dragover{ border-color:var(--gold); background:rgba(232,182,76,0.04); }
 .dropzone:focus-visible{ outline:2px solid var(--gold); outline-offset:4px; }
 .dropzone svg{ width:36px; height:36px; color:var(--paper-faint); margin-bottom:14px; }
 .dropzone .dz-title{ font-family:'Space Grotesk',sans-serif; font-weight:500; color:var(--paper); margin-bottom:6px; }
-.dropzone .dz-sub{ font-family:'Space Mono',monospace; font-size:.78rem; color:var(--paper-faint); }
+.dropzone .dz-sub{ font-family:inherit; font-size:.8125rem; color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .dropzone input[type="file"]{ display:none; }
 
 .file-info{
@@ -164,7 +160,7 @@ html[data-theme="light"] .result-row{ background:var(--ink-soft); }
 }
 .file-info.active{ display:flex; }
 .file-info .fname{ font-family:'Space Grotesk',sans-serif; font-weight:500; color:var(--paper); flex:1; word-break:break-all; min-width:140px; }
-.file-info .fsize{ font-family:'Space Mono',monospace; font-size:.78rem; color:var(--paper-faint); }
+.file-info .fsize{ font-family:inherit; font-size:.8125rem; color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .file-info .fclear{
   background:transparent; border:none; color:var(--paper-faint); padding:4px; display:flex; transition:color .3s;
 }
@@ -178,27 +174,25 @@ html[data-theme="light"] .result-row{ background:var(--ink-soft); }
   overflow:hidden;
 }
 .progress-bar-fill{
-  height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-bright)); width:0%;
+  height:100%; background:var(--gold); width:0%;
   transition:width .15s linear; border-radius:100px;
 }
 .progress-label{
-  font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); margin-top:8px;
-  display:flex; justify-content:space-between;
-}
+  font-family:inherit; font-size:.8125rem; color:var(--paper-faint); margin-top:8px;
+  display:flex; justify-content:space-between;font-variant-numeric:tabular-nums}
 
 /* Vergleichsmodus */
 .compare-result{
   margin-top:24px; display:none; align-items:center; gap:14px; padding:18px 20px; border-radius:10px;
-  border:1px solid var(--line); font-family:'Space Mono',monospace; font-size:.88rem;
+  border:1px solid var(--line); font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.88rem;
 }
 .compare-result.show{ display:flex; }
-.compare-result.match{ border-color:var(--gold); background:rgba(216,180,106,0.08); color:var(--gold-bright); }
+.compare-result.match{ border-color:var(--gold); background:rgba(232,182,76,0.08); color:var(--gold-bright); }
 .compare-result.nomatch{ border-color:#a1453a; background:rgba(161,69,58,0.08); color:#d97b6f; }
 .compare-result svg{ width:22px; height:22px; flex-shrink:0; }
 
 .hint{
-  font-family:'Space Mono',monospace; font-size:.74rem; color:var(--paper-faint); margin-top:10px; line-height:1.7;
-}
+  font-family:inherit; font-size:.8125rem; color:var(--paper-faint); margin-top:10px; line-height:1.7;font-variant-numeric:tabular-nums}
 .hint strong{ color:var(--paper-dim); font-weight:400; }
 
 /* HMAC-Key-Feld */
@@ -221,8 +215,6 @@ html[data-theme="light"] .result-row{ background:var(--ink-soft); }
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
 
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <header>
   <div class="header-inner">
@@ -243,8 +235,7 @@ html[data-theme="light"] .result-row{ background:var(--ink-soft); }
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Werkzeug · Kryptografie</span>
-  <h1>Hash-<em>Rechner</em></h1>
+  <h1>Hash-Rechner</h1>
   <p class="lede">Berechne Prüfsummen für Text oder Dateien — MD5, SHA-1, SHA-256, SHA-384, SHA-512, optional als HMAC. Läuft komplett in deinem Browser, nichts wird hochgeladen.</p>
 </div>
 
@@ -365,7 +356,7 @@ html[data-theme="light"] .result-row{ background:var(--ink-soft); }
         </div>
 
         <label class="field-label" style="margin-top:18px;" for="compareAlgoSelect">Algorithmus des Ist-Hashs</label>
-        <select id="compareAlgoSelect" style="width:100%; background:var(--ink-soft); border:1px solid var(--line); border-radius:10px; color:var(--paper); font-family:'Space Mono',monospace; font-size:.92rem; padding:14px 16px;">
+        <select id="compareAlgoSelect" style="width:100%; background:var(--ink-soft); border:1px solid var(--line); border-radius:10px; color:var(--paper); font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.92rem; padding:14px 16px;">
           <option value="MD5">MD5</option>
           <option value="SHA-1">SHA-1</option>
           <option value="SHA-256" selected>SHA-256</option>

@@ -1,16 +1,13 @@
 /* ==========================================================================
    31415.me — gemeinsames Seiten-Verhalten
    --------------------------------------------------------------------------
-   Einzige Quelle für Theme-Umschaltung, Pi-Ziffernregen, Scroll-Einblendung,
-   Toast und den Karten-Spotlight. Jede Seite bindet diese Datei im <head>
+   Einzige Quelle für Theme-Umschaltung, Scroll-Einblendung und Toast. Jede Seite bindet diese Datei im <head>
    ein; das Theme wird sofort gesetzt (kein Aufblitzen), alles Weitere hängt
    sich bei DOM-Bereitschaft ein.
 
    Was Seiten hiervon nutzen können — nichts davon selbst nachbauen:
    • showToast(text[, dauerMs])   Kurzmeldung unten mittig.
    • revealScan()                 Nachgeladene .reveal-Elemente einblenden.
-   • Spotlight                    Karten mit einer Klasse aus SPOTLIGHT_SELECTOR
-                                  (oder data-spotlight) bekommen --mx/--my.
    ========================================================================== */
 (function(){
   'use strict';
@@ -20,15 +17,10 @@
   var mqLight  = window.matchMedia('(prefers-color-scheme: light)');
   var reduceMotion = mqReduce.matches;
 
-  var THEME_COLOR = {dark:'#0a0e14', light:'#f6f3ea'};
+  var THEME_COLOR = {dark:'#0c0c0d', light:'#ececea'};
 
-  /* Karten, die den Goldschimmer unter dem Zeiger tragen. Neue Kartenklassen
-     hier eintragen, statt in der Seite einen eigenen Listener zu schreiben. */
-  var SPOTLIGHT_SELECTOR = [
-    '.card', '.app-card', '.deck-card', '.panel', '.timer-card',
-    '.controls-card', '.output-card', '.editor-card', '.tree-card',
-    '[data-card]', '[data-spotlight]'
-  ].join(',');
+  /* Ab hier läuft Skript: erst jetzt darf CSS Inhalte fürs Einblenden verstecken. */
+  root.classList.add('js');
 
   /* ---------- Theme ----------
      Ohne eigene Wahl folgt die Seite dem Betriebssystem; eine Wahl über den
@@ -83,64 +75,6 @@
   }
   window.showToast = showToast;
 
-  /* ---------- Karten-Spotlight ----------
-     Ein delegierter Listener für die ganze Seite: das kostet unabhängig von
-     der Kartenzahl gleich viel und erfasst auch später eingefügte Karten. */
-  function initSpotlight(){
-    if(reduceMotion) return;
-    document.addEventListener('pointermove', function(e){
-      var el = e.target && e.target.closest ? e.target.closest(SPOTLIGHT_SELECTOR) : null;
-      if(!el) return;
-      var r = el.getBoundingClientRect();
-      el.style.setProperty('--mx', (e.clientX - r.left) + 'px');
-      el.style.setProperty('--my', (e.clientY - r.top) + 'px');
-    }, {passive:true});
-  }
-
-  /* ---------- Pi-Ziffernregen ---------- */
-  function initDigitField(){
-    var cv = document.getElementById('digit-field');
-    if(!cv) return;
-    if(reduceMotion){ cv.style.display = 'none'; return; }
-    var ctx = cv.getContext('2d');
-    var PI_DIGITS = "31415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679".split('');
-    var drops = [];
-
-    function resize(){
-      cv.width = window.innerWidth;
-      cv.height = window.innerHeight;
-      var cols = Math.floor(cv.width / 28);
-      drops = [];
-      for(var i=0;i<cols;i++){
-        drops.push({
-          x: i*28 + 14,
-          y: Math.random() * cv.height,
-          speed: 0.4 + Math.random() * 0.6,
-          char: PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)]
-        });
-      }
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    function draw(){
-      ctx.clearRect(0, 0, cv.width, cv.height);
-      ctx.font = "13px 'Space Mono', monospace";
-      drops.forEach(function(d){
-        var gradAlpha = 0.05 + (d.y / cv.height) * 0.35;
-        ctx.fillStyle = 'rgba(216,180,106,' + gradAlpha + ')';
-        ctx.fillText(d.char, d.x, d.y);
-        d.y += d.speed;
-        if(d.y > cv.height){
-          d.y = -20;
-          d.char = PI_DIGITS[Math.floor(Math.random() * PI_DIGITS.length)];
-        }
-      });
-      requestAnimationFrame(draw);
-    }
-    draw();
-  }
-
   /* ---------- Einblenden beim Scrollen ---------- */
   function initReveal(){
     if(reduceMotion || !('IntersectionObserver' in window)){
@@ -175,8 +109,6 @@
 
   function init(){
     initTheme();
-    initSpotlight();
-    initDigitField();
     initReveal();
     initYear();
   }

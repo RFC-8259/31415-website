@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -51,7 +51,7 @@ nav{display:flex;align-items:center;gap:24px;}
 
 .card{
   position:relative;
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   border:1px solid var(--line);
   border-radius:var(--r);
   padding:28px 26px 26px;
@@ -62,7 +62,7 @@ nav{display:flex;align-items:center;gap:24px;}
 }
 .card::before{
   content:'';position:absolute;inset:0;pointer-events:none;border-radius:var(--r);
-  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%), var(--shadow), transparent 60%);
+  background:none;
   opacity:0;transition:opacity .4s cubic-bezier(.2,.8,.2,1);
 }
 .card:hover::before{opacity:.14;}
@@ -76,7 +76,7 @@ nav{display:flex;align-items:center;gap:24px;}
   color:var(--paper);display:flex;align-items:center;gap:10px;
 }
 .card-title svg{width:19px;height:19px;color:var(--gold);flex-shrink:0;}
-.card-index{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--paper-faint);letter-spacing:.1em;}
+.card-index{font-family:inherit;font-size:.8125rem;color:var(--paper-faint);font-variant-numeric:tabular-nums}
 
 .stage{
   flex:1;min-height:108px;
@@ -88,7 +88,7 @@ nav{display:flex;align-items:center;gap:24px;}
   font-size:clamp(1.8rem,4vw,2.5rem);color:var(--paper);
   transition:opacity .25s ease;
 }
-.stage-value.muted{color:var(--paper-faint);font-family:'Space Mono',monospace;font-size:1rem;font-weight:400;letter-spacing:.05em;}
+.stage-value.muted{color:var(--paper-faint);font-family:inherit;font-size:1rem;font-weight:400;font-variant-numeric:tabular-nums}
 .stage-value.win{color:var(--gold-bright);}
 .stage-value.lose{color:var(--paper-dim);}
 
@@ -103,12 +103,11 @@ nav{display:flex;align-items:center;gap:24px;}
 .row{display:flex;gap:10px;align-items:center;min-width:0;width:100%;}
 .row.center{justify-content:center;}
 label.mini{
-  font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--paper-faint);white-space:nowrap;flex-shrink:0;
-}
+  font-family:inherit;font-size:.8125rem;
+  color:var(--paper-faint);white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums}
 input[type="number"], input[type="text"], textarea{
   width:100%;min-width:0;background:var(--ink-soft);border:1px solid var(--line);
-  border-radius:8px;color:var(--paper);font-family:'Space Mono',monospace;
+  border-radius:8px;color:var(--paper);font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;
   font-size:.92rem;padding:9px 10px;transition:border-color .3s cubic-bezier(.2,.8,.2,1);
 }
 input::placeholder, textarea::placeholder{color:var(--paper-faint);font-family:'Space Grotesk',sans-serif;}
@@ -136,13 +135,13 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
 .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--paper);}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
 .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.btn-sm{padding:7px 14px;font-size:.78rem;width:auto;}
+.btn-sm{padding:7px 14px;font-size:.8125rem;width:auto;}
 
-.hint{font-size:.78rem;color:var(--paper-faint);text-align:center;min-height:1.1em;}
+.hint{font-size:.8125rem;color:var(--paper-faint);text-align:center;min-height:1.1em;}
 .hint.warn{color:var(--gold);}
 
 /* tally pills (yes/no, coin) */
-.tally{display:flex;gap:8px;justify-content:center;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--paper-faint);letter-spacing:.05em;}
+.tally{display:flex;gap:8px;justify-content:center;font-family:inherit;font-size:.8125rem;color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .tally span{color:var(--paper-dim);}
 
 /* dice */
@@ -150,15 +149,15 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
 .die{
   width:42px;height:42px;border-radius:9px;border:1px solid var(--line);
   background:var(--ink-soft);display:flex;align-items:center;justify-content:center;
-  font-family:'Space Mono',monospace;font-size:1.1rem;color:var(--gold-bright);flex-shrink:0;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:1.1rem;color:var(--gold-bright);flex-shrink:0;
 }
-.dice-total{font-family:'Space Mono',monospace;font-size:.75rem;color:var(--paper-faint);text-align:center;letter-spacing:.05em;}
+.dice-total{font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:.8125rem;color:var(--paper-faint);text-align:center;letter-spacing:.05em;}
 
 /* list shuffle results */
 .list-out{
   background:var(--ink-soft);border:1px solid var(--line);border-radius:10px;
   padding:10px 4px;max-height:190px;overflow-y:auto;
-  font-family:'Space Mono',monospace;font-size:.82rem;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:.82rem;
 }
 .empty-state{text-align:center;padding:16px;}
 .empty-state .pi-big{
@@ -173,7 +172,7 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
 }
 .list-out li:last-child{border-bottom:none;}
 .list-out li .n{color:var(--gold);min-width:1.6em;}
-.list-out li.picked{background:rgba(216,180,106,.08);}
+.list-out li.picked{background:rgba(232,182,76,.08);}
 
 /* wheel/spinner options */
 .opt-list{display:flex;flex-direction:column;gap:8px;max-height:172px;overflow-y:auto;padding-right:4px;min-width:0;}
@@ -190,10 +189,9 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
 .opt-row button.del svg{width:13px;height:13px;}
 .add-link{
   display:inline-flex;align-items:center;gap:6px;color:var(--gold);
-  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.06em;
-  text-transform:uppercase;background:none;border:none;padding:4px 0;align-self:flex-start;
-  transition:opacity .25s ease;width:auto;
-}
+  font-family:inherit;font-size:.8125rem;
+  background:none;border:none;padding:4px 0;align-self:flex-start;
+  transition:opacity .25s ease;width:auto;font-variant-numeric:tabular-nums}
 .add-link:hover{opacity:.7;}
 .add-link svg{width:13px;height:13px;}
 
@@ -218,8 +216,8 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
 }
 .duel-card:hover{border-color:var(--gold);transform:translateY(-2px);}
 .duel-card:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.duel-vs{font-family:'Space Mono',monospace;color:var(--paper-faint);font-size:.72rem;letter-spacing:.1em;flex-shrink:0;}
-.duel-round{font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-faint);text-align:center;}
+.duel-vs{font-family:inherit;color:var(--paper-faint);font-size:.8125rem;flex-shrink:0;font-variant-numeric:tabular-nums}
+.duel-round{font-family:inherit;font-size:.8125rem;color:var(--paper-faint);text-align:center;font-variant-numeric:tabular-nums}
 .duel-champion{font-family:'Fraunces',serif;font-style:italic;font-weight:500;color:var(--gold-bright);}
 
 /* footer */
@@ -236,8 +234,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
 
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <header>
   <div class="header-inner">
@@ -258,8 +254,7 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Werkzeug · Entscheidung</span>
-  <h1>Acht Wege zu einer <em>Entscheidung</em></h1>
+  <h1>Acht Wege zu einer Entscheidung</h1>
   <p class="lede">Wenn das Abwägen nicht weiterhilft, hilft der Zufall. Acht kleine Entscheider für alle Lagen — von der einfachen Münze bis zum Turnier. Alles bleibt in deinem Browser.</p>
 </div>
 
@@ -273,7 +268,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.4.9c0 1.8-2.8 2.6-2.8 2.6"/><path d="M12 16.2h.01"/></svg>
           Ja oder Nein
         </h2>
-        <span class="card-index">01</span>
       </div>
       <div class="stage">
         <div class="stage-value muted" id="yn-stage">Stelle deine Frage</div>
@@ -292,7 +286,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 9.5c0-1.4 1.3-2.5 3-2.5s3 1.1 3 2.5-1.3 2-3 2.5-3 1-3 2.5 1.3 2.5 3 2.5 3-1.1 3-2.5"/></svg>
           Münzwurf
         </h2>
-        <span class="card-index">02</span>
       </div>
       <div class="stage">
         <div class="stage-value muted" id="coin-stage">Kopf oder Zahl?</div>
@@ -311,7 +304,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="8.5" r=".6" fill="currentColor"/><circle cx="8.5" cy="15.5" r=".6" fill="currentColor"/><circle cx="15.5" cy="15.5" r=".6" fill="currentColor"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg>
           Würfel
         </h2>
-        <span class="card-index">03</span>
       </div>
       <div class="row center" style="margin-bottom:-4px;">
         <label class="mini" for="dice-count">Würfel</label>
@@ -336,7 +328,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="10" y1="4" x2="8" y2="20"/><line x1="16" y1="4" x2="14" y2="20"/></svg>
           Zufallszahl
         </h2>
-        <span class="card-index">04</span>
       </div>
       <div class="row center">
         <input type="number" id="num-min" class="num-mini" value="1" inputmode="numeric" aria-label="Minimum">
@@ -360,7 +351,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h12M3 12h7M3 17h4"/><path d="m16 7 3 3-3 3"/><path d="m21 17-3 3-3-3"/><path d="M19 8v6"/></svg>
           Liste mischen
         </h2>
-        <span class="card-index">05</span>
       </div>
       <textarea id="list-input" placeholder="Ein Eintrag pro Zeile, z. B.&#10;Pizza&#10;Sushi&#10;Curry"></textarea>
       <div class="list-out" id="list-out"><div class="empty-state"><p class="pi-big">π</p><p>Gemischte Reihenfolge erscheint hier.</p></div></div>
@@ -380,7 +370,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.4"/><path d="M12 3v6.6M21 12h-6.6M12 21v-6.6M3 12h6.6"/></svg>
           Glücksrad
         </h2>
-        <span class="card-index">06</span>
       </div>
       <div class="row" style="align-items:flex-start;gap:24px;">
         <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0;">
@@ -414,7 +403,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           Mehrfachauswahl
         </h2>
-        <span class="card-index">07</span>
       </div>
       <textarea id="pick-input" placeholder="Optionen, eine pro Zeile" style="min-height:72px;"></textarea>
       <div class="row center">
@@ -435,7 +423,6 @@ textarea{resize:vertical;min-height:96px;line-height:1.55;font-size:.86rem;box-s
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z"/><path d="M7 5H4a2 2 0 0 0 0 4M17 5h3a2 2 0 0 1 0 4"/></svg>
           Turnier
         </h2>
-        <span class="card-index">08</span>
       </div>
       <div id="duel-setup">
         <textarea id="duel-input" placeholder="Mindestens 2 Optionen, eine pro Zeile, z. B.&#10;Wandern&#10;Stadtbummel&#10;Museum&#10;Strand"></textarea>
@@ -643,7 +630,7 @@ function escapeHtml(str){
       const large = (a1-a0) > Math.PI ? 1 : 0;
       const path = document.createElementNS('http://www.w3.org/2000/svg','path');
       path.setAttribute('d', `M${cx},${cy} L${x0.toFixed(2)},${y0.toFixed(2)} A${r},${r} 0 ${large} 1 ${x1.toFixed(2)},${y1.toFixed(2)} Z`);
-      const baseColors = ['rgba(216,180,106,0.85)','rgba(180,170,150,0.35)'];
+      const baseColors = ['rgba(232,182,76,0.85)','rgba(180,170,150,0.35)'];
       path.setAttribute('fill', n===1 ? baseColors[0] : baseColors[i%2]);
       path.setAttribute('stroke', 'var(--ink)');
       path.setAttribute('stroke-width', '0.6');

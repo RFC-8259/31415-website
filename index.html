@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0a0e14">
-<title>31415 · Ein digitales Taschenmesser</title>
-<meta name="description" content="Eine wachsende Sammlung kleiner, durchdachter Web-Werkzeuge für Alltag und Arbeit. Jedes tut genau eine Sache – und sie gut.">
+<meta name="theme-color" content="#0c0c0d">
+<title>31415.me · Werkzeuge, die sofort laufen</title>
+<meta name="description" content="17 kleine Web-Werkzeuge für Netzwerk, Text, Planung und Spiel. Kein Konto, kein Server: alles rechnet in deinem Browser.">
 <link rel="canonical" href="https://31415.me/">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="manifest" href="/site.webmanifest">
@@ -14,389 +14,707 @@
 <meta property="og:site_name" content="31415.me">
 <meta property="og:locale" content="de_DE">
 <meta property="og:url" content="https://31415.me/">
-<meta property="og:title" content="31415 · Ein digitales Taschenmesser">
-<meta property="og:description" content="Eine wachsende Sammlung kleiner, durchdachter Web-Werkzeuge für Alltag und Arbeit. Jedes tut genau eine Sache – und sie gut.">
+<meta property="og:title" content="31415.me · Werkzeuge, die sofort laufen">
+<meta property="og:description" content="17 kleine Web-Werkzeuge für Netzwerk, Text, Planung und Spiel. Kein Konto, kein Server: alles rechnet in deinem Browser.">
 <meta name="twitter:card" content="summary">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  html,body{overflow-x:hidden;width:100%;max-width:100vw}
-  html[data-theme="light"] #digit-field{opacity:.6}
-  .wrap{position:relative;z-index:2}
-  header.dense{background:linear-gradient(180deg,var(--header-a2),var(--header-b2))}
-  .mark{display:flex;align-items:center;gap:12px;font-family:'Space Mono',monospace;font-size:15px;letter-spacing:.04em}
-  .mark .glyph{font-family:'Fraunces',serif;font-size:26px;color:var(--gold);line-height:1;transform:translateY(1px)}
-  .mark .dim{color:var(--paper-faint)}
-  .nav-right{display:flex;align-items:center;gap:30px}
-  nav.top{display:flex;gap:30px;font-size:14px;color:var(--paper-dim)}
-  nav.top a{transition:color .25s;position:relative}
-  nav.top a:hover{color:var(--gold-bright)}
-  nav.top a::after{content:'';position:absolute;left:0;bottom:-4px;height:1px;width:0;background:var(--gold);transition:width .3s ease}
-  nav.top a:hover::after{width:100%}
-  @media(max-width:640px){nav.top{display:none}}
-  .theme-btn{width:40px;height:40px;border-radius:100px;border:1px solid var(--line);background:transparent;color:var(--paper-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:border-color .3s,color .3s,transform .4s cubic-bezier(.2,.8,.2,1)}
-  .theme-btn:hover{border-color:var(--gold);color:var(--gold-bright)}
-  .theme-btn:active{transform:scale(.92)}
+  /* ------------------------------------------------------------------
+     Startseite. Ein Motiv: der Kreis, dessen Umfang π misst — riesig im
+     Kopf, als Punkt vor jedem Werkzeug, als Ring im Timer, als Fläche im
+     Panel. Fünf Schriftgrößen, ein Gold, keine Linien.
+     ------------------------------------------------------------------ */
+  :root{
+    --m:clamp(20px,3.2vw,48px);
+    --t-display:clamp(2.6rem,7.2vw,7.25rem);
+    --t-h2:clamp(2rem,4.2vw,3.75rem);
+    --t-lead:clamp(1.15rem,1.45vw,1.375rem);
+    --t-body:1.0625rem;
+    --t-small:.875rem;
+    --ease:cubic-bezier(.2,.8,.2,1);
+    --mono:ui-monospace,"Cascadia Mono","SF Mono",Consolas,monospace; /* taste-skill-ignore: nur für echte Werte in <code>/<pre> der Ausschnitte */
+  }
+  body{font-size:var(--t-body);line-height:1.55}
+  h1,h2,h3,p,ul,ol,dl,dd,figure{margin:0;padding:0}
+  ul,ol{list-style:none}
+  .frame{padding-inline:var(--m);max-width:1520px;margin-inline:auto}
+  .serif{font-family:'Fraunces',Georgia,serif;font-weight:400;letter-spacing:-.03em;line-height:.98;font-optical-sizing:auto}
+
+  /* ---------- Kopfleiste ---------- */
+  header .bar{max-width:1520px;padding:0 var(--m)}
+  .mark{display:flex;align-items:baseline;gap:.35em;font-size:var(--t-body);font-weight:600;letter-spacing:-.01em}
+  .mark .glyph{font-family:'Fraunces',serif;font-size:1.6rem;font-weight:500;color:var(--gold);line-height:1}
+  .mark .dim{color:var(--paper-faint);font-weight:400;margin-left:-.3em}
+  .nav-right{display:flex;align-items:center;gap:clamp(16px,2.4vw,32px)}
+  nav.top{display:flex;gap:clamp(16px,2.4vw,32px);font-size:var(--t-body)}
+  nav.top a{color:var(--paper-dim);transition:color .25s var(--ease)}
+  nav.top a:hover{color:var(--paper)}
+  .theme-btn{width:44px;height:44px;border-radius:50%;border:0;background:var(--ink-soft);color:var(--paper);display:grid;place-items:center;transition:background .3s var(--ease),transform .3s var(--ease)}
+  .theme-btn:hover{background:var(--panel)}
+  .theme-btn:active{transform:scale(.9)}
   .theme-btn svg{width:18px;height:18px}
-  .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:72px;position:relative;width:100%}
-  .eyebrow{font-family:'Space Mono',monospace;font-size:12.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:30px;display:flex;align-items:center;gap:14px;opacity:0;animation:rise .9s .2s forwards}
-  .eyebrow::before{content:'';width:42px;height:1px;background:var(--gold);opacity:.6}
-  h1.display{font-family:'Fraunces',serif;font-weight:300;font-size:clamp(3rem,9vw,7.5rem);line-height:.96;letter-spacing:-.02em;max-width:15ch}
-  h1.display em{font-style:italic;color:var(--gold-bright)}
-  h1.display .l1{opacity:0;animation:rise 1s .35s forwards}
-  h1.display .l2{opacity:0;animation:rise 1s .5s forwards}
-  .lede{margin-top:34px;max-width:50ch;font-size:clamp(1rem,1.5vw,1.18rem);color:var(--paper-dim);font-weight:300;opacity:0;animation:rise 1s .68s forwards}
-  .hero-cta{margin-top:46px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;opacity:0;animation:rise 1s .82s forwards}
-  .btn{font-family:'Space Grotesk';font-size:15px;padding:14px 26px;border-radius:100px;border:1px solid var(--gold);background:var(--gold);color:var(--ink);font-weight:500;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,background .3s;cursor:pointer}
-  .btn:hover{transform:translateY(-3px);box-shadow:0 14px 40px -12px var(--shadow)}
-  .btn.ghost{background:transparent;color:var(--paper);border-color:var(--line)}
-  .btn.ghost:hover{border-color:var(--gold);color:var(--gold-bright);box-shadow:none}
-  .scroll-hint{position:absolute;bottom:34px;left:0;right:0;margin:0 auto;width:max-content;display:flex;flex-direction:column;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--paper-faint);opacity:0;animation:rise 1s 1.2s forwards}
-  .scroll-hint .rail{width:1px;height:46px;background:linear-gradient(var(--gold),transparent);position:relative;overflow:hidden}
-  .scroll-hint .rail::after{content:'';position:absolute;top:0;left:0;width:100%;height:14px;background:var(--gold-bright);animation:drip 2.2s ease-in-out infinite}
-  section.block{padding:130px 0;position:relative}
-  .sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:14px}
-  .sec-idx{font-family:'Space Mono',monospace;font-size:13px;color:var(--gold);letter-spacing:.1em}
-  .sec-title{font-family:'Fraunces',serif;font-weight:400;font-size:clamp(1.9rem,4vw,2.9rem);letter-spacing:-.01em}
-  .sec-sub{color:var(--paper-dim);max-width:54ch;font-weight:300;margin-bottom:54px}
-  .cat{margin-bottom:64px}
-  .cat:last-child{margin-bottom:0}
-  .cat-head{display:flex;align-items:center;gap:16px;margin-bottom:24px}
-  .cat-name{font-family:'Space Mono',monospace;font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
-  .cat-rule{flex:1;height:1px;background:var(--line)}
-  .cat-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--paper-faint)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:22px}
-  .card{position:relative;background:linear-gradient(160deg,var(--panel),var(--ink-soft));border:1px solid var(--line);border-radius:var(--r);padding:32px 30px 28px;overflow:hidden;transition:transform .45s cubic-bezier(.2,.8,.2,1),border-color .45s,box-shadow .45s;display:flex;flex-direction:column;min-height:212px}
-  html[data-theme="light"] .card{box-shadow:0 1px 2px rgba(60,52,33,.04)}
-  .card::before{content:'';position:absolute;inset:0;background:radial-gradient(420px circle at var(--mx,50%) var(--my,0%),var(--shadow),transparent 60%);opacity:0;transition:opacity .45s}
-  .card:hover{transform:translateY(-6px);border-color:var(--gold)}
-  html[data-theme="light"] .card:hover{box-shadow:0 16px 40px -18px rgba(60,52,33,.28)}
-  .card:hover::before{opacity:.5}
-  .card .icon{width:44px;height:44px;margin-bottom:18px;color:var(--gold)}
-  .card h3{font-family:'Fraunces',serif;font-weight:500;font-size:1.45rem;margin-bottom:8px;letter-spacing:-.01em}
-  .card p{color:var(--paper-dim);font-size:.93rem;font-weight:300;max-width:34ch}
-  .card .go{margin-top:auto;padding-top:18px;display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--gold);font-family:'Space Mono',monospace;letter-spacing:.03em}
-  .card .go .arr{transition:transform .35s}
-  .card:hover .go .arr{transform:translateX(6px)}
-  .card.soon{opacity:.6}
-  .card.soon:hover{transform:none;border-color:var(--line);box-shadow:none}
-  .card.soon .go{color:var(--paper-faint)}
-  .pi-strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:42px 0;overflow:hidden;position:relative}
-  .pi-strip .track{font-family:'Space Mono',monospace;font-size:clamp(1.4rem,3.4vw,2.4rem);color:var(--paper-faint);white-space:nowrap;display:inline-block;animation:marquee 60s linear infinite;letter-spacing:.06em}
-  .pi-strip .track b{color:var(--gold)}
-  .about-body{max-width:62ch;color:var(--paper-dim);font-weight:300;font-size:clamp(1rem,1.4vw,1.1rem)}
-  .about-body strong{color:var(--paper);font-weight:500}
-  footer{padding:90px 0 60px;border-top:1px solid var(--line);position:relative;z-index:2}
-  .foot-grid{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:30px}
-  .foot-mark{font-family:'Fraunces',serif;font-size:clamp(2.5rem,8vw,5rem);font-weight:300;line-height:1;color:var(--paper)}
-  .foot-mark span{color:var(--gold)}
-  .foot-meta{font-family:'Space Mono',monospace;font-size:12.5px;color:var(--paper-faint);text-align:right;line-height:1.9}
-  .foot-meta a:hover{color:var(--gold-bright)}
+
+  /* ---------- Kopf: Schlagzeile, Suche, die Scheibe ---------- */
+  .hero{position:relative;overflow:hidden;min-height:max(680px,100svh);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:4vw;align-items:center;padding-top:calc(72px + 5vh);padding-bottom:8vh}
+  .hero-text{position:relative;z-index:2;max-width:760px}
+  .hero h1{font-size:var(--t-display);max-width:11ch}
+  .hero .lead{margin-top:36px;font-size:var(--t-lead);line-height:1.45;color:var(--paper);max-width:34ch}
+
+  .search{position:relative;margin-top:48px;max-width:560px}
+  .search-box{display:flex;align-items:center;gap:8px;background:var(--ink-soft);border:1px solid var(--line);border-radius:999px;padding:6px 6px 6px 24px; /* taste-skill-ignore: Formularfeld */transition:border-color .25s var(--ease),background .25s var(--ease)}
+  .search-box:focus-within{border-color:var(--gold);background:var(--panel)}
+  .search-box svg{flex:none;width:20px;height:20px;color:var(--paper-faint)}
+  .search input{flex:1;min-width:0;height:52px;border:0;background:transparent;color:var(--paper);font:inherit;font-size:var(--t-lead);outline:none}
+  .search input::placeholder{color:var(--paper-faint)}
+  .search input::-webkit-search-cancel-button{display:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:52px;padding:0 26px;border-radius:999px;border:0;background:var(--gold);color:var(--on-gold);font:inherit;font-size:var(--t-body);font-weight:600;white-space:nowrap;transition:background .25s var(--ease),transform .2s var(--ease)}
+  .btn:hover{background:var(--gold-bright)}
+  .btn:active{transform:scale(.96)}
+  .btn .arr{transition:transform .3s var(--ease)}
+  .btn:hover .arr{transform:translateX(4px)}
+  .hint{margin-top:14px;padding-left:24px;font-size:var(--t-small);color:var(--paper-dim)}
+  .hint kbd{font:inherit;font-weight:600;color:var(--paper)}
+  .js-only{display:none}
+  .js .js-only{display:block}
+
+  .results{position:absolute;left:0;right:0;top:calc(100% - 26px);z-index:6;background:var(--panel);border-radius:24px;padding:8px;box-shadow:0 24px 60px -20px var(--shadow);display:none} /* taste-skill-ignore: schwebende Trefferliste */
+  .results.open{display:block}
+  .results li{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:16px;cursor:pointer}
+  .results li[aria-selected="true"]{background:var(--ink-soft)}
+  .results .r-dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+  .results .r-main{flex:1;min-width:0}
+  .results .r-name{display:block;font-weight:500}
+  .results .r-desc{display:block;font-size:var(--t-small);color:var(--paper-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .results .r-go{font-size:var(--t-small);color:var(--gold)}
+  .results .r-empty{color:var(--paper-dim);cursor:default}
+
+  .stage{position:relative;z-index:1;align-self:stretch;display:flex;align-items:center;justify-content:flex-end}
+  .disc{position:absolute;z-index:0;left:-40px;top:52%;width:min(122vh,1200px);aspect-ratio:1;border-radius:50%;background:var(--disc);translate:0 -38%;will-change:transform}
+  .shots{position:relative;z-index:1;display:grid;width:min(100%,440px);margin-top:10vh}
+  .shots > .ui{grid-area:1/1;transition:opacity .9s var(--ease),transform .9s var(--ease)}
+  .js .shots > .ui{opacity:0;transform:translateY(10px);pointer-events:none;visibility:hidden}
+  .js .shots > .ui.on{opacity:1;transform:none;pointer-events:auto;visibility:visible}
+  .shots > .ui:not(:first-child){display:none}
+  .js .shots > .ui:not(:first-child){display:block}
+
+  /* ---------- Werkzeug-Ausschnitte (echte Oberflächen, data-ui) ---------- */
+  .ui{background:var(--ink-soft);color:var(--paper);border-radius:var(--r);padding:22px 24px 24px;align-self:center}
+  .ui-top{display:flex;justify-content:space-between;align-items:baseline;gap:16px;margin-bottom:18px;font-size:var(--t-small)}
+  .ui-top span{color:var(--paper-dim)}
+  .ui-top a{color:var(--gold);font-weight:500}
+  .ui-top a:hover{color:var(--gold-bright)}
+  .ui code,.ui pre{font-family:var(--mono);font-size:.9rem} /* taste-skill-ignore: echter Code */
+  .ui .big{display:block;font-size:1.35rem;letter-spacing:-.01em;margin-bottom:16px;overflow-wrap:anywhere}
+  .ui code.big{font-size:1.35rem}
+  .ui dl{display:grid;grid-template-columns:auto 1fr;gap:9px 20px;font-size:var(--t-small)}
+  .ui dt{color:var(--paper-dim)}
+  .ui dd{text-align:right;font-variant-numeric:tabular-nums}
+  .ui dd code{font-size:.9rem}
+  .ui .hash{display:grid;grid-template-columns:repeat(2,auto);justify-content:start;gap:4px 18px;color:var(--paper);margin-top:4px}
+  .ui .hash code{font-size:1rem}
+  .ui .note{margin-top:16px;font-size:var(--t-small);color:var(--paper-dim)}
+  .ui .ids{display:grid;gap:10px}
+  .ui .ids code{display:block;background:var(--panel);padding:10px 12px;border-radius:10px;overflow-wrap:anywhere}
+  .ui .mini{margin-top:16px;height:40px;padding:0 18px;border-radius:999px;border:0;background:var(--panel);color:var(--paper);font:inherit;font-size:var(--t-small);font-weight:500;transition:background .2s var(--ease),transform .2s var(--ease)}
+  .ui .mini:hover{background:var(--line)}
+  .ui .mini:active{transform:scale(.95)}
+  .ui .pomo{display:flex;align-items:center;gap:24px}
+  .ui .pomo svg{flex:none;width:132px;height:132px;transform:rotate(-90deg)}
+  .ui .pomo .track{stroke:var(--panel)}
+  .ui .pomo .prog{stroke:var(--gold);transition:stroke-dashoffset 1s linear}
+  .ui .pomo .time{font-family:var(--mono);font-size:2.4rem;font-variant-numeric:tabular-nums;line-height:1;display:block}
+  .ui .pomo .phase{display:block;margin-top:10px;font-size:var(--t-small);color:var(--paper-dim)}
+  .ui pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:hidden;color:var(--paper);background:var(--panel);padding:12px 14px;border-radius:10px}
+  .ui .ok{color:var(--gold)}
+
+  /* ---------- Alle Werkzeuge ---------- */
+  .tools-sec{padding-top:clamp(88px,9vw,140px);padding-bottom:clamp(96px,9vw,140px)}
+  .sec-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6vw;align-items:end;margin-bottom:clamp(48px,6vw,88px)}
+  .sec-head h2{font-size:var(--t-h2)}
+  .sec-head p{font-size:var(--t-lead);line-height:1.45;max-width:36ch}
+  .jump{display:none}
+  .cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 6vw;align-items:start}
+  .group{scroll-margin-top:140px}
+  .group + .group{margin-top:64px}
+  .group h3{font-size:var(--t-body);font-weight:500;color:var(--paper-dim);margin-bottom:10px}
+  .tool{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:18px;align-items:baseline;padding:16px 0;border-radius:6px;transition:transform .35s var(--ease)}
+  .tool .dot{width:12px;height:12px;border-radius:50%;background:var(--panel);transform:translateY(-2px);transition:background .3s var(--ease),transform .35s var(--ease)}
+  .tool .name{display:block;font-size:var(--t-lead);font-weight:500;letter-spacing:-.01em;line-height:1.25}
+  .tool .desc{display:block;margin-top:4px;color:var(--paper-dim);max-width:46ch}
+  .tool .val{font-size:var(--t-small);color:var(--paper-faint);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;transition:color .3s var(--ease)}
+  .tool:hover,.tool:focus-visible{transform:translateX(6px)}
+  .tool:hover .dot,.tool:focus-visible .dot{background:var(--gold);transform:translateY(-2px) scale(1.5)}
+  .tool:hover .val,.tool:focus-visible .val{color:var(--gold)}
+  .tool:active .dot{transform:translateY(-2px) scale(1.1)}
+
+  /* ---------- Idee: das helle Feld ---------- */
+  .about{position:relative;overflow:hidden;margin-inline:var(--m);background:var(--field);color:var(--field-ink);padding:clamp(40px,6vw,96px);display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:6vw;min-height:min(820px,100svh);scroll-margin-top:72px}
+  .about h2{font-size:var(--t-h2);max-width:10ch}
+  .about .orb{position:absolute;left:clamp(40px,6vw,96px);bottom:0;width:min(38vw,560px);aspect-ratio:1;border-radius:50%;background:var(--field-ink);translate:0 22%;display:grid;place-items:center}
+  .about .orb svg{width:62%;fill:var(--disc);overflow:visible}
+  .about .copy{display:grid;align-content:start;gap:56px;max-width:440px;padding-top:8px}
+  .about h3{font-size:var(--t-lead);font-weight:500;margin-bottom:12px}
+  .about p{line-height:1.6}
+  .about .btn{justify-self:start;background:var(--field-ink);color:var(--field)}
+  .about .btn:hover{background:var(--field-dim)}
+
+  /* ---------- Schluss ---------- */
+  footer{border-top:0;padding:clamp(96px,10vw,160px) 0 40px}
+  footer p{margin:0;font-family:inherit;font-size:var(--t-body);letter-spacing:0;color:var(--paper-dim)}
+  .blocks{display:flex;gap:4px;align-items:flex-end;height:max(220px,34svh)}
+  .blocks span{flex:1;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;background:var(--disc);color:var(--ink);font-family:'Fraunces',serif;font-size:min(19vw,26svh);line-height:.78;transform-origin:bottom}
+  .js .blocks span{transform:scaleY(.55);transition:transform 1s var(--ease)}
+  .js .blocks.in span{transform:none}
+  .blocks span:nth-child(2){transition-delay:.07s}.blocks span:nth-child(3){transition-delay:.14s}.blocks span:nth-child(4){transition-delay:.21s}.blocks span:nth-child(5){transition-delay:.28s}
+  .foot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.4fr);gap:32px;margin-top:56px}
+  .foot h2{font-size:var(--t-body);font-weight:500;color:var(--paper);margin-bottom:12px}
+  .foot li + li{margin-top:6px}
+  .foot a{color:var(--paper-dim);transition:color .25s var(--ease)}
+  .foot a:hover{color:var(--gold)}
+  .foot .contact p{color:var(--paper-dim)}
+  .foot .contact p + p{margin-top:6px}
+  .foot-end{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:72px;font-size:var(--t-small);color:var(--paper-faint)}
+  .up{height:40px;padding:0 18px;border-radius:999px;border:0;background:var(--ink-soft);color:var(--paper);font:inherit;font-size:var(--t-small);font-weight:500;transition:background .2s var(--ease),transform .2s var(--ease)}
+  .up:hover{background:var(--panel)}
+  .up:active{transform:scale(.95)}
+
+  /* ---------- Einstieg ---------- */
   @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
-  @keyframes drip{0%{transform:translateY(-14px)}100%{transform:translateY(46px)}}
-  @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}.eyebrow,h1.display .l1,h1.display .l2,.lede,.hero-cta,.scroll-hint{opacity:1}}
-  @media(max-width:640px){section.block{padding:90px 0}.grid{grid-template-columns:1fr}.foot-grid{flex-direction:column;align-items:flex-start}.foot-meta{text-align:left}.nav-right{gap:14px}}
+  @keyframes grow{from{opacity:0;scale:.86}to{opacity:1;scale:1}}
+  .hero h1{animation:rise .9s .1s var(--ease) both}
+  .hero .lead{animation:rise .9s .18s var(--ease) both}
+  .search{animation:rise .9s .26s var(--ease) both}
+  .hint{animation:rise .9s .34s var(--ease) both}
+  .disc{animation:grow 1.4s .05s var(--ease) both}
+  .shots{animation:rise 1s .45s var(--ease) both}
+  /* Die Einträge staffeln sich innerhalb ihrer Gruppe. */
+  .group li:nth-child(2) .reveal{transition-delay:.07s}.group li:nth-child(3) .reveal{transition-delay:.14s}
+  .group li:nth-child(4) .reveal{transition-delay:.21s}.group li:nth-child(n+5) .reveal{transition-delay:.28s}
+
+  /* ---------- Tablet & Telefon ---------- */
+  @media(max-width:1000px){
+    .hero{grid-template-columns:1fr;gap:0;min-height:0;padding-top:calc(72px + 48px);padding-bottom:0}
+    .hero h1{max-width:12ch}
+    .stage{justify-content:flex-start;padding:88px 0 72px;min-height:calc(min(112vw,540px) + 72px)}
+    .disc{left:auto;right:-24vw;top:24px;width:min(112vw,540px);translate:0 0}
+    .shots{margin-top:0}
+    .sec-head{grid-template-columns:1fr;gap:20px}
+    .cols{grid-template-columns:1fr}
+    .group + .group,.cols > div + div{margin-top:56px}
+    .jump{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px}
+
+    .jump a{flex:none;height:40px;display:inline-flex;align-items:center;padding:0 16px;border-radius:999px;background:var(--ink-soft);font-size:var(--t-small);font-weight:500;transition:background .2s var(--ease)}
+    .jump a:active{background:var(--panel)}
+    .about{grid-template-columns:minmax(0,1fr);gap:40px;padding-bottom:0}
+    .about .orb{position:relative;left:auto;justify-self:center;width:min(100%,520px);translate:0 0;margin-bottom:-22%}
+
+    .about .copy{max-width:none}
+    .foot{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .foot .contact{grid-column:1/-1}
+  }
+  @media(max-width:560px){
+    .search-box{padding-left:18px}
+    .search .btn{padding:0 18px}
+    .search .btn .lbl{display:none}
+    .hint{padding-left:18px}
+    .tool{gap:14px;padding:14px 0}
+    .tool .val{display:none}
+    .about .copy{gap:40px}
+    .blocks{height:max(160px,22svh)}
+    .foot-end{flex-wrap:wrap}
+  }
+  .kbd-tip{display:none}
+  .js .kbd-tip{display:inline}
+  @media(hover:none){.js .kbd-tip{display:none}}
+
+  @media(prefers-reduced-motion:reduce){
+    .hero h1,.hero .lead,.search,.hint,.disc,.shots{animation:none}
+    .js .blocks span{transform:none}
+    .tool:hover,.tool:focus-visible{transform:none}
+    .js .shots > .ui:not(.on){display:none}
+  }
 </style>
 </head>
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 <header>
-  <div class="wrap bar">
-    <div class="mark"><span class="glyph">&#960;</span>31415<span class="dim">.me</span></div>
+  <div class="bar">
+    <a class="mark" href="/" aria-label="31415.me, Startseite"><span class="glyph">&#960;</span>31415<span class="dim">.me</span></a>
     <div class="nav-right">
-      <nav class="top">
-        <a href="#tools">Werkzeuge</a>
-        <a href="#about">Idee</a>
+      <nav class="top" aria-label="Hauptnavigation">
+        <a href="#werkzeuge">Werkzeuge</a>
+        <a href="#idee">Idee</a>
       </nav>
       <button class="theme-btn" id="themeToggle" aria-label="Helligkeit umschalten" title="Heller / dunkler">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
       </button>
     </div>
   </div>
 </header>
+
 <main id="content">
-  <section class="hero">
-    <div class="wrap">
-      <div class="eyebrow">Ein digitales Taschenmesser</div>
-      <h1 class="display">
-        <span class="l1">Werkzeuge, die</span><br>
-        <span class="l2"><em>vielseitig</em> unterst&uuml;tzen.</span>
-      </h1>
-      <p class="lede">
-        Eine wachsende Sammlung kleiner Apps f&uuml;r Alltag und Arbeit. Jede tut
-        genau eine Sache &mdash; und sie gut. Kein Konto, keine Ablenkung,
-        sofort einsatzbereit im Browser.
-      </p>
-      <div class="hero-cta">
-        <a href="#tools" class="btn">Werkzeuge ansehen</a>
-        <a href="#about" class="btn ghost">Warum &#960;?</a>
-      </div>
+  <section class="hero frame" aria-labelledby="title">
+    <div class="hero-text">
+      <h1 id="title" class="serif">Werkzeuge, die sofort laufen.</h1>
+      <p class="lead">17 kleine Apps für Netzwerk, Text, Planung und Spiel. Kein Konto, kein Server: alles rechnet in deinem Browser.</p>
+
+      <form class="search" id="suche" role="search" action="#werkzeuge" autocomplete="off">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+          <input id="q" type="search" name="q" placeholder="Suchen oder einfügen …"
+                 aria-label="Werkzeug suchen oder Daten einfügen" aria-describedby="q-hint"
+                 role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="results" spellcheck="false">
+          <button class="btn" type="submit"><span class="lbl">Öffnen</span> <span class="arr" aria-hidden="true">&rarr;</span></button>
+        </div>
+        <ul class="results" id="results" role="listbox" aria-label="Treffer"></ul>
+        <p class="hint" id="q-hint">Probier <strong>10.0.0.0/8</strong>, ein Stück JSON oder „Würfel“.<span class="kbd-tip"> Taste <kbd>/</kbd> springt hierher.</span></p>
+        <p class="visually-hidden" id="q-status" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)"></p>
+      </form>
     </div>
-    <div class="scroll-hint"><span>3.1415&hellip;</span><div class="rail"></div></div>
-  </section>
-  <div class="pi-strip" aria-hidden="true"><div class="track" id="pi-track"></div></div>
-  <section class="block" id="tools">
-    <div class="wrap">
-      <div class="sec-head reveal"><span class="sec-idx">01</span><h2 class="sec-title">Die Werkzeuge</h2></div>
-      <p class="sec-sub reveal">Nach Bereich sortiert. Alles l&auml;uft komplett im Browser &mdash; w&auml;hle, was du gerade brauchst.</p>
 
-      <div class="cat">
-        <div class="cat-head reveal"><span class="cat-name">Entscheiden &amp; Zufall</span><span class="cat-rule"></span><span class="cat-count">01</span></div>
-        <div class="grid">
-          <a href="/decide/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.2"/></svg>
-            <h3>Decision Maker</h3>
-            <p>Optionen eingeben, gewichten, entscheiden lassen. Schluss mit dem Hin und Her.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-        </div>
+    <div class="stage">
+      <div class="disc" aria-hidden="true"></div>
+      <div class="shots" id="shots">
+        <figure class="ui on" data-ui data-shot="cidr">
+          <div class="ui-top"><span>Subnetting</span><a href="/subnetting/">Öffnen &rarr;</a></div>
+          <code class="big" data-f="cidr">192.168.1.0/24</code>
+          <dl>
+            <dt>Netzadresse</dt><dd><code data-f="net">192.168.1.0</code></dd>
+            <dt>Broadcast</dt><dd><code data-f="bc">192.168.1.255</code></dd>
+            <dt>Erster Host</dt><dd><code data-f="first">192.168.1.1</code></dd>
+            <dt>Letzter Host</dt><dd><code data-f="last">192.168.1.254</code></dd>
+            <dt>Nutzbare Hosts</dt><dd><code data-f="hosts">254</code></dd>
+            <dt>Maske</dt><dd><code data-f="mask">255.255.255.0</code></dd>
+          </dl>
+        </figure>
+        <figure class="ui" data-ui data-shot="uuid">
+          <div class="ui-top"><span>UUID Generator · Version 7</span><a href="/uuid/">Öffnen &rarr;</a></div>
+          <div class="ids" data-f="ids">
+            <code>01a191ff-18ea-7218-9855-a0444f9691f4</code>
+            <code>01a191ff-18ea-7cab-a384-43c9a016173e</code>
+            <code>01a191ff-18ea-7703-86a8-c3dd380add60</code>
+          </div>
+          <button class="mini js-only" type="button" data-act="uuid">Neu erzeugen</button>
+        </figure>
+        <figure class="ui" data-ui data-shot="pomo">
+          <div class="ui-top"><span>Pomodoro Timer</span><a href="/pomodoro/">Öffnen &rarr;</a></div>
+          <div class="pomo">
+            <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="8"/><circle class="prog" cx="60" cy="60" r="52" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="0" data-f="ring"/></svg>
+            <div><span class="time" data-f="time">25:00</span><span class="phase">Fokus · Runde 1 von 4</span></div>
+          </div>
+        </figure>
+        <figure class="ui" data-ui data-shot="hash">
+          <div class="ui-top"><span>Hash-Rechner · SHA-256</span><a href="/hash/">Öffnen &rarr;</a></div>
+          <p class="big" data-f="src">„31415“</p>
+          <div class="hash" data-f="hash"><code>9183c29e</code><code>a013b982</code><code>ff923f04</code><code>bcf81bb7</code><code>9eb481d4</code><code>2659ea19</code><code>fe42bbfe</code><code>2d0264d0</code></div>
+          <p class="note" data-f="note">Berechnet in diesem Tab. Nichts wird hochgeladen.</p>
+        </figure>
+        <figure class="ui" data-ui data-shot="json">
+          <div class="ui-top"><span>JSON Tree</span><a href="/json-tree/">Öffnen &rarr;</a></div>
+          <p class="big" data-f="jstate"><span class="ok">Gültiges JSON</span></p>
+          <pre data-f="jpre">{
+  "name": "31415.me",
+  "werkzeuge": 17,
+  "server": null
+}</pre>
+          <p class="note" data-f="jnote">3 Schlüssel · Tiefe 1</p>
+        </figure>
       </div>
-
-      <div class="cat">
-        <div class="cat-head reveal"><span class="cat-name">Text &amp; Lesen</span><span class="cat-rule"></span><span class="cat-count">02</span></div>
-        <div class="grid">
-          <a href="/read/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 12h16M4 19h10"/><path d="M18 17l3 2-3 2"/></svg>
-            <h3>Fast Reader</h3>
-            <p>Wort f&uuml;r Wort im eigenen Takt. Lies Texte sp&uuml;rbar schneller, ohne zu hetzen.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/markdown/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h10M4 12h16M4 18h7"/><path d="M16 6l3 0M19 4v4"/></svg>
-            <h3>Markdown Formatter</h3>
-            <p>Markdown s&auml;ubern, formatieren und als Vorschau pr&uuml;fen und herunterladen.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-        </div>
-      </div>
-
-      <div class="cat">
-        <div class="cat-head reveal"><span class="cat-name">Netzwerk &amp; IT</span><span class="cat-rule"></span><span class="cat-count">03</span></div>
-        <div class="grid">
-          <a href="/subnetting/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="8.5" y="14" width="7" height="7" rx="1.5"/><path d="M6.5 10v2.5M17.5 10v2.5M6.5 12.5h11M12 12.5V14"/></svg>
-            <h3>Subnetting</h3>
-            <p>CIDR, Netzmaske, Host-Bereiche und Broadcast auf einen Blick berechnen.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/uuid/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l-1 7H8z"/><path d="M8 11l-1 9M16 11l1 9M9 20h6"/></svg>
-            <h3>UUID Generator</h3>
-            <p>v4, v1 & v7-UUIDs einzeln oder im Batch erzeugen und direkt kopieren.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/hash/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4L7 20M17 4l-2 16M4 9h16M3 15h16"/></svg>
-            <h3>Hash-Rechner</h3>
-            <p>MD5, SHA-1 und SHA-256 f&uuml;r Text und Dateien lokal berechnen.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/json-builder/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" opacity="0.3"/>
-              <path d="M8 8c-1.5 0-2.5 1-2.5 2.5v1.5c0 1-1 1.5-2 1.5 1 0 2 .5 2 1.5v1.5c0 1.5 1 2.5 2.5 2.5M16 8c1.5 0 2.5 1 2.5 2.5v1.5c0 1 1 1.5 2 1.5-1 0-2 .5-2 1.5v1.5c0 1.5-1 2.5-2.5 2.5"/>
-            </svg>
-            <h3>JSON Generator</h3>
-            <p>Strukturierte Daten schnell modellieren, validieren und als sauberen Code exportieren.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/json-tree/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="5" cy="6" r="2"/><circle cx="5" cy="12" r="2"/><circle cx="5" cy="18" r="2"/>
-              <circle cx="17" cy="6" r="2"/><circle cx="17" cy="18" r="2"/>
-              <path d="M7 6h4M7 18h4M11 6v12M11 9h4M11 15h4"/>
-            </svg>
-            <h3>JSON Tree</h3>
-            <p>JSON einlesen, validieren und in einer aufklappbaren Baumansicht erkunden.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/powershell-mail/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <path d="M14 2v6h6"/>
-              <rect x="7" y="13" width="10" height="6" rx="1"/>
-              <path d="M7 14l5 3 5-3"/>
-            </svg>
-            <h3>Send-MailMessage</h3>
-            <p>PowerShell-Befehl f&uuml;r den E-Mail-Versand (SMTP) generieren.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/base/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="9"/>
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M12 3v2M12 19v2M3 12h2M19 12h2"/>
-              <path d="M12 9v3l1.5 1.5"/>
-            </svg>
-            <h3>Base &amp; TOTP</h3>
-            <p>Text und Dateien in Base32/64 konvertieren und zeitbasierte Tokens (TOTP) validieren.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-        </div>
-      </div>
-
-      <div class="cat">
-        <div class="cat-head reveal"><span class="cat-name">Planen &amp; Organisieren</span><span class="cat-rule"></span><span class="cat-count">04</span></div>
-        <div class="grid">
-
-          <a href="/pomodoro/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="13" r="8"/>
-              <path d="M12 9v4l2.5 2.5"/>
-              <path d="M10 2h4"/>
-              <path d="M12 2v3"/>
-            </svg>
-            <h3>Pomodoro Timer</h3>
-            <p>Fokussiert arbeiten, rechtzeitig pausieren. Der klassische 25-Minuten-Takt für deine Produktivit&auml;t.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/karteikarten/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M6 3h9a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" opacity="0.3"/>
-              <path d="M9 3v18M13 9h4M13 13h4"/>
-            </svg>
-            <h3>Karteikarten</h3>
-            <p>Lernkarten erstellen, per Spaced Repetition wiederholen und Wissen nachhaltig verankern.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/netzplan/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 6h4v4H5zM10.5 14h4v4h-4zM15 5h4v4h-4z" opacity="0.3"/>
-              <path d="M9 8h4.5M12 10v3M14.5 16h1.5a2 2 0 0 0 2-2v-3.5"/>
-            </svg>
-            <h3>Netzplan</h3>
-            <p>Vorgänge verknüpfen, den kritischen Pfad berechnen und Projekte übersichtlich planen.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-        </div>
-      </div>
-      
-
-      <div class="cat">
-        <div class="cat-head reveal"><span class="cat-name">Spiele &amp; Zeitvertreib</span><span class="cat-rule"></span><span class="cat-count">05</span></div>
-        <div class="grid">
-          <a href="/casino/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 6.5A1.5 1.5 0 0 1 6.5 5h7A1.5 1.5 0 0 1 15 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 5 17.5z"/>
-              <path d="M9 11.5A1.5 1.5 0 0 1 10.5 10h7A1.5 1.5 0 0 1 19 11.5v7a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 9 18.5z"/>
-              <path d="M11 12v3M10 13h2" stroke-width="1"/> <path d="M7 8v2M6 9h2" stroke-width="1"/> </svg>
-            <h3>Casino Royale</h3>
-            <p>Klassische Gl&uuml;cksspiele komplett clientseitig. Teste dein Gl&uuml;ck ohne Risiko.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/kniffel/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="14" width="6" height="6" rx="1.2"/>
-              <circle cx="6" cy="17" r="1" fill="currentColor" stroke="none"/>
-              <rect x="9" y="4" width="6" height="6" rx="1.2"/>
-              <circle cx="10.5" cy="5.5" r="0.8" fill="currentColor" stroke="none"/>
-              <circle cx="13.5" cy="8.5" r="0.8" fill="currentColor" stroke="none"/>
-              <rect x="15" y="14" width="6" height="6" rx="1.2"/>
-              <circle cx="16.5" cy="15.5" r="0.8" fill="currentColor" stroke="none"/>
-              <circle cx="18" cy="17" r="0.8" fill="currentColor" stroke="none"/>
-              <circle cx="19.5" cy="18.5" r="0.8" fill="currentColor" stroke="none"/>
-            </svg>
-            <h3>Kniffel</h3>
-            <p>F&uuml;nf W&uuml;rfel, ein Block. Der zeitlose Klassiker direkt im Browser spielen.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/poker/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2.5" y="8" width="5" height="8" rx="1"/>
-              <path d="M5 12h.01" stroke-width="2"/>
-              <rect x="9.5" y="6" width="5" height="12" rx="1"/>
-              <path d="M12 12h.01" stroke-width="2"/>
-              <rect x="16.5" y="8" width="5" height="8" rx="1"/>
-              <path d="M19 12h.01" stroke-width="2"/>
-            </svg>
-            <h3>Poker</h3>
-            <p>Texas Hold'em gegen deine Freunde. Setzen, bluffen und den Pot abr&auml;umen.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-          <a href="/lenia/" class="card reveal">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="8" opacity="0.3"/>
-              <path d="M12 8c1.5 0 3 1 3 3s-1 2.5-2.5 2.5S10 12.5 10 11s1-2 2-2"/>
-              <circle cx="12" cy="12" r="1"/>
-            </svg>
-            <h3>Lenia</h3>
-            <p>Kontinuierliches zelluläres Automatensystem mit lebendigen, organisch wirkenden Mustern erkunden.</p>
-            <span class="go">&Ouml;ffnen <span class="arr">&rarr;</span></span>
-          </a>
-        </div>
-      </div>
-
     </div>
   </section>
-  <section class="block" id="about">
-    <div class="wrap">
-      <div class="sec-head reveal"><span class="sec-idx">02</span><h2 class="sec-title">Warum &#960;?</h2></div>
-      <p class="about-body reveal">
-        Das ist der Geist dieser Sammlung:
-        kleine, klare Nutzungszwecke, sauber gelöst. Jedes Werkzeug ist absichtlich
-        <strong>winzig, schnell und frei von allem, was es nicht braucht.</strong>
-        Kein Konto, keine Werbung, keine versteckten Server &mdash; nur Code, der im
-        Moment des &Ouml;ffnens lokal seine Arbeit tut.
-      </p>
+
+  <section class="tools-sec frame" id="werkzeuge" aria-labelledby="werkzeuge-h">
+    <div class="sec-head">
+      <h2 id="werkzeuge-h" class="serif reveal">Alle 17 Werkzeuge</h2>
+      <p class="reveal">Nach Bereich sortiert. Jedes öffnet sofort, ohne Anmeldung, und arbeitet nur auf deinem Gerät.</p>
     </div>
+
+    <nav class="jump" aria-label="Bereiche">
+      <a href="#g-netz">Netzwerk &amp; IT</a>
+      <a href="#g-text">Text</a>
+      <a href="#g-plan">Planen</a>
+      <a href="#g-spiel">Spiele</a>
+      <a href="#g-zufall">Entscheiden</a>
+    </nav>
+
+    <div class="cols">
+      <div>
+        <div class="group" id="g-netz">
+          <h3>Netzwerk &amp; IT</h3>
+          <ul>
+            <li><a class="tool reveal" href="/subnetting/" data-k="ip cidr netz netzwerk maske subnetz ipv4 ipv6 vlsm broadcast host"><span class="dot"></span><span><span class="name">Subnetting</span><span class="desc">Netzadresse, Maske, Hostbereich und Broadcast; dazu VLSM.</span></span><span class="val">IPv4 · IPv6</span></a></li>
+            <li><a class="tool reveal" href="/uuid/" data-k="uuid guid id zufall generator v1 v4 v7"><span class="dot"></span><span><span class="name">UUID Generator</span><span class="desc">Einzeln oder hundert auf einmal erzeugen und kopieren.</span></span><span class="val">v1 · v4 · v7</span></a></li>
+            <li><a class="tool reveal" href="/hash/" data-k="hash prüfsumme checksumme md5 sha sha1 sha256 sha512 hmac datei"><span class="dot"></span><span><span class="name">Hash-Rechner</span><span class="desc">Prüfsummen für Text und Dateien, optional als HMAC.</span></span><span class="val">MD5 bis SHA-512</span></a></li>
+            <li><a class="tool reveal" href="/json-builder/" data-k="json generator builder tabelle daten export"><span class="dot"></span><span><span class="name">JSON Generator</span><span class="desc">Felder anlegen, Werte wie in einer Tabelle eintragen, exportieren.</span></span><span class="val">Tabelle → JSON</span></a></li>
+            <li><a class="tool reveal" href="/json-tree/" data-k="json tree baum viewer validieren formatieren"><span class="dot"></span><span><span class="name">JSON Tree</span><span class="desc">JSON einfügen und als aufklappbaren Baum lesen.</span></span><span class="val">Baumansicht</span></a></li>
+            <li><a class="tool reveal" href="/powershell-mail/" data-k="powershell mail email smtp send-mailmessage befehl skript"><span class="dot"></span><span><span class="name">Send-MailMessage</span><span class="desc">Den PowerShell-Befehl für SMTP-Versand live zusammenstellen.</span></span><span class="val">PowerShell</span></a></li>
+            <li><a class="tool reveal" href="/base/" data-k="base64 base32 base64url totp 2fa authenticator otp kodieren dekodieren"><span class="dot"></span><span><span class="name">Base &amp; TOTP</span><span class="desc">Base32 und Base64 in beide Richtungen, dazu ein TOTP-Prüfer.</span></span><span class="val">Base32 · 64</span></a></li>
+          </ul>
+        </div>
+        <div class="group" id="g-zufall">
+          <h3>Entscheiden &amp; Zufall</h3>
+          <ul>
+            <li><a class="tool reveal" href="/decide/" data-k="entscheiden entscheidung zufall münze glücksrad würfel turnier decision"><span class="dot"></span><span><span class="name">Decision Maker</span><span class="desc">Von der Münze bis zum Turnier: wenn Abwägen nicht mehr hilft.</span></span><span class="val">8 Entscheider</span></a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div>
+        <div class="group" id="g-text">
+          <h3>Text &amp; Lesen</h3>
+          <ul>
+            <li><a class="tool reveal" href="/read/" data-k="lesen schnell lesen speed reading bionic fokus text"><span class="dot"></span><span><span class="name">Fast Reader</span><span class="desc">Wort für Wort im eigenen Takt, mit Fokus-Modus und Bionic Reading.</span></span><span class="val">Fokus-Modus</span></a></li>
+            <li><a class="tool reveal" href="/markdown/" data-k="markdown md editor vorschau pdf text formatieren"><span class="dot"></span><span><span class="name">Markdown Formatter</span><span class="desc">Schreiben, sofort das Ergebnis sehen und als PDF exportieren.</span></span><span class="val">PDF-Export</span></a></li>
+          </ul>
+        </div>
+        <div class="group" id="g-plan">
+          <h3>Planen &amp; Organisieren</h3>
+          <ul>
+            <li><a class="tool reveal" href="/pomodoro/" data-k="pomodoro timer fokus pause produktivität uhr"><span class="dot"></span><span><span class="name">Pomodoro Timer</span><span class="desc">Fokus, kurze Pause, lange Pause, frei einstellbar.</span></span><span class="val">25 / 5 min</span></a></li>
+            <li><a class="tool reveal" href="/karteikarten/" data-k="karteikarten lernen flashcards spaced repetition sm2 vokabeln"><span class="dot"></span><span><span class="name">Karteikarten</span><span class="desc">Jede Antwort bestimmt, wann die Karte wiederkommt.</span></span><span class="val">SM-2</span></a></li>
+            <li><a class="tool reveal" href="/netzplan/" data-k="netzplan projekt kritischer pfad puffer planung gantt"><span class="dot"></span><span><span class="name">Netzplan</span><span class="desc">Vorgänge verknüpfen; Puffer und kritischer Pfad rechnen sich selbst.</span></span><span class="val">Kritischer Pfad</span></a></li>
+          </ul>
+        </div>
+        <div class="group" id="g-spiel">
+          <h3>Spiele &amp; Zeitvertreib</h3>
+          <ul>
+            <li><a class="tool reveal" href="/casino/" data-k="casino roulette blackjack slots spiel glück"><span class="dot"></span><span><span class="name">Casino</span><span class="desc">Roulette, Blackjack und Slots, ohne echten Einsatz.</span></span><span class="val">Spielgeld</span></a></li>
+            <li><a class="tool reveal" href="/kniffel/" data-k="kniffel würfel yahtzee spiel"><span class="dot"></span><span><span class="name">Kniffel</span><span class="desc">Fünf Würfel, drei Würfe, eine Tafel. Allein oder reihum.</span></span><span class="val">5 Würfel</span></a></li>
+            <li><a class="tool reveal" href="/poker/" data-k="poker texas holdem karten spiel freunde tischrunde"><span class="dot"></span><span><span class="name">Poker</span><span class="desc">Texas Hold’em am Tisch: alle Geräte rechnen dieselben Karten.</span></span><span class="val">2–6 Spieler</span></a></li>
+            <li><a class="tool reveal" href="/lenia/" data-k="lenia zellulärer automat simulation leben muster game of life"><span class="dot"></span><span><span class="name">Lenia</span><span class="desc">Aus einer Wachstumsregel entstehen Muster, die gleiten und sich teilen.</span></span><span class="val">Simulation</span></a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="about" id="idee" aria-labelledby="idee-h">
+    <h2 id="idee-h" class="serif reveal">Kein Konto. Kein Server.</h2>
+    <div class="copy">
+      <div class="reveal">
+        <h3>Alles bleibt bei dir</h3>
+        <p>Jedes Werkzeug ist eine einzelne Seite, die beim Öffnen auf deinem Gerät arbeitet. Was du eintippst, verlässt den Browser nicht. Keine Werbung, keine Analytik, keine Anmeldung.</p>
+      </div>
+      <div class="reveal">
+        <h3>Warum π?</h3>
+        <p>31415 sind die ersten fünf Ziffern von π, einer Zahl, die nie endet. So ist die Sammlung gedacht: klein angefangen, ohne Schlusspunkt. Jedes Werkzeug tut eine Sache, und die gut.</p>
+      </div>
+      <a class="btn reveal" href="#suche" data-act="focus">Werkzeug suchen <span class="arr" aria-hidden="true">&rarr;</span></a>
+    </div>
+    <div class="orb" aria-hidden="true"><svg viewBox="0 0 100 100"><text x="50" y="66" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-size="64">&#960;</text></svg></div>
   </section>
 </main>
+
 <footer>
-  <div class="wrap foot-grid">
-    <div class="foot-mark">31415<span>.me</span></div>
-    <div class="foot-meta">
-      Gebaut mit Sorgfalt &middot; Gehostet auf Cloudflare Pages<br>
-      <a href="#tools">Werkzeuge</a> &middot; <a href="#about">Idee</a><br>
-      &copy; <span data-year></span> &mdash; &#960; endet nie.
+  <div class="frame">
+    <div class="blocks" id="blocks" aria-label="31415">
+      <span style="height:80%">3</span><span style="height:60%">1</span><span style="height:90%">4</span><span style="height:60%">1</span><span style="height:100%">5</span>
+    </div>
+    <div class="foot">
+      <div>
+        <h2>Netzwerk &amp; IT</h2>
+        <ul>
+          <li><a href="/subnetting/">Subnetting</a></li><li><a href="/uuid/">UUID Generator</a></li><li><a href="/hash/">Hash-Rechner</a></li>
+          <li><a href="/json-builder/">JSON Generator</a></li><li><a href="/json-tree/">JSON Tree</a></li><li><a href="/powershell-mail/">Send-MailMessage</a></li><li><a href="/base/">Base &amp; TOTP</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Text &amp; Planen</h2>
+        <ul>
+          <li><a href="/read/">Fast Reader</a></li><li><a href="/markdown/">Markdown Formatter</a></li><li><a href="/pomodoro/">Pomodoro Timer</a></li><li><a href="/karteikarten/">Karteikarten</a></li><li><a href="/netzplan/">Netzplan</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Spiel &amp; Zufall</h2>
+        <ul>
+          <li><a href="/casino/">Casino</a></li><li><a href="/kniffel/">Kniffel</a></li><li><a href="/poker/">Poker</a></li><li><a href="/lenia/">Lenia</a></li><li><a href="/decide/">Decision Maker</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Diese Seite</h2>
+        <ul>
+          <li><a href="#suche" data-act="focus">Suche</a></li><li><a href="#werkzeuge">Alle Werkzeuge</a></li><li><a href="#idee">Idee</a></li>
+        </ul>
+      </div>
+      <div class="contact">
+        <h2>31415.me</h2>
+        <p>Läuft vollständig in deinem Browser.</p>
+        <p>Gehostet auf Cloudflare Pages.</p>
+      </div>
+    </div>
+    <div class="foot-end">
+      <span>&copy; <span data-year></span> · π endet nie.</span>
+      <button class="up" type="button" data-act="top">Nach oben &uarr;</button>
     </div>
   </div>
 </footer>
+
 <script>
-/* Nur Startseiten-Eigenes. Theme, Ziffernregen, Einblenden, Karten-Spotlight
-   und die Jahreszahl kommen aus /assets/chrome.js. */
+/* Nur Startseiten-Eigenes. Theme, Einblenden und die Jahreszahl kommen aus
+   /assets/chrome.js. Hier: die Suche, die erkennt, was eingefügt wird, und
+   die Werkzeug-Ausschnitte auf der Scheibe. */
 (function(){
   'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var $ = function(s, r){ return (r || document).querySelector(s); };
+  var $$ = function(s, r){ return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
-  /* Laufband mit den Nachkommastellen — jede 17. Ziffer in Gold. */
-  var track = document.getElementById('pi-track');
-  if(track){
-    var digits = "3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964";
-    var segment = '<span>' + digits.replace(/(\d)/g, function(d, _, i){
-      return (i % 17 === 0) ? '<b>' + d + '</b>' : d;
-    }) + '&nbsp;&nbsp;&#960;&nbsp;&nbsp;</span>';
-    track.innerHTML = segment + segment;
+  /* ---------- Ausschnitte: Wechsel und Inhalte ---------- */
+  var shots = {}; $$('#shots > .ui').forEach(function(el){ shots[el.dataset.shot] = el; });
+  var cycle = ['cidr', 'uuid', 'pomo', 'hash'];
+  var current = 'cidr', ci = 0, pinned = false, paused = false;
+  function show(name){
+    if(!shots[name] || name === current) return;
+    shots[current].classList.remove('on');
+    shots[name].classList.add('on');
+    current = name;
   }
+  setInterval(function(){
+    if(pinned || paused || reduce || document.hidden) return;
+    ci = (ci + 1) % cycle.length;
+    show(cycle[ci]);
+  }, 5600);
+  var stage = $('#shots');
+  stage.addEventListener('pointerenter', function(){ paused = true; });
+  stage.addEventListener('pointerleave', function(){ paused = false; });
+  stage.addEventListener('focusin', function(){ paused = true; });
+  stage.addEventListener('focusout', function(){ paused = false; });
 
-  /* Gestaffeltes Einblenden; das Beobachten übernimmt chrome.js. */
-  document.querySelectorAll('.reveal').forEach(function(el, i){
-    el.style.transitionDelay = (i % 4 * 0.06) + 's';
+  function f(shot, key){ return shots[shot].querySelector('[data-f="' + key + '"]'); }
+
+  /* UUID v7: 48 Bit Millisekunden, dann Zufall. */
+  function uuid7(){
+    var b = new Uint8Array(16); crypto.getRandomValues(b);
+    var t = Date.now();
+    for(var i = 5; i >= 0; i--){ b[i] = t % 256; t = Math.floor(t / 256); }
+    b[6] = (b[6] & 0x0f) | 0x70; b[8] = (b[8] & 0x3f) | 0x80;
+    var h = Array.prototype.map.call(b, function(x){ return ('0' + x.toString(16)).slice(-2); }).join('');
+    return h.slice(0,8) + '-' + h.slice(8,12) + '-' + h.slice(12,16) + '-' + h.slice(16,20) + '-' + h.slice(20);
+  }
+  function fillUuids(){
+    if(!window.crypto || !crypto.getRandomValues) return;
+    f('uuid', 'ids').innerHTML = [uuid7(), uuid7(), uuid7()].map(function(u){ return '<code>' + u + '</code>'; }).join('');
+  }
+  fillUuids();
+  $('[data-act="uuid"]').addEventListener('click', function(){
+    fillUuids();
+    if(navigator.clipboard){ navigator.clipboard.writeText(f('uuid','ids').firstChild.textContent).then(function(){ showToast('Erste UUID kopiert'); }, function(){}); }
   });
 
-  /* Kopfleiste wird beim Scrollen dichter. Der Zustand steckt in einer Klasse,
-     damit die Farben in der CSS-Datei bleiben und pro Ereignis nichts gerechnet
-     werden muss. */
-  var header = document.querySelector('header');
-  var ticking = false;
-  function sync(){
-    header.classList.toggle('dense', window.scrollY > 40);
-    ticking = false;
+  /* Pomodoro: läuft ab dem Öffnen der Seite echt herunter. */
+  var t0 = Date.now(), FOCUS = 25 * 60, CIRC = 326.73;
+  function tick(){
+    var left = Math.max(0, FOCUS - Math.floor((Date.now() - t0) / 1000));
+    f('pomo', 'time').textContent = String(Math.floor(left / 60)).padStart(2, '0') + ':' + String(left % 60).padStart(2, '0');
+    f('pomo', 'ring').setAttribute('stroke-dashoffset', (CIRC * (1 - left / FOCUS)).toFixed(2));
   }
-  window.addEventListener('scroll', function(){
-    if(ticking) return;
-    ticking = true;
-    requestAnimationFrame(sync);
-  }, {passive:true});
-  sync();
+  setInterval(function(){ if(current === 'pomo' && !document.hidden) tick(); }, 1000);
+
+  /* SHA-256 über die Web Crypto API. */
+  function sha256(text){
+    if(!window.crypto || !crypto.subtle) return Promise.reject();
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function(buf){
+      return Array.prototype.map.call(new Uint8Array(buf), function(x){ return ('0' + x.toString(16)).slice(-2); }).join('');
+    });
+  }
+  function fillHash(text){
+    return sha256(text).then(function(hex){
+      f('hash', 'src').textContent = '„' + (text.length > 28 ? text.slice(0, 27) + '…' : text) + '“';
+      f('hash', 'hash').innerHTML = hex.match(/.{8}/g).map(function(p){ return '<code>' + p + '</code>'; }).join('');
+      return hex;
+    });
+  }
+
+  /* IPv4 mit Präfix. */
+  function ipToInt(ip){ return ip.split('.').reduce(function(a, o){ return (a * 256) + (+o); }, 0) >>> 0; }
+  function intToIp(n){ return [n >>> 24, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join('.'); }
+  function cidr(text){
+    var m = text.match(/^(\d{1,3}(?:\.\d{1,3}){3})(?:\/(\d{1,2}))?$/);
+    if(!m) return null;
+    if(m[1].split('.').some(function(o){ return +o > 255; })) return null;
+    var p = m[2] === undefined ? 32 : +m[2];
+    if(p > 32) return null;
+    var ip = ipToInt(m[1]);
+    var mask = p === 0 ? 0 : (0xffffffff << (32 - p)) >>> 0;
+    var net = (ip & mask) >>> 0, bc = (net | (~mask >>> 0)) >>> 0;
+    var hosts = p === 32 ? 1 : p === 31 ? 2 : Math.pow(2, 32 - p) - 2;
+    return {
+      cidr: intToIp(net) + '/' + p, net: intToIp(net), bc: intToIp(bc),
+      first: intToIp(p >= 31 ? net : net + 1), last: intToIp(p >= 31 ? bc : bc - 1),
+      hosts: hosts.toLocaleString('de-DE'), mask: intToIp(mask)
+    };
+  }
+  function fillCidr(r){ Object.keys(r).forEach(function(k){ f('cidr', k).textContent = r[k]; }); }
+
+  function jsonInfo(v){
+    var keys = 0, depth = 0;
+    (function walk(x, d){
+      if(x && typeof x === 'object'){
+        depth = Math.max(depth, d + 1);
+        var ks = Array.isArray(x) ? x : Object.keys(x);
+        if(!Array.isArray(x)) keys += ks.length;
+        (Array.isArray(x) ? x : ks.map(function(k){ return x[k]; })).forEach(function(c){ walk(c, d + 1); });
+      }
+    })(v, 0);
+    return keys + (keys === 1 ? ' Schlüssel' : ' Schlüssel') + ' · Tiefe ' + depth;
+  }
+
+  /* ---------- Suche ---------- */
+  function norm(s){ return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ß/g, 'ss'); }
+  var tools = $$('.tool').map(function(a){
+    var name = $('.name', a).textContent, desc = $('.desc', a).textContent;
+    return { href: a.getAttribute('href'), name: name, desc: desc, n: norm(name), hay: norm(name + ' ' + desc + ' ' + $('.val', a).textContent + ' ' + (a.dataset.k || '')) };
+  });
+  var SHOT_FOR = { '/subnetting/': 'cidr', '/uuid/': 'uuid', '/pomodoro/': 'pomo', '/hash/': 'hash', '/json-tree/': 'json', '/json-builder/': 'json' };
+
+  var input = $('#q'), list = $('#results'), status = $('#q-status'), form = $('#suche');
+  var items = [], active = -1, seq = 0;
+
+  function search(q){
+    var words = norm(q).split(/\s+/).filter(Boolean);
+    if(!words.length) return [];
+    return tools.map(function(t){
+      if(!words.every(function(w){ return t.hay.indexOf(w) !== -1; })) return null;
+      var s = t.n.indexOf(words[0]) === 0 ? 3 : t.n.indexOf(words[0]) !== -1 ? 2 : 1;
+      return { t: t, s: s };
+    }).filter(Boolean).sort(function(a, b){ return b.s - a.s; }).slice(0, 5).map(function(x){
+      return { href: x.t.href, name: x.t.name, desc: x.t.desc };
+    });
+  }
+
+  function render(){
+    list.innerHTML = '';
+    items.forEach(function(it, i){
+      var li = document.createElement('li');
+      li.id = 'opt-' + i; li.setAttribute('role', 'option');
+      li.setAttribute('aria-selected', i === active ? 'true' : 'false');
+      li.innerHTML = '<span class="r-dot" aria-hidden="true"></span><span class="r-main"><span class="r-name"></span><span class="r-desc"></span></span><span class="r-go" aria-hidden="true">&rarr;</span>';
+      li.querySelector('.r-name').textContent = it.name;
+      li.querySelector('.r-desc').textContent = it.desc;
+      li.addEventListener('mousedown', function(e){ e.preventDefault(); go(it); });
+      li.addEventListener('mousemove', function(){ if(active !== i){ active = i; mark(); } });
+      list.appendChild(li);
+    });
+    if(!items.length && input.value.trim()){
+      var li = document.createElement('li');
+      li.className = 'r-empty'; li.setAttribute('role', 'option'); li.setAttribute('aria-disabled', 'true');
+      li.textContent = 'Kein Werkzeug heißt so. Den SHA-256 des Textes siehst du daneben.';
+      list.appendChild(li);
+    }
+    var open = !!input.value.trim();
+    list.classList.toggle('open', open);
+    input.setAttribute('aria-expanded', open ? 'true' : 'false');
+    mark();
+  }
+  function mark(){
+    $$('li[role="option"]', list).forEach(function(li, i){ li.setAttribute('aria-selected', i === active ? 'true' : 'false'); });
+    if(active >= 0) input.setAttribute('aria-activedescendant', 'opt-' + active);
+    else input.removeAttribute('aria-activedescendant');
+  }
+  function go(it){ if(it && it.href) location.href = it.href; }
+
+  function update(){
+    var q = input.value.trim(), my = ++seq, det = null;
+    pinned = !!q;
+    if(!q){ items = []; active = -1; render(); status.textContent = ''; return; }
+
+    var c = cidr(q);
+    if(c){
+      fillCidr(c); show('cidr');
+      det = { href: '/subnetting/', name: 'Netz ' + c.cidr, desc: c.hosts + ' nutzbare Hosts · Broadcast ' + c.bc };
+    } else if(/^[\[{]/.test(q)){
+      show('json');
+      try{
+        var v = JSON.parse(q);
+        f('json', 'jstate').innerHTML = '<span class="ok">Gültiges JSON</span>';
+        f('json', 'jpre').textContent = JSON.stringify(v, null, 2).split('\n').slice(0, 9).join('\n');
+        f('json', 'jnote').textContent = jsonInfo(v);
+        det = { href: '/json-tree/', name: 'Gültiges JSON', desc: 'Im JSON Tree als Baum öffnen' };
+      }catch(e){
+        f('json', 'jstate').textContent = 'Noch kein gültiges JSON';
+        f('json', 'jpre').textContent = q.slice(0, 300);
+        f('json', 'jnote').textContent = e.message.replace(/^JSON\.parse: /, '');
+        det = { href: '/json-tree/', name: 'JSON prüfen', desc: 'Der JSON Tree zeigt, wo es hakt' };
+      }
+    } else if(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(q)){
+      det = { href: '/uuid/', name: 'UUID Version ' + q.charAt(14), desc: 'Gültiges Format · neue im UUID Generator' };
+      show('uuid');
+    }
+
+    items = (det ? [det] : []).concat(search(q));
+    active = items.length ? 0 : -1;
+    render();
+    status.textContent = items.length ? items.length + (items.length === 1 ? ' Treffer' : ' Treffer') : 'Kein Treffer';
+
+    if(!det){
+      var top = items[0];
+      if(top && SHOT_FOR[top.href]) show(SHOT_FOR[top.href]);
+      else if(!top){
+        fillHash(q).then(function(){ if(my === seq){ show('hash'); f('hash','note').textContent = 'Kein Werkzeug heißt so. Das ist sein SHA-256.'; } }, function(){});
+      }
+    }
+  }
+
+  input.addEventListener('input', update);
+  input.addEventListener('focus', function(){ if(input.value.trim()) render(); });
+  input.addEventListener('blur', function(){ list.classList.remove('open'); input.setAttribute('aria-expanded', 'false'); });
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'ArrowDown' && items.length){ e.preventDefault(); active = (active + 1) % items.length; mark(); }
+    else if(e.key === 'ArrowUp' && items.length){ e.preventDefault(); active = (active - 1 + items.length) % items.length; mark(); }
+    else if(e.key === 'Escape'){ input.value = ''; update(); }
+  });
+  form.addEventListener('submit', function(e){
+    if(!input.value.trim()) return; /* leer: zur Liste springen (action) */
+    e.preventDefault();
+    go(items[active] || items[0]);
+  });
+
+  /* „/“ springt von überall in die Suche. */
+  document.addEventListener('keydown', function(e){
+    if(e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+    var t = e.target.tagName;
+    if(t === 'INPUT' || t === 'TEXTAREA' || e.target.isContentEditable) return;
+    e.preventDefault(); input.focus({ preventScroll: true });
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  });
+  $$('[data-act="focus"]').forEach(function(a){
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+      setTimeout(function(){ input.focus({ preventScroll: true }); }, reduce ? 0 : 450);
+    });
+  });
+  $('[data-act="top"]').addEventListener('click', function(){ window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); });
+
+  /* ---------- Bewegung ---------- */
+  /* Die Scheibe sinkt beim Scrollen langsamer als die Seite. */
+  var disc = $('.disc');
+  if(!reduce && disc){
+    var ticking = false;
+    window.addEventListener('scroll', function(){
+      if(ticking) return; ticking = true;
+      requestAnimationFrame(function(){
+        var y = Math.min(window.scrollY, window.innerHeight);
+        disc.style.transform = 'translate3d(0,' + (y * (innerWidth > 1000 ? 0.18 : 0.05)).toFixed(1) + 'px,0) rotate(' + (y * 0.02).toFixed(2) + 'deg)';
+        ticking = false;
+      });
+    }, { passive: true });
+  }
+  /* Die Ziffernblöcke im Schluss wachsen, sobald sie ins Bild kommen. */
+  var blocks = $('#blocks');
+  if('IntersectionObserver' in window && !reduce){
+    var io = new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ blocks.classList.add('in'); io.disconnect(); } });
+    }, { threshold: .3 });
+    io.observe(blocks);
+  } else { blocks.classList.add('in'); }
 })();
 </script>
 </body>

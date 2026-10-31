@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -35,7 +35,7 @@ main{padding-bottom:100px;min-height:60vh;}
 
 /* CARDS */
 .card{
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   border:1px solid var(--line);
   border-radius:var(--r);
   position:relative;
@@ -44,7 +44,7 @@ main{padding-bottom:100px;min-height:60vh;}
 .card::before{
   content:'';
   position:absolute;inset:0;
-  background:radial-gradient(circle 280px at var(--mx,50%) var(--my,50%), var(--shadow), transparent 70%);
+  background:none;
   opacity:0;
   transition:opacity .4s cubic-bezier(.2,.8,.2,1);
   pointer-events:none;
@@ -128,7 +128,7 @@ main{padding-bottom:100px;min-height:60vh;}
   border:1px solid var(--line);
   display:flex;align-items:center;justify-content:center;
 }
-.mode-option.active .mo-check{border-color:var(--gold);background:var(--gold);}
+.mode-option.active .mo-check{border-color:var(--gold);background:var(--paper);;color:var(--ink)}
 .mode-option.active .mo-check::after{
   content:'';width:7px;height:7px;border-radius:100px;background:var(--ink);
 }
@@ -153,7 +153,7 @@ main{padding-bottom:100px;min-height:60vh;}
 .player-row input[type="text"]:focus{outline:none;border-color:var(--gold);}
 .player-row input[type="text"]:focus-visible{outline:2px solid var(--gold);outline-offset:1px;}
 .player-row .pr-num{
-  font-family:'Space Mono',monospace;color:var(--paper-faint);font-size:13px;width:22px;text-align:right;flex-shrink:0;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;color:var(--paper-faint);font-size:13px;width:22px;text-align:right;flex-shrink:0;
 }
 .btn-remove{
   width:36px;height:36px;border-radius:100px;
@@ -167,17 +167,15 @@ main{padding-bottom:100px;min-height:60vh;}
 
 .add-player{
   display:flex;align-items:center;gap:8px;
-  font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  font-family:inherit;font-size:.8125rem;
   color:var(--gold);background:transparent;border:none;padding:10px 0;margin-bottom:28px;
-  transition:gap .3s cubic-bezier(.2,.8,.2,1), opacity .3s;
-}
+  transition:gap .3s cubic-bezier(.2,.8,.2,1), opacity .3s;font-variant-numeric:tabular-nums}
 .add-player:hover{gap:13px;}
 .add-player:disabled{opacity:.3;cursor:not-allowed;}
 .add-player:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 .setup-hint{
-  font-family:'Space Mono',monospace;font-size:11.5px;color:var(--paper-faint);margin:0 0 26px;letter-spacing:.02em;
-}
+  font-family:inherit;font-size:.8125rem;color:var(--paper-faint);margin:0 0 26px;font-variant-numeric:tabular-nums}
 
 /* ====== GAME SCREEN ====== */
 .game-area{
@@ -195,12 +193,10 @@ main{padding-bottom:100px;min-height:60vh;}
   margin-bottom:24px;flex-wrap:wrap;gap:10px;
 }
 .turn-who{
-  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--paper-faint);
-}
+  font-family:inherit;font-size:.8125rem;color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .turn-who strong{color:var(--gold);font-weight:400;}
 .round-count{
-  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--paper-faint);
-}
+  font-family:inherit;font-size:.8125rem;color:var(--paper-faint);font-variant-numeric:tabular-nums}
 
 .dice-card{
   padding:36px 28px;
@@ -226,7 +222,7 @@ main{padding-bottom:100px;min-height:60vh;}
 .die:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .die.held{
   border-color:var(--gold);
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   box-shadow:0 8px 22px -8px var(--shadow);
 }
 .die.rolling{animation:dieRoll .55s cubic-bezier(.3,.6,.3,1);}
@@ -245,9 +241,8 @@ main{padding-bottom:100px;min-height:60vh;}
 .die.held .pip{fill:var(--gold);}
 .die-held-label{
   position:absolute;bottom:-20px;left:0;right:0;text-align:center;
-  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);
-  opacity:0;transition:opacity .3s;
-}
+  font-family:inherit;font-size:.8125rem;color:var(--gold);
+  opacity:0;transition:opacity .3s;font-variant-numeric:tabular-nums}
 .die.held .die-held-label{opacity:1;}
 
 .roll-controls{
@@ -259,8 +254,7 @@ main{padding-bottom:100px;min-height:60vh;}
   font-size:16px;
 }
 .rolls-left{
-  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper-faint);
-}
+  font-family:inherit;font-size:.8125rem;color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .rolls-left strong{color:var(--gold);}
 
 .dice-instructions{
@@ -270,9 +264,8 @@ main{padding-bottom:100px;min-height:60vh;}
 /* SCOREBOARD */
 .score-card{padding:22px;}
 .score-section-title{
-  font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--paper-faint);
-  padding:6px 4px;margin-top:14px;
-}
+  font-family:inherit;font-size:.8125rem;color:var(--paper-faint);
+  padding:6px 4px;margin-top:14px;font-variant-numeric:tabular-nums}
 .score-section-title:first-child{margin-top:0;}
 .score-row{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -285,9 +278,9 @@ main{padding-bottom:100px;min-height:60vh;}
 .score-row.suggested{border-color:var(--line);}
 .score-row.filled{opacity:.55;}
 .score-row .sr-label{font-size:13.5px;color:var(--paper);}
-.score-row .sr-sub{display:block;font-family:'Space Mono',monospace;font-size:10px;color:var(--paper-faint);margin-top:1px;}
+.score-row .sr-sub{display:block;font-family:inherit;font-size:.8125rem;color:var(--paper-faint);margin-top:1px;font-variant-numeric:tabular-nums}
 .score-row .sr-value{
-  font-family:'Space Mono',monospace;font-size:15px;color:var(--paper-dim);min-width:28px;text-align:right;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:15px;color:var(--paper-dim);min-width:28px;text-align:right;
 }
 .score-row.filled .sr-value{color:var(--gold);}
 .score-row.preview .sr-value{color:var(--gold-bright);}
@@ -297,7 +290,7 @@ main{padding-bottom:100px;min-height:60vh;}
 }
 .bonus-row{
   display:flex;align-items:center;justify-content:space-between;
-  padding:9px 10px;font-family:'Space Mono',monospace;font-size:11.5px;color:var(--paper-faint);
+  padding:9px 10px;font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:.8125rem;color:var(--paper-faint);
 }
 .subtotal-row{
   display:flex;align-items:center;justify-content:space-between;
@@ -311,8 +304,7 @@ main{padding-bottom:100px;min-height:60vh;}
   border-top:1px solid var(--line);
 }
 .grand-total .gt-label{
-  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper-faint);
-}
+  font-family:inherit;font-size:.8125rem;color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .grand-total .gt-value{
   font-family:'Fraunces',serif;font-size:30px;font-weight:400;color:var(--gold);
 }
@@ -324,10 +316,9 @@ main{padding-bottom:100px;min-height:60vh;}
   flex-shrink:0;
   padding:10px 16px;border-radius:100px;
   border:1px solid var(--line);
-  font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.04em;
+  font-family:inherit;font-size:.8125rem;
   color:var(--paper-faint);white-space:nowrap;
-  display:flex;align-items:center;gap:8px;
-}
+  display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
 .player-chip.current{border-color:var(--gold);color:var(--gold);background:var(--panel);}
 .player-chip .pc-score{color:inherit;opacity:.7;}
 
@@ -337,23 +328,21 @@ main{padding-bottom:100px;min-height:60vh;}
 }
 @media (max-width:560px){ .end-card{padding:32px 22px;} }
 .end-eyebrow{
-  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:block;
-}
+  font-family:inherit;font-size:.8125rem;color:var(--gold);margin-bottom:18px;display:block;font-variant-numeric:tabular-nums}
 .end-winner{
   font-family:'Fraunces',serif;font-weight:300;font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:-.02em;margin:0 0 8px;
 }
 .end-winner em{font-style:italic;color:var(--gold);font-weight:400;}
 .end-score{
-  font-family:'Space Mono',monospace;font-size:14px;color:var(--paper-dim);margin:0 0 36px;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:14px;color:var(--paper-dim);margin:0 0 36px;
 }
 .end-table{
   width:100%;border-collapse:collapse;margin-bottom:36px;text-align:left;
 }
 .end-table th, .end-table td{
   padding:10px 8px;border-bottom:1px solid var(--line);
-  font-family:'Space Mono',monospace;font-size:12.5px;color:var(--paper-dim);
-}
-.end-table th{color:var(--paper-faint);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:400;}
+  font-family:inherit;font-size:.8125rem;color:var(--paper-dim);font-variant-numeric:tabular-nums}
+.end-table th{color:var(--paper-faint);font-size:.8125rem;font-weight:400;}
 .end-table td:first-child, .end-table th:first-child{color:var(--paper);font-family:'Space Grotesk',sans-serif;font-size:13.5px;}
 .end-table tr:last-child td{border-bottom:none;}
 .end-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
@@ -377,8 +366,6 @@ main{padding-bottom:100px;min-height:60vh;}
 <body>
 <a class="skip-link" href="#app">Zum Inhalt springen</a>
 
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <div class="layer">
 
@@ -401,8 +388,7 @@ main{padding-bottom:100px;min-height:60vh;}
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Spiel · Würfel</span>
-  <h1><em>Kniffel</em> ohne Server</h1>
+  <h1>Kniffel ohne Server</h1>
   <p class="lede">Fünf Würfel, drei Würfe, eine Tafel. Spiel allein gegen deinen Highscore oder reicht das Gerät im Wechsel weiter — alles läuft hier im Browser, nichts wird gespeichert.</p>
 </div>
 
@@ -644,8 +630,7 @@ function initReveal(){
 
     app.innerHTML = `
       <div class="card setup-card reveal">
-        <span class="eyebrow">Schritt 1 · Modus wählen</span>
-        <h2 class="app-title" style="font-size:clamp(1.6rem,4vw,2.2rem);margin-bottom:28px;">Wer <em>würfelt</em> mit?</h2>
+        <h2 class="app-title" style="font-size:clamp(1.6rem,4vw,2.2rem);margin-bottom:28px;">Wer würfelt mit?</h2>
         <div class="mode-grid">
           <button class="mode-option ${setupState.mode==='solo'?'active':''}" data-mode="solo" aria-pressed="${setupState.mode==='solo'}">
             <span class="mo-check" aria-hidden="true"></span>
@@ -834,7 +819,7 @@ function initReveal(){
                   <td>${upperTotal(pl)}</td>
                   <td>${bonus(pl)}</td>
                   <td>${lowerTotal(pl)}</td>
-                  <td style="color:var(--gold);font-family:'Space Mono',monospace;">${grandTotal(pl)}</td>
+                  <td style="color:var(--gold);font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;">${grandTotal(pl)}</td>
                 </tr>
               `).join('')}
             </tbody>

@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -61,24 +61,23 @@ html[data-theme="light"]{--suit-red:#a8453a; --suit-black:#1d2329;
 /* ---------- Cards / Panels ---------- */
 .card{
   position:relative;border-radius:var(--r);border:1px solid var(--line);
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   padding:28px;overflow:hidden;
 }
 .card::before{
   content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;opacity:0;
-  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%), var(--shadow), transparent 70%);
+  background:none;
   transition:opacity .4s;mix-blend-mode:overlay;
 }
 .card:hover::before{opacity:.5;}
 
 /* ---------- Forms ---------- */
 label.field-label{
-  display:block;font-family:'Space Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;
-  color:var(--paper-faint);margin-bottom:8px;
-}
+  display:block;font-family:inherit;font-size:.8125rem;
+  color:var(--paper-faint);margin-bottom:8px;font-variant-numeric:tabular-nums}
 input[type=text],input[type=number],select{
   width:100%;background:var(--ink-soft);border:1px solid var(--line);color:var(--paper);
-  border-radius:10px;padding:13px 16px;font-family:'Space Mono',monospace;font-size:1rem;
+  border-radius:10px;padding:13px 16px;font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:1rem;
   transition:border-color .25s;
 }
 input[type=text]:focus,input[type=number]:focus,select:focus{border-color:var(--gold);outline:none;}
@@ -99,10 +98,10 @@ input::placeholder{color:var(--paper-faint);}
 /* ---------- Playing Cards ---------- */
 .pcard{
   width:64px;height:88px;border-radius:8px;
-  background:linear-gradient(155deg, var(--ink-soft), var(--panel));
+  background:var(--ink-soft);
   border:1px solid var(--line);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  font-family:'Space Mono',monospace;flex-shrink:0;
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;flex-shrink:0;
   position:relative;
 }
 .pcard .rank{font-size:1.3rem;font-weight:700;line-height:1;}
@@ -133,18 +132,16 @@ input::placeholder{color:var(--paper-faint);}
 .pl-item.folded{opacity:.45;}
 .pl-item.is-me{border-color:var(--gold-bright);}
 .pl-item .pl-name{font-weight:500;display:flex;align-items:center;gap:6px;}
-.pl-item .pl-tag{font-family:'Space Mono',monospace;font-size:.65rem;letter-spacing:.08em;color:var(--gold);text-transform:uppercase;}
-.pl-item .pl-stack{font-family:'Space Mono',monospace;color:var(--paper-dim);font-size:.88rem;margin-top:4px;}
-.pl-item .pl-bet{font-family:'Space Mono',monospace;color:var(--gold-bright);font-size:.82rem;margin-top:2px;}
-.pl-item .pl-status{font-size:.78rem;color:var(--paper-faint);margin-top:4px;}
+.pl-item .pl-tag{font-family:inherit;font-size:.8125rem;color:var(--gold);font-variant-numeric:tabular-nums}
+.pl-item .pl-stack{font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;color:var(--paper-dim);font-size:.88rem;margin-top:4px;}
+.pl-item .pl-bet{font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;color:var(--gold-bright);font-size:.82rem;margin-top:2px;}
+.pl-item .pl-status{font-size:.8125rem;color:var(--paper-faint);margin-top:4px;}
 
 </style>
 </head>
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
 
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <div class="layer">
 
@@ -167,8 +164,7 @@ input::placeholder{color:var(--paper-faint);}
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Spiel · Karten</span>
-  <h1>Tisch&shy;runde <em>für 2–6 Spieler</em></h1>
+  <h1>Tisch&shy;runde für 2–6 Spieler</h1>
   <p class="lede">Texas Hold’em ohne Server: Alle Geräte berechnen aus einem gemeinsamen Code dieselben Karten. Ihr sagt euch eure Züge laut und tippt sie auf eurem eigenen Gerät mit.</p>
 </div>
 
@@ -234,7 +230,7 @@ input::placeholder{color:var(--paper-faint);}
     </div>
 
     <details class="card reveal" style="margin-top:24px;max-width:640px;">
-      <summary style="cursor:pointer;font-family:'Space Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);">Wie funktioniert das ohne Server?</summary>
+      <summary style="cursor:pointer;font-size:1rem;font-weight:500;color:var(--paper);">Wie funktioniert das ohne Server?</summary>
       <div style="margin-top:16px;color:var(--paper-dim);font-size:.92rem;">
         <p>Alle Geräte erzeugen aus demselben Code dieselbe Kartenreihenfolge — wie ein Kartenstapel, der überall identisch gemischt wird. Niemand muss etwas übers Internet senden.</p>
         <p>Du siehst auf deinem Gerät nur <em>deine</em> Karten. Die Aktionen der anderen Spieler (checken, setzen, erhöhen, passen) sagt ihr euch laut am Tisch oder am Telefon — und <strong>jeder tippt sie auf seinem eigenen Gerät reihum mit ein</strong>, damit alle Geräte synchron bleiben.</p>
@@ -250,7 +246,7 @@ input::placeholder{color:var(--paper-faint);}
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
         <div>
           <p class="field-label" style="margin:0 0 6px;">Hand <span id="handNumber">1</span> · <span id="streetLabel">Preflop</span></p>
-          <p style="font-family:'Space Mono',monospace;font-size:1.3rem;color:var(--gold-bright);margin:0;">Pot: <span id="potDisplay">0</span></p>
+          <p style="font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:1.3rem;color:var(--gold-bright);margin:0;">Pot: <span id="potDisplay">0</span></p>
         </div>
         <div style="text-align:right;">
           <p class="field-label" style="margin:0 0 6px;">Du spielst als</p>
@@ -297,8 +293,8 @@ input::placeholder{color:var(--paper-faint);}
 
     <!-- Verlauf -->
     <details class="card reveal" style="margin-bottom:24px;">
-      <summary style="cursor:pointer;font-family:'Space Mono',monospace;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);">Verlauf dieser Hand</summary>
-      <div id="historyLog" style="margin-top:16px;font-family:'Space Mono',monospace;font-size:.82rem;color:var(--paper-dim);line-height:1.8;"></div>
+      <summary style="cursor:pointer;font-size:1rem;font-weight:500;color:var(--paper);">Verlauf dieser Hand</summary>
+      <div id="historyLog" style="margin-top:16px;font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:.82rem;color:var(--paper-dim);line-height:1.8;"></div>
     </details>
 
     <button class="btn btn-ghost btn-sm" id="leaveTableBtn" type="button">Tisch verlassen / neu aufsetzen</button>
@@ -931,7 +927,7 @@ function renderShowdown(){
     const cardsHtml = G.holeCards[r.idx].map(c=>`${c.r}${c.s}`).join(' ');
     html += `<div style="display:flex;justify-content:space-between;align-items:center;border:1px solid var(--line);border-radius:8px;padding:10px 14px;${isWinner?'border-color:var(--gold);':''}">
       <span>${G.names[r.idx]} — ${cardsHtml}</span>
-      <span style="font-family:'Space Mono',monospace;color:${isWinner?'var(--gold-bright)':'var(--paper-faint)'};">${HAND_NAMES[r.hand.rank]}</span>
+      <span style="font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;color:${isWinner?'var(--gold-bright)':'var(--paper-faint)'};">${HAND_NAMES[r.hand.rank]}</span>
     </div>`;
   });
   html += '</div>';

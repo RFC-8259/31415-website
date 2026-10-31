@@ -20,16 +20,16 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
 <style>
-:root{--accent2:#c9705a; --accent2-bright:#e2907a;
+:root{--accent2:#ef6464; --accent2-bright:#ff8c8c;
   /* Bewertungsfarben (bestätigte Ausnahme für die vier Lern-Buttons) */
   --rate-again:#c9705a; --rate-hard:#d59550; --rate-good:#8fbd8a; --rate-easy:#7dabd0;
 }
-html[data-theme="light"]{--accent2:#a8452f; --accent2-bright:#8c3521;
+html[data-theme="light"]{--accent2:#c4242a; --accent2-bright:#a11d22;
   --rate-again:#a8452f; --rate-hard:#9c651c; --rate-good:#48763f; --rate-easy:#38638c;
 }
 
@@ -65,7 +65,7 @@ main{position:relative;z-index:2;}
 .btn-sm{padding:9px 18px;font-size:.82rem;}
 
 .panel{
-  position:relative;background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  position:relative;background:var(--ink-soft);
   border:1px solid var(--line);border-radius:var(--r);padding:26px;overflow:hidden;
 }
 .panel > *{position:relative;z-index:1;}
@@ -74,15 +74,14 @@ main{position:relative;z-index:2;}
 .deck-card, .panel{--mx:50%; --my:50%;}
 .deck-card::before, .panel::before{
   content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
-  background:radial-gradient(420px circle at var(--mx) var(--my), var(--shadow), transparent 70%);
+  background:none;
   opacity:0; transition:opacity .4s cubic-bezier(.2,.8,.2,1);
 }
 .deck-card:hover::before, .panel:hover::before{opacity:.14;}
 
 .mono-label{
-  display:block;font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--paper-faint);margin-bottom:8px;
-}
+  display:block;font-family:inherit;font-size:.8125rem;
+  color:var(--paper-faint);margin-bottom:8px;font-variant-numeric:tabular-nums}
 
 input[type="text"], textarea{
   width:100%;background:var(--ink-soft);border:1px solid var(--line);border-radius:10px;
@@ -94,7 +93,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 ::placeholder{color:var(--paper-faint);}
 
 .error-line{
-  display:none;font-family:'Space Mono',monospace;font-size:.78rem;color:var(--accent2);
+  display:none;font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:.8125rem;color:var(--accent2);
   margin-top:14px;letter-spacing:.02em;
 }
 .error-line.show{display:block;}
@@ -108,30 +107,28 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 .count-row button{
   width:40px;height:40px;border-radius:100px;flex:none;
   background:transparent;border:1px solid var(--line);color:var(--paper);cursor:pointer;
-  font-family:'Space Mono',monospace;font-size:1.05rem;line-height:1;
+  font-family:inherit;font-size:1.05rem;line-height:1;
   display:flex;align-items:center;justify-content:center;
-  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
-}
+  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);font-variant-numeric:tabular-nums}
 .count-row button:hover{border-color:var(--gold);color:var(--gold);}
 .count-row button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .count-row input{
-  width:74px;text-align:center;font-family:'Space Mono',monospace;font-size:1rem;padding:9px 8px;
-}
+  width:74px;text-align:center;font-family:inherit;font-size:1rem;padding:9px 8px;font-variant-numeric:tabular-nums}
 .goal-status{flex:1;min-width:220px;}
-.goal-text{font-family:'Space Mono',monospace;font-size:.74rem;color:var(--paper-faint);letter-spacing:.05em;margin-bottom:10px;}
+.goal-text{font-family:inherit;font-size:.8125rem;color:var(--paper-faint);margin-bottom:10px;font-variant-numeric:tabular-nums}
 .goal-text b{color:var(--gold);font-weight:700;}
 .goal-bar{height:6px;border-radius:100px;background:var(--field-base);border:1px solid var(--line);overflow:hidden;}
 .goal-fill{height:100%;background:var(--gold);border-radius:100px;width:0%;transition:width .45s cubic-bezier(.2,.8,.2,1);}
 
 .deck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
 .deck-card{
-  position:relative;background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  position:relative;background:var(--ink-soft);
   border:1px solid var(--line);border-radius:var(--r);padding:26px;overflow:hidden;
   display:flex;flex-direction:column;gap:14px;
 }
 .deck-card > *{position:relative;z-index:1;}
 .deck-card h3{font-family:'Fraunces',serif;font-weight:400;font-size:1.45rem;letter-spacing:-.01em;line-height:1.15;word-break:break-word;}
-.deck-stats{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--paper-faint);letter-spacing:.05em;}
+.deck-stats{font-family:inherit;font-size:.8125rem;color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .deck-stats .due{color:var(--gold);}
 .deck-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto;}
 
@@ -147,10 +144,9 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 .help-item{background:var(--ink-soft);border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
 .help-item summary{
   list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;
-  padding:16px 20px;font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--paper);
-  transition:color .3s cubic-bezier(.2,.8,.2,1);
-}
+  padding:16px 20px;font-family:inherit;font-size:.8125rem;
+  color:var(--paper);
+  transition:color .3s cubic-bezier(.2,.8,.2,1);font-variant-numeric:tabular-nums}
 .help-item summary::-webkit-details-marker{display:none;}
 .help-item summary:hover{color:var(--gold);}
 .help-item summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
@@ -162,7 +158,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 .help-body p{margin-bottom:10px;}
 .help-body p:last-child{margin-bottom:0;}
 .help-body b{color:var(--paper);font-weight:500;}
-.help-body .k{font-family:'Space Mono',monospace;font-size:.82em;color:var(--gold);letter-spacing:.03em;}
+.help-body .k{font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace;font-size:.82em;color:var(--gold);letter-spacing:.03em;}
 
 /* ---------- Deckansicht ---------- */
 
@@ -175,7 +171,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 .deck-title-input:hover{border-color:var(--line);}
 .deck-title-input:focus{outline:none;border-color:var(--gold);}
 
-.deck-meta{font-family:'Space Mono',monospace;font-size:.74rem;color:var(--paper-faint);letter-spacing:.05em;margin:8px 0 24px;}
+.deck-meta{font-family:inherit;font-size:.8125rem;color:var(--paper-faint);margin:8px 0 24px;font-variant-numeric:tabular-nums}
 .deck-meta .due{color:var(--gold);}
 
 .deck-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:34px;}
@@ -183,7 +179,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 .card-form{margin-bottom:34px;}
 .card-form .fields{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
 .card-form .form-actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
-.form-mode{font-family:'Space Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-left:auto;display:none;}
+.form-mode{font-family:inherit;font-size:.8125rem;color:var(--gold);margin-left:auto;display:none;font-variant-numeric:tabular-nums}
 .form-mode.show{display:block;}
 
 .card-list{display:flex;flex-direction:column;gap:10px;}
@@ -194,7 +190,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 .row .row-text{flex:1;min-width:0;}
 .row .row-front{font-weight:500;font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .row .row-back{color:var(--paper-dim);font-size:.82rem;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.row .row-due{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-faint);white-space:nowrap;}
+.row .row-due{font-family:inherit;font-size:.8125rem;color:var(--paper-faint);white-space:nowrap;font-variant-numeric:tabular-nums}
 .row .row-due.is-due{color:var(--gold);}
 .row .row-due.is-new{color:var(--paper-dim);}
 .row-actions{display:flex;gap:8px;}
@@ -211,13 +207,12 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 
 /* ---------- Lernansicht ---------- */
 .study-top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
-.study-counts{font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.08em;color:var(--paper-faint);}
+.study-counts{font-family:inherit;font-size:.8125rem;color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .study-counts b{color:var(--gold);font-weight:700;}
 
 .study-stats{
   display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;
-  font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.05em;color:var(--paper-faint);
-}
+  font-family:inherit;font-size:.8125rem;color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .study-stats b{color:var(--gold);font-weight:700;}
 .mini-goal{display:inline-flex;align-items:center;gap:10px;}
 .mini-bar{width:110px;height:5px;border-radius:100px;background:var(--field-base);border:1px solid var(--line);overflow:hidden;display:inline-block;}
@@ -228,9 +223,8 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
   text-align:center;padding:44px 30px;cursor:pointer;
 }
 .study-side-label{
-  font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--paper-faint);margin-bottom:20px;
-}
+  font-family:inherit;font-size:.8125rem;
+  color:var(--paper-faint);margin-bottom:20px;font-variant-numeric:tabular-nums}
 .study-text{
   font-family:'Fraunces',serif;font-weight:400;font-size:clamp(1.3rem,3.5vw,1.9rem);
   letter-spacing:-.01em;line-height:1.3;max-width:34ch;white-space:pre-wrap;word-break:break-word;
@@ -253,7 +247,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
   font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.88rem;padding:10px 12px;
   transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1), background .3s cubic-bezier(.2,.8,.2,1);
 }
-.rate-btn .ivl{font-family:'Space Mono',monospace;font-size:.62rem;letter-spacing:.06em;font-weight:400;color:currentColor;opacity:.75;}
+.rate-btn .ivl{font-family:inherit;font-size:.8125rem;font-weight:400;color:currentColor;opacity:.75;font-variant-numeric:tabular-nums}
 .rate-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 /* Bestätigte Ausnahme: je Bewertungs-Button eine eigene Farbe */
 .rate-btn.again{color:var(--rate-again);}
@@ -266,9 +260,8 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 .rate-btn.easy:hover{background:var(--rate-easy);border-color:var(--rate-easy);color:var(--ink);}
 
 .key-hint{
-  text-align:center;margin-top:20px;font-family:'Space Mono',monospace;font-size:.66rem;
-  letter-spacing:.1em;color:var(--paper-faint);
-}
+  text-align:center;margin-top:20px;font-family:inherit;font-size:.8125rem;
+  color:var(--paper-faint);font-variant-numeric:tabular-nums}
 
 .study-done{text-align:center;padding:60px 20px;}
 .study-done .pi-big{
@@ -306,10 +299,9 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 }
 .btn-back{
   display:inline-flex;align-items:center;gap:8px;color:var(--paper);text-decoration:none;
-  font-family:'Space Mono',monospace;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;
+  font-family:inherit;font-size:.8125rem;
   background:none;border:none;cursor:pointer;padding:0;margin-bottom:26px;
-  transition:color .3s cubic-bezier(.2,.8,.2,1);
-}
+  transition:color .3s cubic-bezier(.2,.8,.2,1);font-variant-numeric:tabular-nums}
 .btn-back:hover{color:var(--gold);}
 .btn-back .arr{display:inline-block;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
 .btn-back:hover .arr{transform:translateX(-4px);}
@@ -319,8 +311,6 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 </head>
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <header>
   <div class="header-inner">
@@ -341,8 +331,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Werkzeug · Lernen</span>
-  <h1>Karten, die <em>wiederkommen.</em></h1>
+  <h1>Karten, die wiederkommen.</h1>
   <p class="lede">Lernkarten mit Spaced Repetition nach dem SM-2-Verfahren: Jede Antwort bestimmt, wann eine Karte wieder auftaucht. Decks bleiben in deinem Browser gespeichert und lassen sich jederzeit importieren und exportieren.</p>
 </div>
 
@@ -376,7 +365,7 @@ textarea{resize:vertical;min-height:76px;line-height:1.5;}
       <div class="deck-grid" id="deckGrid"></div>
       <div class="empty-state" id="homeEmpty" hidden>
         <span class="pi-big">π</span>
-        <p>Noch keine Decks. Lege ein neues Deck an oder importiere eine CSV-Datei im Format <span style="font-family:'Space Mono',monospace">Vorderseite;Rückseite</span> — eine Karte pro Zeile.</p>
+        <p>Noch keine Decks. Lege ein neues Deck an oder importiere eine CSV-Datei im Format <span style="font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace">Vorderseite;Rückseite</span> — eine Karte pro Zeile.</p>
       </div>
 
       <div class="help">
