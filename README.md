@@ -29,22 +29,23 @@ der Dateien — dafür gibt es jetzt `assets/chrome.*` und `tools/check.mjs`.
 
 `assets/chrome.css` ist die einzige Quelle für:
 
-* Farbtokens (`--ink`, `--paper`, `--gold`, …) für hell und dunkel,
+* Farbtokens (`--ink`, `--paper`, `--gold`, `--disc`, `--mono`, …) für hell und dunkel —
+  Flächen trennt ein Tonschritt (`--ink` → `--ink-soft` → `--panel`), kein Verlauf,
+  kein Glühen; Monospace (`--mono`) nur für echte Werte wie IPs, Hashes, Code,
 * Grundlayout: `.wrap`/`.container` (Aliasse, 1180 px breit, 28 px Rand) und
-  `.layer` — Letzteres hebt Inhalt nur über Ziffernregen und Korn, **ohne**
+  `.layer` — Letzteres hebt Inhalt nur in die oberste Ebene, **ohne**
   Breite und Polsterung. Wer dafür `.wrap` nimmt, bekommt die Polsterung
   doppelt,
-* Kopfleiste, Seitenkopf (`.app-head`), Footer, Toast, `.skip-link`,
+* Kopfleiste, Seitenkopf (`.app-head`: Titel mit Goldpunkt, max. 32 px — ohne
+  Label darüber und ohne Kursivwort), Footer, Toast, `.skip-link`,
 * die Scroll-Einblendung `.reveal` und den Tastaturfokus.
 
 `assets/chrome.js` ist die einzige Quelle für:
 
 * das Theme (folgt dem Betriebssystem, bis jemand den Schalter benutzt),
-* den Pi-Ziffernregen auf `#digit-field`,
 * die Scroll-Einblendung inkl. nachgeladener Inhalte (`revealScan()`),
 * `window.showToast(text[, dauerMs])`,
-* den Karten-Spotlight (`--mx`/`--my`) für alle Klassen aus
-  `SPOTLIGHT_SELECTOR` — ein delegierter Listener für die ganze Seite,
+* die Klasse `.js` am `<html>` — erst damit versteckt `.reveal` Inhalte,
 * `[data-year]` im Footer.
 
 Eine neue Seite bindet beides ein und schreibt in ihr eigenes `<style>`/`<script>`
@@ -64,8 +65,6 @@ Eine neue Seite bindet beides ein und schreibt in ihr eigenes `<style>`/`<script
 </head>
 <body>
   <a class="skip-link" href="#content">Zum Inhalt springen</a>
-  <canvas id="digit-field" aria-hidden="true"></canvas>
-  <div class="grain" aria-hidden="true"></div>
   <header><div class="header-inner">…</div></header>
   <div class="app-head reveal">…</div>
   <main id="content" class="wrap">…</main>

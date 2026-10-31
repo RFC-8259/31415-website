@@ -9,30 +9,38 @@
    Regeln (siehe README.md → "Architektur"):
    • Farben und Radien immer über die Tokens unten, nie als Literal.
    • Layout-Breite über .wrap bzw. .container (Aliasse, gleiches Verhalten).
-   • Interaktive Karten bekommen eine der Klassen aus der Spotlight-Liste in
-     assets/chrome.js — dann setzt das Skript --mx/--my von allein.
+   • Flächen trennt ein Tonschritt, kein Verlauf und kein Glühen.
    ========================================================================== */
 
 
-/* ---------- Tokens: Dark (Default) ---------- */
+/* ---------- Tokens: Dark (Default) ----------
+   Ruß statt Nachtblau: ein fast neutrales Schwarz, warmes Weiß als Schrift,
+   Gold nur dort, wo gehandelt wird — und als eine große Fläche (--disc).
+   Flächen trennt ein Tonschritt (--ink → --ink-soft → --panel), keine Linie. */
 :root{
-  --ink:#0a0e14; --ink-soft:#111722; --panel:#141b27; --line:rgba(214,201,170,0.12);
-  --paper:#f4efe2; --paper-dim:#b9b2a1; --paper-faint:#6f6c63;
-  --gold:#d8b46a; --gold-bright:#f0cd84;
-  --field-base:rgba(10,14,20,0.12);
-  --header-a:rgba(10,14,20,0.85); --header-b:rgba(10,14,20,0);
-  --header-a2:rgba(10,14,20,0.95); --header-b2:rgba(10,14,20,0.6);
-  --shadow:rgba(216,180,106,.55); --r:14px;
+  --ink:#0c0c0d; --ink-soft:#151517; --panel:#1c1c1f; --line:#262629;
+  --paper:#f3f3f1; --paper-dim:#bdbab3; --paper-faint:#8c8983;
+  --gold:#e8b64c; --gold-bright:#f6cc6a;
+  --disc:#e8b64c; --on-gold:#0c0c0d;
+  --field:#f2f2f0; --field-ink:#0c0c0d; --field-dim:#46433d;
+  --field-base:rgba(12,12,13,0.12);
+  --header-a:#0c0c0d; --header-b:#0c0c0d;
+  --header-a2:#0c0c0d; --header-b2:#0c0c0d;
+  --shadow:rgba(0,0,0,.55); --r:14px;
+  --mono:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; /* nur für Werte: IPs, Hashes, Code */
 }
-/* ---------- Tokens: Light ---------- */
+/* ---------- Tokens: Light ----------
+   Kalkstein statt Creme; das Gold wird dunkler, damit es als Schrift trägt. */
 html[data-theme="light"]{
-  --ink:#f6f3ea; --ink-soft:#fffefb; --panel:#fffefb; --line:rgba(60,52,33,0.14);
-  --paper:#1d2329; --paper-dim:#5a564c; --paper-faint:#8f8a7d;
-  --gold:#a9802e; --gold-bright:#8c6618;
-  --field-base:rgba(246,243,234,0.14);
-  --header-a:rgba(246,243,234,0.88); --header-b:rgba(246,243,234,0);
-  --header-a2:rgba(246,243,234,0.96); --header-b2:rgba(246,243,234,0.7);
-  --shadow:rgba(169,128,46,.32);
+  --ink:#ececea; --ink-soft:#f6f6f4; --panel:#fcfcfb; --line:#d6d6d3;
+  --paper:#141414; --paper-dim:#45423c; --paper-faint:#66625a;
+  --gold:#8a6414; --gold-bright:#6f500d;
+  --disc:#dfab3f; --on-gold:#fcfcfb;
+  --field:#141414; --field-ink:#f4f4f2; --field-dim:#bdb9b0;
+  --field-base:rgba(236,236,234,0.14);
+  --header-a:#ececea; --header-b:#ececea;
+  --header-a2:#ececea; --header-b2:#ececea;
+  --shadow:rgba(40,32,15,.22);
 }
 
 /* ---------- Grundlayout ---------- */
@@ -74,27 +82,18 @@ button{font-family:inherit;cursor:pointer;}
   position:fixed;top:12px;left:12px;z-index:200;
   transform:translateY(-160%);
   background:var(--gold);color:var(--ink);
-  font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;
+  font-family:'Space Grotesk',system-ui,sans-serif;font-size:.9rem;font-weight:500;
   padding:11px 18px;border-radius:100px;
   transition:transform .25s cubic-bezier(.2,.8,.2,1);
 }
 .skip-link:focus-visible{transform:translateY(0);outline-offset:3px;}
-
-#digit-field{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none;}
-
-.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.035;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-html[data-theme="light"] .grain{opacity:.02;}
 
 /* ---------- Header ---------- */
 /* Die Leiste selbst legt weder Höhe noch Flow fest — so trägt sie sowohl das
    .header-inner der Werkzeugseiten als auch die .bar der Startseite. */
 header{
   position:fixed;top:0;left:0;right:0;z-index:50;
-  background:linear-gradient(to bottom, var(--header-a), var(--header-b));
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
+  background:var(--header-a);
   transition:background .4s ease;
 }
 .header-inner,.bar{
@@ -105,58 +104,60 @@ header{
 
 .brand{display:flex;align-items:baseline;gap:.32em;font-size:1rem;}
 .brand .pi{font-family:'Fraunces',serif;font-size:1.5rem;color:var(--gold);line-height:1;}
-.brand .num{font-family:'Space Mono',monospace;font-weight:700;color:var(--paper);letter-spacing:.02em;}
-.brand .me{font-family:'Space Mono',monospace;color:var(--paper-faint);}
+.brand .num{font-weight:600;color:var(--paper);letter-spacing:-.01em;}
+.brand .me{color:var(--paper-faint);margin-left:-.32em;}
 
-.header-right{display:flex;align-items:center;gap:18px;}
+.header-right{display:flex;align-items:center;gap:clamp(14px,2.4vw,28px);}
 .back-link{
-  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--paper-dim);display:flex;align-items:center;gap:6px;
+  font-size:1rem;
+  color:var(--paper-dim);display:flex;align-items:center;gap:8px;
   transition:color .3s cubic-bezier(.2,.8,.2,1);
   border-radius:4px;
 }
-.back-link:hover{color:var(--gold);}
+.back-link:hover{color:var(--paper);}
 .back-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.back-link svg{width:13px;height:13px;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+.back-link svg{width:16px;height:16px;transition:transform .3s cubic-bezier(.2,.8,.2,1);}
 .back-link:hover svg{transform:translateX(-5px);}
 @media(max-width:359px){.back-link span{display:none;}}
 
 .theme-toggle{
-  width:40px;height:40px;border-radius:100px;border:1px solid var(--line);
-  background:transparent;color:var(--paper-dim);cursor:pointer;
+  width:44px;height:44px;border-radius:50%;border:0;
+  background:var(--ink-soft);color:var(--paper);cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  transition:border-color .3s cubic-bezier(.2,.8,.2,1), color .3s cubic-bezier(.2,.8,.2,1);
+  transition:background .3s cubic-bezier(.2,.8,.2,1), transform .3s cubic-bezier(.2,.8,.2,1);
 }
-.theme-toggle:hover{border-color:var(--gold);color:var(--gold);}
+.theme-toggle:hover{background:var(--panel);}
+.theme-toggle:active{transform:scale(.9);}
 .theme-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .theme-toggle svg{width:17px;height:17px;}
 .icon-sun{display:none;}
 html[data-theme="light"] .icon-moon{display:none;}
 html[data-theme="light"] .icon-sun{display:block;}
 
-/* ---------- Seitenkopf ---------- */
-.app-head{max-width:1180px;margin:0 auto;padding:150px 28px 56px;position:relative;z-index:2;}
-@media(max-width:640px){.app-head{padding:120px 20px 40px;}}
-.app-head .eyebrow{
-  font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
-  color:var(--gold);display:block;margin:0 0 18px;
-}
-.app-head .eyebrow::before{content:none;}
+/* ---------- Seitenkopf ----------
+   Ein Werkzeug ist eine Arbeitsfläche, keine Landingpage: der Titel bleibt
+   bei 32 px, damit das Werkzeug selbst schon auf dem ersten Bildschirm steht.
+   Der Goldpunkt davor ist derselbe wie vor jedem Eintrag der Startseite. */
+.app-head{max-width:1180px;margin:0 auto;padding:124px 28px 40px;position:relative;z-index:2;}
+@media(max-width:640px){.app-head{padding:104px 20px 28px;}}
+.app-head .eyebrow{display:none;}
 .app-head h1{
-  font-family:'Fraunces',serif;font-weight:300;font-size:clamp(2.2rem,6vw,3.6rem);
-  letter-spacing:-.02em;line-height:.98;margin:0 0 16px;color:var(--paper);
+  font-family:'Fraunces',serif;font-weight:400;font-size:clamp(1.75rem,3vw,2rem);
+  letter-spacing:-.02em;line-height:1.1;margin:0 0 12px;color:var(--paper);
+  display:flex;align-items:baseline;gap:14px;
 }
-.app-head h1 em{font-style:italic;color:var(--gold-bright);font-weight:400;}
-.app-head .lede{font-size:1.05rem;color:var(--paper-dim);max-width:580px;margin:0;}
+.app-head h1::before{content:'';flex:none;width:14px;height:14px;border-radius:50%;background:var(--gold);transform:translateY(-.12em);}
+.app-head h1 em{font-style:normal;color:inherit;font-weight:inherit;}
+.app-head .lede{font-size:1.0625rem;line-height:1.55;color:var(--paper-dim);max-width:62ch;margin:0;}
 
 /* ---------- Footer ---------- */
-footer{padding:50px 0 70px;border-top:1px solid var(--line);margin-top:0;position:relative;z-index:2;}
+footer{padding:64px 0 56px;margin-top:0;position:relative;z-index:2;}
 .footer-inner{
   max-width:1180px;margin:0 auto;padding:0 28px;
   display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
 }
 @media(max-width:640px){.footer-inner{padding:0 20px;}}
-footer p{margin:0;font-family:'Space Mono',monospace;font-size:.74rem;color:var(--paper-faint);letter-spacing:.05em;}
+footer p{margin:0;font-size:.875rem;color:var(--paper-faint);}
 footer a{color:var(--paper-faint);transition:color .3s cubic-bezier(.2,.8,.2,1);}
 footer a:hover{color:var(--gold);}
 
@@ -172,12 +173,13 @@ footer a:hover{color:var(--gold);}
 .toast.show{transform:translate(-50%, 0);opacity:1;}
 
 /* ---------- Einblenden beim Scrollen ---------- */
-.reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
-.reveal.in{opacity:1;transform:translateY(0);}
+/* Versteckt wird nur, wenn chrome.js läuft (setzt .js) — sonst bliebe der
+   Inhalt bei einem Skriptfehler unsichtbar. */
+.js .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1);}
+.js .reveal.in{opacity:1;transform:translateY(0);}
 
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto;}
   *{transition:none !important; animation:none !important;}
-  .reveal{opacity:1; transform:none;}
-  #digit-field{display:none;}
+  .js .reveal{opacity:1; transform:none;}
 }

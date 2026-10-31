@@ -20,7 +20,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="/assets/chrome.css">
 <script src="/assets/chrome.js"></script>
@@ -33,7 +33,7 @@
 /* ---------- Meta panel (Titel/Autor/Version/Datum) ---------- */
 .meta-panel{
   position:relative; z-index:2; margin-bottom:32px;
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   border:1px solid var(--line); border-radius:var(--r);
   overflow:hidden;
 }
@@ -42,9 +42,8 @@
   padding:16px 22px; cursor:pointer; user-select:none;
 }
 .meta-toggle-row .label{
-  font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.2em; text-transform:uppercase;
-  color:var(--paper-dim); display:flex; align-items:center; gap:10px;
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--paper-dim); display:flex; align-items:center; gap:10px;font-variant-numeric:tabular-nums}
 .meta-toggle-row .label .dot{width:6px; height:6px; border-radius:50%; background:var(--gold);}
 .meta-toggle-row .chev{
   color:var(--paper-faint); transition:transform .3s cubic-bezier(.2,.8,.2,1);
@@ -60,9 +59,8 @@
 @media (max-width:480px){ .meta-body{grid-template-columns:1fr;} }
 .field{display:flex; flex-direction:column; gap:6px;}
 .field label{
-  font-family:'Space Mono',monospace; font-size:.66rem; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--paper-faint);
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .field input{
   background:var(--ink-soft); border:1px solid var(--line); border-radius:8px;
   color:var(--paper); padding:9px 12px; font-family:'Space Grotesk',sans-serif; font-size:.92rem;
@@ -75,7 +73,7 @@
 .toolbar{
   position:relative; z-index:2;
   display:flex; align-items:center; gap:6px; flex-wrap:wrap;
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   border:1px solid var(--line); border-radius:var(--r);
   padding:10px; margin-bottom:18px;
 }
@@ -89,7 +87,7 @@
   font-family:'Space Grotesk',sans-serif; font-size:.85rem; font-weight:600;
   transition:background .25s cubic-bezier(.2,.8,.2,1), color .25s cubic-bezier(.2,.8,.2,1), border-color .25s cubic-bezier(.2,.8,.2,1);
 }
-.tb-btn.wide{width:auto; padding:0 12px; gap:6px; font-size:.78rem; font-weight:500;}
+.tb-btn.wide{width:auto; padding:0 12px; gap:6px; font-size:.8125rem; font-weight:500;}
 .tb-btn svg{width:16px; height:16px;}
 .tb-btn:hover{background:var(--field-base); color:var(--gold); border-color:var(--line);}
 .tb-btn.active{background:var(--field-base); color:var(--gold); border-color:var(--gold);}
@@ -109,7 +107,7 @@
 @media (max-width:880px){ .editor-wrap{grid-template-columns:1fr;} }
 
 .pane{
-  background:linear-gradient(160deg, var(--panel), var(--ink-soft));
+  background:var(--ink-soft);
   border:1px solid var(--line); border-radius:var(--r);
   display:flex; flex-direction:column; min-height:560px; overflow:hidden;
 }
@@ -118,16 +116,14 @@
   padding:12px 18px; border-bottom:1px solid var(--line);
 }
 .pane-head .ph-label{
-  font-family:'Space Mono',monospace; font-size:.66rem; letter-spacing:.2em; text-transform:uppercase;
-  color:var(--paper-faint);
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .pane-head .ph-count{
-  font-family:'Space Mono',monospace; font-size:.68rem; color:var(--paper-faint);
-}
+  font-family:inherit; font-size:.8125rem; color:var(--paper-faint);font-variant-numeric:tabular-nums}
 
 #md-input{
   flex:1; resize:none; border:none; outline:none; background:transparent;
-  color:var(--paper); font-family:'Space Mono',monospace; font-size:.92rem; line-height:1.7;
+  color:var(--paper); font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.92rem; line-height:1.7;
   padding:20px 22px; tab-size:2;
 }
 #md-input::placeholder{color:var(--paper-faint);}
@@ -147,9 +143,8 @@
 }
 .doc-subline{
   display:flex; justify-content:center; gap:18px; flex-wrap:wrap;
-  font-family:'Space Mono',monospace; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
-  color:var(--paper-faint);
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--paper-faint);font-variant-numeric:tabular-nums}
 .doc-subline span.hl{color:var(--gold);}
 
 #preview-doc h1,#preview-doc h2,#preview-doc h3,#preview-doc h4{
@@ -165,7 +160,7 @@
 #preview-doc strong{color:var(--paper); font-weight:600;}
 #preview-doc em{font-style:italic;}
 #preview-doc code{
-  font-family:'Space Mono',monospace; font-size:.85em; background:var(--field-base);
+  font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.85em; background:var(--field-base);
   padding:.15em .4em; border-radius:5px;
 }
 #preview-doc pre{
@@ -189,40 +184,37 @@
   border:1px solid var(--line); padding:8px 12px; text-align:left;
 }
 #preview-doc th{
-  background:var(--field-base); font-family:'Space Mono',monospace; font-size:.74rem;
-  letter-spacing:.08em; text-transform:uppercase; color:var(--paper-dim);
-}
+  background:var(--field-base); font-family:inherit; font-size:.8125rem;
+    color:var(--paper-dim);font-variant-numeric:tabular-nums}
 #preview-doc .toc-block{
   background:var(--field-base); border:1px solid var(--line); border-radius:10px;
   padding:16px 20px; margin:1em 0;
 }
 #preview-doc .toc-block .toc-title{
-  font-family:'Space Mono',monospace; font-size:.68rem; letter-spacing:.2em; text-transform:uppercase;
-  color:var(--gold); margin-bottom:10px;
-}
+  font-family:inherit; font-size:.8125rem;  
+  color:var(--gold); margin-bottom:10px;font-variant-numeric:tabular-nums}
 #preview-doc .toc-block ol{ margin:0; padding-left:1.2em; }
 #preview-doc .toc-block a{ text-decoration:none; }
 #preview-doc .toc-block a:hover{ text-decoration:underline; }
 
 .page-num-display{
-  text-align:center; font-family:'Space Mono',monospace; font-size:.68rem;
+  text-align:center; font-family:ui-monospace,'Cascadia Mono','SF Mono',Consolas,monospace; font-size:.8125rem;
   color:var(--paper-faint); letter-spacing:.1em; padding-top:18px; margin-top:18px;
   border-top:1px dashed var(--line);
 }
 
 /* ---------- Help row under toolbar ---------- */
+@media(hover:none),(max-width:640px){.shortcut-hint{display:none!important}}
 .shortcut-hint{
-  font-family:'Space Mono',monospace; font-size:.68rem; color:var(--paper-faint);
-  letter-spacing:.04em; margin:-6px 0 18px; display:flex; flex-wrap:wrap; gap:14px;
-}
+  font-family:inherit; font-size:.8125rem; color:var(--paper-faint);
+   margin:-6px 0 18px; display:flex; flex-wrap:wrap; gap:14px;font-variant-numeric:tabular-nums}
 .shortcut-hint kbd{
   background:var(--field-base); border:1px solid var(--line); border-radius:5px;
-  padding:1px 6px; font-family:'Space Mono',monospace; color:var(--paper-dim);
-}
+  padding:1px 6px; font-family:inherit; color:var(--paper-dim);font-variant-numeric:tabular-nums}
 
 /* ---------- Print ---------- */
 @media print{
-  #digit-field, .grain, header, footer, .toolbar, .meta-toggle-row, .shortcut-hint,
+  header, footer, .toolbar, .meta-toggle-row, .shortcut-hint,
   .app-head, #md-input, .pane-head, .editor-wrap .pane:first-child, .toast{
     display:none !important;
   }
@@ -244,8 +236,6 @@
 </head>
 <body>
 <a class="skip-link" href="#content">Zum Inhalt springen</a>
-<canvas id="digit-field" aria-hidden="true"></canvas>
-<div class="grain" aria-hidden="true"></div>
 
 <header>
   <div class="header-inner">
@@ -266,8 +256,7 @@
 </header>
 
 <div class="app-head reveal">
-  <span class="eyebrow">Werkzeug · Markdown</span>
-  <h1>Markdown <em>Formatter</em></h1>
+  <h1>Markdown Formatter</h1>
   <p class="lede">Schreib in Markdown, sieh sofort das Ergebnis — und exportiere als PDF. Mit Tastaturkürzeln, Inhaltsverzeichnis und Dokument-Metadaten.</p>
 </div>
 
